@@ -36,7 +36,6 @@ These limitations are being actively addressed by the developer to enhance the s
 3. Move both downloaded files into the "autoss" folder.
 4. Run Script:
 
-- Open your terminal or command prompt.
 For Windows 10, navigate to the 'autoss' folder and press and hold the Shift key, then right-click anywhere inside the folder. In the context menu that appears, select 'Open command window here'.
 
 ![App Screenshot](https://www.groovypost.com/wp-content/uploads/2018/11/02-Open-command-window-here-option-added.png)
