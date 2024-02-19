@@ -164,7 +164,6 @@ def process_excel_data(file_path):
         )
 
         profile_paths = [chrome_profile_path, edge_profile_path]
-        print("Profile Path:", profile_paths)
         browsers = []
         for profile_path in profile_paths:
             browser = p.chromium.launch_persistent_context(
