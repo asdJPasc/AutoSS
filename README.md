@@ -18,17 +18,19 @@ Monitoring website changes for competitive analysis.
 Tracking online content for compliance or regulatory purposes.
 Collecting visual data for research or trend analysis.
 Automating periodic website snapshots for archival or historical records.
+
 How to Use:
 
-Prepare an Excel file with the list of URLs you want to capture screenshots of.
-Customize the script settings according to your preferences, such as capture interval and folder organization.
-Run the script and let it continuously capture screenshots at the specified intervals.
-Sit back and review the captured screenshots for insights, trends, or anomalies in the monitored web pages.
+  Prepare an Excel file with the list of URLs you want to capture screenshots of.
+  Customize the script settings according to your preferences, such as capture interval and folder organization.
+  Run the script and let it continuously capture screenshots at the specified intervals.
+  Sit back and review the captured screenshots for insights, trends, or anomalies in the monitored web pages.
+
 Requirements:
 
-Python 3.x
-Playwright library (pip install playwright)
-Excel file containing URLs (Agents.xlsx)
+  Python 3.x
+  Playwright library (pip install playwright)
+  Excel file containing URLs (Agents.xlsx)
 
 **Current Limitation and Ongoing Development:**
 
