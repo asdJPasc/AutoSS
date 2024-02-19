@@ -24,7 +24,7 @@ This script automates the task of capturing full-page screenshots of multiple we
 
 - Automating periodic website snapshots for archival or historical records.
 ## How to Use:
-- Download the Excel file Agents.xlxs.
+- Download the autoss.py and agents.xlxs.
 
 - Customize the script settings according to your preferences, such as Cycles and Interval.
 
