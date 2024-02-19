@@ -30,7 +30,7 @@ This script automates the task of capturing full-page screenshots of multiple we
 
 These limitations are being actively addressed by the developer to enhance the script's functionality and user experience. Your feedback and suggestions are invaluable in driving future improvements.
 ## How to Use:
-Notes: Ensure you have Python 3.x installed 
+Notes: Ensure you have Python 3.x installed and Required Libraries/Modules:
 ```bash
 Microsoft Windows [Version 10.0.22631.3155]
 (c) Microsoft Corporation. All rights reserved.
