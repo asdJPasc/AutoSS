@@ -38,17 +38,9 @@ This script automates the task of capturing full-page screenshots of multiple we
 
 These limitations are being actively addressed by the developer to enhance the script's functionality and user experience. Your feedback and suggestions are invaluable in driving future improvements.
 ## Usage/Examples
-1. Create Folder:
-
-- Create a new folder on your desktop called "autoss".
-2. Download Files:
-
-- Download auto.py (the Python script) and agents.xlsx (the Excel file with URLs).
-
-3. Move Files:
-
-- Move both downloaded files into the "autoss" folder.
-
+1. Create a new folder on your desktop called "autoss".
+2. Download auto.py (the Python script) and agents.xlsx (the Excel file with URLs).
+3. Move both downloaded files into the "autoss" folder.
 4. Run Script:
 
 - Open your terminal or command prompt.
