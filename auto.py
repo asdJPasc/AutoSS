@@ -1,4 +1,3 @@
-#February changes
 import os
 import base64
 import ctypes
@@ -6,6 +5,7 @@ import time
 from datetime import datetime, timedelta
 import pandas as pd
 from playwright.sync_api import sync_playwright, TimeoutError
+import appdirs
 
 def get_screen_size():
     user32 = ctypes.windll.user32
@@ -70,7 +70,8 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
     while attempt <= max_attempts:
         try:
             time.sleep(interval)
-            remove_elements(page)
+            remove_elements(page) #REMOVE HEADER AND FOOTER OF THE PAGE
+
             # CUSTOM NAVIGATION BEFORE CAPTURING OF SCREENSHOT START #
             
             if click_if_visible(page, 'div.initial:nth-child(3) > a:nth-child(1)'): #BANKINGSUPERVISION.EUROPA
@@ -111,7 +112,7 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
             page.wait_for_load_state('networkidle')
 
             if detect_captcha(page):
-                print(f"\033[91mCAPTCHA detected! Skipping URL of row ID: {row_id:04}...\033[0m\n")
+                print(f"\033[91mCAPTCHA detected! Please perform a manual capture of the screenshot for row ID: {row_id:04}...\033[0m\n")
                 break
 
             timestamp = datetime.now().strftime("Date: %m-%d-%Y || Time: %I:%M:%S %p")
@@ -152,12 +153,27 @@ def process_excel_data(file_path):
     with sync_playwright() as p:
 
         width, height = get_screen_size()
-        browser = p.chromium.launch_persistent_context (
-            user_data_dir="user_data",
-            headless=True,
-            accept_downloads=True,
-            viewport={"width": width, "height": height}
+        edge_profile_path = os.path.join(
+            appdirs.user_data_dir('Edge', 'Microsoft'),
+            'User Data'
         )
+
+        chrome_profile_path = os.path.join(
+            appdirs.user_data_dir('Chrome', 'Google'),
+            'User Data'
+        )
+
+        profile_paths = [chrome_profile_path, edge_profile_path]
+        print("Profile Path:", profile_paths)
+        browsers = []
+        for profile_path in profile_paths:
+            browser = p.chromium.launch_persistent_context(
+                user_data_dir=profile_path,
+                headless=True,
+                accept_downloads=True,
+                viewport={"width": width, "height": height}
+            )
+            browsers.append(browser)
 
         for index, row in df.iterrows():
             url = row['URL']
