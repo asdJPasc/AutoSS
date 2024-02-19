@@ -24,9 +24,9 @@ This script automates the task of capturing full-page screenshots of multiple we
 
 - Automating periodic website snapshots for archival or historical records.
 ## Current Limitation and Ongoing Development:
-- Captcha Puzzle Handling: The script currently lacks the capability to bypass captcha puzzles automatically. Development is ongoing to implement captcha solving mechanisms.
+- Captcha Puzzle Handling: The script currently lacks the capability to bypass captcha puzzles automatically. Once a captcha puzzle is detected, it notifies the user to manually capture the specific row ID for further action. Development is ongoing to implement captcha solving mechanisms.
 
-- Partial Website Configuration: Not all websites listed in the Excel file may be fully configured to navigate and capture screenshots seamlessly. Additional configuration may be required for specific websites to handle unique elements or interactions effectively.
+- Partial Website Configuration: Not all websites listed in the Excel file may be fully configured to navigate and capture screenshots seamlessly. Additional configuration may be required for specific websites to handle unique elements or interactions effectively. Users are encouraged to request guidance from the developer for the necessary steps needed to configure these websites before capturing the required content.
 
 These limitations are being actively addressed by the developer to enhance the script's functionality and user experience. Your feedback and suggestions are invaluable in driving future improvements.
 ## How to Use:
