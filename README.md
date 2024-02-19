@@ -30,7 +30,7 @@ This script automates the task of capturing full-page screenshots of multiple we
 
 These limitations are being actively addressed by the developer to enhance the script's functionality and user experience. Your feedback and suggestions are invaluable in driving future improvements.
 ## How to Use:
-
+Notes: Ensure you have Python 3.x installed
 - Download the script and the "agent.xlxs" file from [this link.](https://github.com/asdJPasc/AutoSS/archive/refs/heads/master.zip)
 
 - Extract the downloaded ZIP file to your desktop.
