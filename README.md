@@ -65,7 +65,7 @@ Once open type auto.py and press Enter to run the script.
 Microsoft Windows [Version 10.0.22631.3155]
 (c) Microsoft Corporation. All rights reserved.
 
-C:\Users\whoAmI\OneDrive\Desktop\AutoSSFolder>auto.py
+C:\Users\whoAmI\OneDrive\Desktop\autoss>auto.py
 ```
 
 5. Monitor Progress:
