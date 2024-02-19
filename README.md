@@ -47,7 +47,7 @@ These limitations are being actively addressed by the developer to enhance the s
 
 3. Move Files:
 
-- Move both downloaded files into the "Screenshot_Automation" folder.
+- Move both downloaded files into the "autoss" folder.
 
 4. Run Script:
 
