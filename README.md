@@ -19,20 +19,20 @@ Tracking online content for compliance or regulatory purposes.
 Collecting visual data for research or trend analysis.
 Automating periodic website snapshots for archival or historical records.
 
-How to Use:
+[ How to Use ]
 
   Prepare an Excel file with the list of URLs you want to capture screenshots of.
   Customize the script settings according to your preferences, such as capture interval and folder organization.
   Run the script and let it continuously capture screenshots at the specified intervals.
   Sit back and review the captured screenshots for insights, trends, or anomalies in the monitored web pages.
 
-Requirements:
+[ Requirements ]
 
   Python 3.x
   Playwright library (pip install playwright)
   Excel file containing URLs (Agents.xlsx)
 
-**Current Limitation and Ongoing Development:**
+[ Current Limitation and Ongoing Development ]
 
 Captcha Puzzle Handling: The script currently lacks the capability to bypass captcha puzzles automatically. When encountering a captcha challenge on a webpage, the script notifies the user and skips capturing a screenshot for that particular URL. Development is ongoing to implement captcha solving mechanisms to enhance automation and minimize user intervention.
 
