@@ -86,23 +86,27 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
                 pass
             elif click_if_visible(page, 'body > div.animated.fadeIn.position-relative.ng-scope > div > div:nth-child(3) > div.col-lg-3 > div.card.mb-4 > div.card-body > div:nth-child(6) > label'): #BOLSA SANTIAGO CIRCULARES
                 pass
-            elif click_if_visible(page, '//*[@id="main"]/div/div[1]/div/div/div/div/div[1]/ul/li[1]/a'): #JORF WEBSITE 
+            elif click_if_visible(page, '//*[@id="main"]/div/div[1]/div/div/div/div/div[1]/ul/li[1]/a'): #JORF 
                 pass
-            elif click_if_visible(page, '#filtros > div:nth-child(1) > label'): #BOE.es WEBSITE  
+            elif click_if_visible(page, '#filtros > div:nth-child(1) > label'): #BOE.es
                 pass
-            elif click_if_visible(page, '//*[@id="cn-accept-cookie"]'): #Takeoverpanel WEBSITE
+            elif click_if_visible(page, '//*[@id="cn-accept-cookie"]'): #Takeoverpanel
                 pass
-            elif click_if_visible(page, '#onetrust-accept-btn-handler'): #IRISHISTATUTEBOOK WEBSITE
+            elif click_if_visible(page, '#onetrust-accept-btn-handler'): #IRISHISTATUTEBOOK
                 pass
-            elif click_if_visible(page, '#popup-buttons > button.agree-button.eu-cookie-compliance-secondary-button.button.button--small'): #BANREP WEBSITE
+            elif click_if_visible(page, '#popup-buttons > button.agree-button.eu-cookie-compliance-secondary-button.button.button--small'): #BANREP
                 pass
-            elif click_if_visible(page, 'body > app-root > bcb-cookies > div > div > div > div > button.btn.btn-primary.btn-accept'): #BCB.GOV WEBSITE
+            elif click_if_visible(page, 'body > app-root > bcb-cookies > div > div > div > div > button.btn.btn-primary.btn-accept'): #BCB.GOV
                 pass
-            elif click_if_visible(page, '#cookie-consent-banner > div > div > div.cck-actions.wt-noconflict > a.wt-link.wt-ecl-button.wt-ecl-button--primary.cck-actions-button.ea_ignore'): #EUR.LEX WEBSITE
+            elif click_if_visible(page, '#cookie-consent-banner > div > div > div.cck-actions.wt-noconflict > a.wt-link.wt-ecl-button.wt-ecl-button--primary.cck-actions-button.ea_ignore'): #EUR.LEX
                 pass
             elif click_if_visible(page, '.wt-ecl-button__label'):
                 pass
             elif click_if_visible(page, '#content > div.home-articles.news-wrap > div > div.all-news-link-wrap > button'):
+                pass
+            elif click_if_visible(page, '#cookie-banner > div > div > ul > li:nth-child(3) > button'): #CSSF.LU
+                pass    
+            elif click_if_visible(page, '#moove_gdpr_cookie_info_bar > div > div > div.moove-gdpr-button-holder > button.mgbutton.moove-gdpr-infobar-allow-all.gdpr-fbo-0'): #SEPBLAC.ES
                 pass
             elif click_if_visible(page, 'text=Prosseguir'):
                 pass  
