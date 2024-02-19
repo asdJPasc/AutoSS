@@ -23,14 +23,7 @@ This script automates the task of capturing full-page screenshots of multiple we
 - Collecting visual data for research or trend analysis.
 
 - Automating periodic website snapshots for archival or historical records.
-## How to Use:
-- Download the autoss.py and agents.xlxs.
 
-- Customize the script settings according to your preferences, such as Cycles and Interval.
-
-- Run the script and let it continuously capture screenshots at the specified intervals.
-
-- Sit back and review the captured screenshots for changes in the monitored web pages.
 ## Current Limitation and Ongoing Development:
 - Captcha Puzzle Handling: The script currently lacks the capability to bypass captcha puzzles automatically. Development is ongoing to implement captcha solving mechanisms.
 
