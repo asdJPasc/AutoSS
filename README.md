@@ -45,12 +45,6 @@ Microsoft Windows [Version 10.0.22631.3155]
 C:\Users\I51\OneDrive\Desktop\AutoSSFolder>pip install pandas
 ```
 
-```bash
-Microsoft Windows [Version 10.0.22631.3155]
-(c) Microsoft Corporation. All rights reserved.
-
-C:\Users\I51\OneDrive\Desktop\AutoSSFolder>pip install appdirs
-```
 - Download the script and the "agent.xlxs" file from [this link.](https://github.com/asdJPasc/AutoSS/archive/refs/heads/master.zip)
 
 - Extract the downloaded ZIP file to your desktop.
