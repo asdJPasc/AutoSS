@@ -1,3 +1,4 @@
+#I51/JPascual
 import os
 import base64
 import ctypes
@@ -60,7 +61,11 @@ stringCol = '\033[94m'; print(stringCol + decode_base64("CiAgICAgICAgICAgICAgICA
 
 #USER SETTINGS
 cycle = 1800 #INTERVAL PER BATCH (1800 = 30MINS || 3200 = 1HR)
+<<<<<<< HEAD
 interval = 5 #INTERVAL FOR EACH URL
+=======
+interval = 4 #INTERVAL FOR EACH URL
+>>>>>>> mod
 
 def capture_full_page_screenshot(context, url, row_id, folder, extension):
     page = context.new_page()
