@@ -5,12 +5,6 @@ import time
 from datetime import datetime, timedelta
 import pandas as pd
 from playwright.sync_api import sync_playwright, TimeoutError
-import appdirs
-
-def get_screen_size():
-    user32 = ctypes.windll.user32
-    width, height = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
-    return width, height
 
 def decode_base64(encoded_string):
     decoded_bytes = base64.b64decode(encoded_string)
@@ -25,10 +19,17 @@ def detect_captcha(page):
     body_text = page.query_selector('body').text_content()
     return any(keyword in body_text for keyword in captcha_keywords)
 
-def click_if_visible(page, selector):
-    if page.locator(selector).is_visible():
-        page.locator(selector).click()
-        return True  
+def click_if_visible(page, selectors):
+    accept_texts = ["Accept", "I Accept", "Agree", "Save and Close", "Accept additional cookies", "Dismiss", "Yes, these cookies are OK", "Prosseguir", "Accept all cookies", "I understand and I accept the use of cookies", "Accept all", "Aceptar", "Aceptar y continuar", "Accept All Cookies", "Hide this message"]
+    for selector in selectors:
+        for text in accept_texts:
+            elements = page.query_selector_all(selector)
+            for element in elements:
+                if element.is_visible():
+                    element_text = element.evaluate('(el) => el.textContent')
+                    if element_text and text in element_text:
+                        element.click()
+                        return True
     return False
 
 def remove_elements(page):
@@ -58,12 +59,12 @@ cmd(decode_base64("STUxIFNjcmlwdA=="))
 stringCol = '\033[94m'; print(stringCol + decode_base64("CiAgICAgICAgICAgICAgICAgICAgICAkJFwgICAgICAgICAgICAgICAgICAgJCRJNTEkXCAgICQkSTUxJFwgIAogICAgICAgICAgICAgICAgICAgICAgJCQgfCAgICAgICAgICAgICAgICAgJCQgIF9fJCRcICQkICBfXyQkXCAKICRJNTEkJFwgICQkXCAgICQkXCAkSTUxJCRcICAgICRJNTEkJFwgICAgICQkIC8gIFxfX3wkJCAvICBcX198CiBcX19fXyQkXCAkJCB8ICAkJCB8XF8kJCAgX3wgICQkICBfXyQkXCAgICBcJEk1MSQkXCAgXCRJNTEkJFwgIAogJCQkJCQkJCB8JCQgfCAgJCQgfCAgJCQgfCAgICAkJCAvICAkJCB8ICAgIFxfX19fJCRcICBcX19fXyQkXCAKJCQgIF9fJCQgfCQkIHwgICQkIHwgICQkIHwkJFwgJCQgfCAgJCQgfCAgICQkXCAgICQkIHwkJFwgICAkJCB8ClwkSTUxJCQkIHxcJEk1MSQkICB8ICBcJCQkJCAgfFwkSTUxJCQgIHwkJFxcJCRJNTEkICB8XCQkSTUxJCAgfAogXF9fX19fX198IFxfX19fX18vICAgIFxfX19fLyAgXF9fX19fXy8gXF9ffFxfX19fX18vICBcX19fX19fLyAKCiAgICAgICAgICAgICAgICAgWyAwMTAwMTAwMSAwMDExMDEwMSAwMDExMDAwMSBdCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAK"))
 
 #USER SETTINGS
-cycle = 600 #INTERVAL PER BATCH (1800 = 30MINS || 3200 = 1HR)
-interval = 3 #INTERVAL FOR EACH URL
+cycle = 1800 #INTERVAL PER BATCH (1800 = 30MINS || 3200 = 1HR)
+interval = 5 #INTERVAL FOR EACH URL
 
 def capture_full_page_screenshot(context, url, row_id, folder, extension):
     page = context.new_page()
-    page.goto(url, timeout=60000)
+    page.goto(url, timeout=120000)
     max_attempts = 3
     attempt = 1
 
@@ -71,45 +72,30 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
         try:
             time.sleep(interval)
             remove_elements(page) #REMOVE HEADER AND FOOTER OF THE PAGE
-
-            # CUSTOM NAVIGATION BEFORE CAPTURING OF SCREENSHOT START #
+            selectors = [
+                'button',
+                'button[type="button"]',
+                'a[text="Accept"]',
+                'button.accept-cookies',  
+                'button#accept-cookies',      
+                'button[data-cookie="accept"]',  
+                'button[aria-label="Accept Cookies"]'  
+            ] 
+            click_if_visible(page, selectors)
             
-            if click_if_visible(page, 'div.initial:nth-child(3) > a:nth-child(1)'): #BANKINGSUPERVISION.EUROPA
-                pass
-            elif click_if_visible(page, 'a[alt="year/2024"]'): #rowid 219
-                pass
-            elif click_if_visible(page, 'button.cky-btn-accept:nth-child(2)'): #M-X.CA
-                pass
-            elif click_if_visible(page, '#ccc-recommended-settings > span:nth-child(1)'): #PSR.GOV
-                pass
-            elif click_if_visible(page, '#close'): #SFO.GOV.UK
-                pass
-            elif click_if_visible(page, 'body > div.animated.fadeIn.position-relative.ng-scope > div > div:nth-child(3) > div.col-lg-3 > div.card.mb-4 > div.card-body > div:nth-child(6) > label'): #BOLSA SANTIAGO CIRCULARES
-                pass
-            elif click_if_visible(page, '//*[@id="main"]/div/div[1]/div/div/div/div/div[1]/ul/li[1]/a'): #JORF 
-                pass
-            elif click_if_visible(page, '#filtros > div:nth-child(1) > label'): #BOE.es
-                pass
-            elif click_if_visible(page, '//*[@id="cn-accept-cookie"]'): #Takeoverpanel
-                pass
-            elif click_if_visible(page, '#onetrust-accept-btn-handler'): #IRISHISTATUTEBOOK
-                pass
-            elif click_if_visible(page, '#popup-buttons > button.agree-button.eu-cookie-compliance-secondary-button.button.button--small'): #BANREP
-                pass
-            elif click_if_visible(page, 'body > app-root > bcb-cookies > div > div > div > div > button.btn.btn-primary.btn-accept'): #BCB.GOV
-                pass
-            elif click_if_visible(page, '#cookie-consent-banner > div > div > div.cck-actions.wt-noconflict > a.wt-link.wt-ecl-button.wt-ecl-button--primary.cck-actions-button.ea_ignore'): #EUR.LEX
-                pass
-            elif click_if_visible(page, '.wt-ecl-button__label'):
-                pass
-            elif click_if_visible(page, '#content > div.home-articles.news-wrap > div > div.all-news-link-wrap > button'):
-                pass
-            elif click_if_visible(page, '#cookie-banner > div > div > ul > li:nth-child(3) > button'): #CSSF.LU
-                pass    
-            elif click_if_visible(page, '#moove_gdpr_cookie_info_bar > div > div > div.moove-gdpr-button-holder > button.mgbutton.moove-gdpr-infobar-allow-all.gdpr-fbo-0'): #SEPBLAC.ES
-                pass
-            elif click_if_visible(page, 'text=Prosseguir'):
-                pass  
+            # CUSTOM NAVIGATION BEFORE CAPTURING OF SCREENSHOT START #
+
+            locators = [
+                '#main > div > div:nth-child(1) > div > div > div > div > div.main-col > ul > li:nth-child(1) > a',  #legifrance.fov
+                '#filtros > div:nth-child(1) > label',  # boe.es
+                '#filtros > div:nth-child(1) > ul > li:nth-child(2) > a',  # boe.es
+                'body > div.container > div.contenido > div:nth-child(1) > div.col-xs-12.col-md-8 > div > form > div:nth-child(2) > button' #bcra.gob
+            ]
+
+            for locator in locators:
+                if page.locator(locator).is_visible():
+                    page.locator(locator).click()
+
             
             # CUSTOM NAVIGATION BEFORE CAPTURING OF SCREENSHOT END #
 
@@ -142,6 +128,20 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
             print(f"\033[91mError capturing screenshot for row ID {row_id:04}: {e}. Attempt {attempt} of {max_attempts}\033[0m")
             attempt += 1
             page.reload()
+
+        except TimeoutError:
+            print(f"Timeout exceeded while navigating to row ID: {row_id:04}.")
+            attempt += 1
+            page.reload()
+
+        except playwright._impl._errors.Error as e:
+            if "net::ERR_TIMED_OUT" in str(e):
+                print(f"Timeout error occurred. Retrying... (Attempt {attempt} of {max_attempts})")
+                attempt += 1
+            else:
+                print(f"Unexpected error occurred: {e}")
+                break
+
         
     if attempt > max_attempts:
         print(f"\033[91mSkipping URL {url} after {max_attempts} attempts. Moving to next URL.\033[0m")
@@ -153,30 +153,13 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
 
 def process_excel_data(file_path):
     df = pd.read_excel(file_path)
-
     with sync_playwright() as p:
 
-        width, height = get_screen_size()
-        edge_profile_path = os.path.join(
-            appdirs.user_data_dir('Edge', 'Microsoft'),
-            'User Data'
+        browser = p.chromium.launch_persistent_context (
+            user_data_dir="user_dir",
+            headless=False,
+            accept_downloads=True
         )
-
-        chrome_profile_path = os.path.join(
-            appdirs.user_data_dir('Chrome', 'Google'),
-            'User Data'
-        )
-
-        profile_paths = [chrome_profile_path, edge_profile_path]
-        browsers = []
-        for profile_path in profile_paths:
-            browser = p.chromium.launch_persistent_context(
-                user_data_dir=profile_path,
-                headless=True,
-                accept_downloads=True,
-                viewport={"width": width, "height": height}
-            )
-            browsers.append(browser)
 
         for index, row in df.iterrows():
             url = row['URL']
