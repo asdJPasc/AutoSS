@@ -47,7 +47,8 @@ def remove_elements(page):
                            '#footer',
                            '#footerNav',
                            'body > footer',
-                           'body > div.o-wrapper--page > footer'
+                           'body > div.o-wrapper--page > footer',
+                           'body > div.LGPD_ANBIMA_global_sites > div'
                           ]
 
     for selector in selectors_to_remove:
@@ -61,7 +62,7 @@ stringCol = '\033[94m'; print(stringCol + decode_base64("CiAgICAgICAgICAgICAgICA
 
 #USER SETTINGS
 cycle = 1800 #INTERVAL PER BATCH (1800 = 30MINS || 3200 = 1HR)
-interval = 5 #INTERVAL FOR EACH URL
+interval = 6 #INTERVAL FOR EACH URL
 
 def capture_full_page_screenshot(context, url, row_id, folder, extension):
     page = context.new_page()
@@ -158,7 +159,7 @@ def process_excel_data(file_path):
 
         browser = p.chromium.launch_persistent_context (
             user_data_dir="user_dir",
-            headless=False,
+            headless=True,
             accept_downloads=True
         )
 
