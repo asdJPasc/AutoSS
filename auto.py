@@ -1,11 +1,27 @@
 #I51/JPascual
+import subprocess
 import os
 import base64
 import ctypes
 import time
-from datetime import datetime, timedelta
+import playwright
 import pandas as pd
+from datetime import datetime
+from colorama import Fore
 from playwright.sync_api import sync_playwright, TimeoutError
+
+def check_playwright():
+    try:
+        # Check if "playwright" command is available
+        subprocess.run(["playwright", "install", "-h"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        print("Playwright is already installed.")
+    except FileNotFoundError:
+        try:
+            # Attempt to install Playwright
+            subprocess.run(["playwright", "install"], check=True)
+            print("Playwright installation complete.")
+        except subprocess.CalledProcessError:
+            print("Error occurred while installing browsers via playwright. Please install manually using 'playwright install' command.")
 
 def decode_base64(encoded_string):
     decoded_bytes = base64.b64decode(encoded_string)
@@ -16,7 +32,7 @@ def cmd(title):
     ctypes.windll.kernel32.SetConsoleTitleW(title)
 
 def detect_captcha(page):
-    captcha_keywords = {'captcha', 'CAPTCHA', 'sendo exibido?'}
+    captcha_keywords = {'captcha', 'CAPTCHA', 'sendo exibido?', 'Verify you are human', 'Verifying you are human'}
     body_text = page.query_selector('body').text_content()
     return any(keyword in body_text for keyword in captcha_keywords)
 
@@ -57,16 +73,18 @@ def remove_elements(page):
             for element in elements:
                 element.evaluate('(element) => element.remove()')
 
-cmd(decode_base64("STUxIFNjcmlwdA=="))
-stringCol = '\033[94m'; print(stringCol + decode_base64("CiAgICAgICAgICAgICAgICAgICAgICAkJFwgICAgICAgICAgICAgICAgICAgJCRJNTEkXCAgICQkSTUxJFwgIAogICAgICAgICAgICAgICAgICAgICAgJCQgfCAgICAgICAgICAgICAgICAgJCQgIF9fJCRcICQkICBfXyQkXCAKICRJNTEkJFwgICQkXCAgICQkXCAkSTUxJCRcICAgICRJNTEkJFwgICAgICQkIC8gIFxfX3wkJCAvICBcX198CiBcX19fXyQkXCAkJCB8ICAkJCB8XF8kJCAgX3wgICQkICBfXyQkXCAgICBcJEk1MSQkXCAgXCRJNTEkJFwgIAogJCQkJCQkJCB8JCQgfCAgJCQgfCAgJCQgfCAgICAkJCAvICAkJCB8ICAgIFxfX19fJCRcICBcX19fXyQkXCAKJCQgIF9fJCQgfCQkIHwgICQkIHwgICQkIHwkJFwgJCQgfCAgJCQgfCAgICQkXCAgICQkIHwkJFwgICAkJCB8ClwkSTUxJCQkIHxcJEk1MSQkICB8ICBcJCQkJCAgfFwkSTUxJCQgIHwkJFxcJCRJNTEkICB8XCQkSTUxJCAgfAogXF9fX19fX198IFxfX19fX18vICAgIFxfX19fLyAgXF9fX19fXy8gXF9ffFxfX19fX18vICBcX19fX19fLyAKCiAgICAgICAgICAgICAgICAgWyAwMTAwMTAwMSAwMDExMDEwMSAwMDExMDAwMSBdCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAK"))
-
 #USER SETTINGS
-cycle = 1800 #INTERVAL PER BATCH (1800 = 30MINS || 3200 = 1HR)
-interval = 6 #INTERVAL FOR EACH URL
+cycle = 600 #INTERVAL PER BATCH (1800 = 30MINS || 3200 = 1HR)
+interval = 7 #INTERVAL FOR EACH URL
+
+def create_date_folder():
+    current_date = datetime.now().strftime("%m-%d-%Y")
+    os.makedirs(current_date, exist_ok=True)
+    return current_date
 
 def capture_full_page_screenshot(context, url, row_id, folder, extension):
     page = context.new_page()
-    page.goto(url, timeout=120000)
+    page.goto(url)
     max_attempts = 3
     attempt = 1
 
@@ -104,16 +122,15 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
             page.wait_for_load_state('networkidle')
 
             if detect_captcha(page):
-                print(f"\033[91mCAPTCHA detected! Please perform a manual capture of the screenshot for row ID: {row_id:04}...\033[0m\n")
+                print(f"{Fore.RED}CAPTCHA detected! Please perform a manual capture of the screenshot for row ID: {row_id:04}.{Fore.RESET}")
                 break
 
             timestamp = datetime.now().strftime("Date: %m-%d-%Y || Time: %I:%M:%S %p")
             header_content = f'<div style="position: absolute; top: 0; left: 0; width: 100%; font-weight: bold !important; background-color: black; padding: 10px; z-index: 9999999999; color: white;">{timestamp} || row ID: {row_id:04} || URL: {url}</div>'
             page.evaluate('(headerContent) => { document.body.innerHTML = `${headerContent}${document.body.innerHTML}`; }', header_content)
-
-            folder_path = os.path.join(os.getcwd(), str(folder))
+        
+            folder_path = os.path.join(create_date_folder(), folder)
             os.makedirs(folder_path, exist_ok=True)
-
             if pd.notna(extension) and isinstance(extension, str) and extension.strip():
                 filename = f"{row_id:04}_{datetime.now().strftime('%m%d%Y_%H%M')}_{extension}.png"
             else:
@@ -123,11 +140,11 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
             page.screenshot(path=screenshot_path, full_page=True)
 
             cmdTimestamp = datetime.now().strftime("%I:%M:%S %p")
-            print(f"\033[92mScreenshot of row ID {row_id:04} taken at {cmdTimestamp} has been saved.\033[0m\n")
+            print(f"{Fore.GREEN}Screenshot of row ID {row_id:04} taken at {cmdTimestamp} has been saved.{Fore.RESET}")
             break
 
         except Exception as e:
-            print(f"\033[91mError capturing screenshot for row ID {row_id:04}: {e}. Attempt {attempt} of {max_attempts}\033[0m")
+            print(f"{Fore.RED}Error capturing screenshot for row ID {row_id:04}: {e}. Attempt {attempt} of {max_attempts}{Fore.RESET}")
             attempt += 1
             page.reload()
 
@@ -144,20 +161,19 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
                 print(f"Unexpected error occurred: {e}")
                 break
 
-        
     if attempt > max_attempts:
-        print(f"\033[91mSkipping URL {url} after {max_attempts} attempts. Moving to next URL.\033[0m")
+        print(f"{Fore.YELLOW}Skipping URL {url} after {max_attempts} attempts. Moving to next URL.{Fore.RESET}")
 
     if not page.is_closed():
         page.close()
     else:
-        print(f"Page for row ID {row_id:04} is closed. It may have been reloaded or closed.")             
-
+        print(f"Page for row ID {row_id:04} is closed. It may have been reloaded or closed.")
+             
 def process_excel_data(file_path):
     df = pd.read_excel(file_path)
     with sync_playwright() as p:
 
-        browser = p.chromium.launch_persistent_context (
+        browser = p.firefox.launch_persistent_context (
             user_data_dir="user_dir",
             headless=True,
             accept_downloads=True
@@ -169,17 +185,27 @@ def process_excel_data(file_path):
             folder = f"{row['Folder']:04}".replace(" ", "")
             extension = row['Extension']
 
-            capture_full_page_screenshot(browser, url, row_id, folder, extension)
+            try:
+                capture_full_page_screenshot(browser, url, row_id, folder, extension)
+            except Exception as e:
+                print(f"{Fore.RED}Error processing URL {url}: {e}. Skipping to the next URL...{Fore.RESET}")
+                continue
+
         browser.close()
 
 def main():
+    os.system('cls')
+    check_playwright()
+    cmd(decode_base64("STUxIFNjcmlwdA=="))
+    stringCol = Fore.CYAN
+    print(stringCol + decode_base64("CiAgICAgICAgICAgICAgICAgICAgICAkJFwgICAgICAgICAgICAgICAgICAgJCRJNTEkXCAgICQkSTUxJFwgIAogICAgICAgICAgICAgICAgICAgICAgJCQgfCAgICAgICAgICAgICAgICAgJCQgIF9fJCRcICQkICBfXyQkXCAKICRJNTEkJFwgICQkXCAgICQkXCAkSTUxJCRcICAgICRJNTEkJFwgICAgICQkIC8gIFxfX3wkJCAvICBcX198CiBcX19fXyQkXCAkJCB8ICAkJCB8XF8kJCAgX3wgICQkICBfXyQkXCAgICBcJEk1MSQkXCAgXCRJNTEkJFwgIAogJCQkJCQkJCB8JCQgfCAgJCQgfCAgJCQgfCAgICAkJCAvICAkJCB8ICAgIFxfX19fJCRcICBcX19fXyQkXCAKJCQgIF9fJCQgfCQkIHwgICQkIHwgICQkIHwkJFwgJCQgfCAgJCQgfCAgICQkXCAgICQkIHwkJFwgICAkJCB8ClwkSTUxJCQkIHxcJEk1MSQkICB8ICBcJCQkJCAgfFwkSTUxJCQgIHwkJFxcJCRJNTEkICB8XCQkSTUxJCAgfAogXF9fX19fX198IFxfX19fX18vICAgIFxfX19fLyAgXF9fX19fXy8gXF9ffFxfX19fX18vICBcX19fX19fLyAKCiAgICAgICAgICAgICAgICAgWyAwMTAwMTAwMSAwMDExMDEwMSAwMDExMDAwMSBdCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAK") + Fore.RESET)
     excel_file_path = "agents.xlsx"
     try:
         cycle_count = 0
 
         while True:
             cycle_count += 1
-            print(f"\n\033[91m[ Starting cycle #{cycle_count} ]")
+            print(f"{Fore.CYAN}[ Starting cycle #{cycle_count} ]\n")
             process_excel_data(excel_file_path)
             time.sleep(cycle)
     except KeyboardInterrupt:
