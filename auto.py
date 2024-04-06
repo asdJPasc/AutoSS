@@ -10,6 +10,10 @@ from datetime import datetime
 from colorama import Fore
 from playwright.sync_api import sync_playwright, TimeoutError
 
+#USER SETTINGS
+cycle = 3200
+interval = 7
+
 def check_playwright():
     try:
         # Check if "playwright" command is available
@@ -72,10 +76,6 @@ def remove_elements(page):
         if elements:
             for element in elements:
                 element.evaluate('(element) => element.remove()')
-
-#USER SETTINGS
-cycle = 600 #INTERVAL PER BATCH (1800 = 30MINS || 3200 = 1HR)
-interval = 7 #INTERVAL FOR EACH URL
 
 def create_date_folder():
     current_date = datetime.now().strftime("%m-%d-%Y")
