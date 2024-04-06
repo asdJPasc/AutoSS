@@ -1,1775 +1,0 @@
-var loc = window.location.pathname.toLowerCase();
-var cNavArr = [];
-var bcContent;
-
-function highlightMega(){
-//highlightNav(window.location.href, window.location.href);
-/*var tries = 0;
-var i = setInterval(function(){
-	if($(".megamenu").find("a[href*='"+window.location.pathname+"']").closest('li.accessible-megamenu-top-nav-item').find("a:first").length > 0 && tries < 10){//nothing highlighted
-		$(".megamenu").find("a[href*='"+window.location.pathname+"']").closest('li.accessible-megamenu-top-nav-item').find("a:first").addClass("current");
-		//$(".megamenu").find("a[href*='"+window.location.pathname+"']").closest('li.accessible-megamenu-top-nav-item').find("a:first").addClass('current')
-		//console.log('set it');
-		clearInterval(i);
-	}else{
-		//console.log(tries);
-	}
-	
-	tries++;
-	}, 500);
-	*/
-}
-
-
-function buildHorizontalNav() {
-bcContent = $("div.ms-webpart-zone span:contains('Ginnie Mae Breadcrumb')").closest("div[id*='MSOZoneCell_WebPartWPQ']").closest("div");
-if (bcContent.length > 0){
-	//console.log('build bc');
-	$("#SlideShowZone").remove();
-   		var bc =  buildBreadcrumb();
-   		if(bc != true){
-   		 	buildMobileSecondaryNav();
-   		 }else if($("#bm-nav-icon:visible").length > 0){
-   		 	$("div.bcNavContainer").appendTo("#gmContentContainer div:first");
-   		 	$("#CenteredContent1").css({'margin-top':'0px'});
-   		 	}
-}else{
-	 $("#SlideShowZone").show();
-    	buildTieredMenu();
-    	buildMobileSecondaryNav();
-    
-}  
-
-//////////////////mobile sec nav///////////////
-$('#DeltaPlaceHolderMain').on('click', '#mSecNavDDText, #mSecNavDDIcon', function(evt){
-evt.stopPropagation();
-var acc = $("#DeltaPlaceHolderMain #mSecNavAcc");
-
-if($(acc).is(':visible'))
-{
-   
-acc.hide().slideUp('slow');
-}else{
-acc.show().slideDown('slow');
-var cookie = getCookie("mGMNAV");
-	if(cookie!=null && cookie.split("|")[0]=="mSecNavAcc"){
-	//$("#mSecNavAcc .ui-accordion-header:contains('"+cookie.split("|")[1]+"')").click();
-	}else{
-	//acc.find(".SecNavAccselectedmi:first").closest("li").closest("ol").closest("div").prev(".ui-accordion-header").not(".ui-accordion-header-active").click();
-	}
-}
- 
- 
-});
-
-highlightMega();
-
-}
-
-function getNavNodes(){
-
-$("#SecTerHorizontalNav div[id*='_CurrentNav'] > ul > li > ul > li").each(function (i, item) {
-		var linkurl = "XXXXXXXXX";
-		if($(item).find("a:first").attr('href'))
-			linkurl = $(item).find("a:first").attr('href').toLowerCase();
-			
-       // console.log("main nav linkurl:" + linkurl);
-        var ni = { nm: $(item).find("span.menu-item-text:first").text(), href: $(item).find("a:first").attr('href'), title: $(item).find("a:first").attr('title'),target: $(item).find("a:first").attr('target'), subNodes: [], current: (window.location.pathname.toLowerCase().indexOf(linkurl) > -1 ? true : false) };
-        $(item).find(">ul>li").each(function (x, sitem) {
-        linkurl = "XXXXXXXXX";
-		if($(sitem).find("a:first").attr('href'))
-			linkurl = $(sitem).find("a:first").attr('href').toLowerCase();
-		  //  console.log('subnav  linkurl:' + linkurl);
-            ni.subNodes.push({ nm: $(sitem).find("span.menu-item-text:first").text(), href: $(sitem).find("a:first").attr('href'), title: $(sitem).find("a:first").attr('title'), target:$(sitem).find("a:first").attr('target'),  current: (window.location.pathname.toLowerCase().indexOf(linkurl) > -1 ? true : false) });
-        });
-        cNavArr.push(ni);
-    });
-  //  console.log(cNavArr);
-
-}
-
-function buildTieredMenu(){
- $("#SecTerHorizontalNav").prepend("<div id=\"hNav\"><div class=\"sncBg\"></div><div class=\"secondaryNavContainer\"></div></div>");
- $("<div class=\"tncBg\"></div><div class=\"tertiaryNavContainer\"></div>").insertAfter($("div.secondaryNavContainer"));
-         
-	//var intX=0;
-    
-    //console.log('max width:' + maxWidth);
-    $("#SecTerHorizontalNavCont,#SecTerHorizontalNav").show();
-	var maxWidth = $("div.centeredContent:first").outerWidth() - 250;
-	if( cNavArr.length==0){ getNavNodes();}
-    //var i = setInterval(function(){
-    //maxWidth = $("div.centeredContent:first").outerWidth() - 250;
-     
-    //if($("div.centeredContent:first").outerWidth()!=1024|| intX>1){
-    //if(intX>1){
-    
-    //console.log('intX:'+intX);
-    
-    //clearInterval(i);
-     
-
-   /*
-    $("#SecTerHorizontalNav div[id*='_CurrentNav'] > div  > ul > li > ul > li").each(function (i, item) {
-        var ni = { nm: $(item).find("span.menu-item-text:first").text(), href: $(item).find("a:first").attr('href'), title: $(item).find("a:first").attr('title'),target: $(item).find("a:first").attr('target'), subNodes: [] };
-        $(item).find(">ul>li").each(function (x, sitem) {
-            ni.subNodes.push({ nm: $(sitem).find("span.menu-item-text:first").text(), href: $(sitem).find("a:first").attr('href'), title: $(sitem).find("a:first").attr('title'), target:$(sitem).find("a:first").attr('target') });
-        });
-        cNavArr.push(ni);
-    });
-    */
-    
-     //remove nav if empty
-    if(cNavArr.length==0)
-    {
-      $("#SecTerHorizontalNav>div").hide();
-      return;
-    }
-    
-    
-
-    var cNavI;
-    var isCurrentSNav = false;
-    var currentWidth = 0;
-    $("div.s4-ql[id*='_CurrentNav']").hide();
-    //$("#SecTerHorizontalNav").prepend("<div id=\"hNav\"><div class=\"sncBg\"></div><div class=\"secondaryNavContainer\"></div></div>");
-    var sNav = $("div.secondaryNavContainer");
-    var maxWidthReached = false;
-    
-   
-    $(cNavArr).each(function (i, ni) {
-    //check if location matches or if subnode contains the link
-        //PJP rmv 8/1/2023 if ((ni.href != null && loc.indexOf(ni.href.toLowerCase()) > -1) || $(ni.subNodes).filter(function(){ return this.href.toLowerCase().indexOf(loc)>-1;}).length > 0) { isCurrentSNav = true; cNavI = ni; } else { isCurrentSNav = false; }
-       //PJP add 8/1/2023
-if (ni.current || $(ni.subNodes).filter(function(item){ return item.current;}).length > 0) { isCurrentSNav = true; cNavI = ni; } else { isCurrentSNav = false; }
-       
- //console.log('onav width:'+$("#SecTerHorizontalNav div[id*='_CurrentNav']").width());
-
-        
-         
-        if (!(maxWidthReached)) 
-        {
-            $("<div class=\"secNav" + (isCurrentSNav ? " currentSNav" : "") + "\"><a "+(typeof ni.target!='undefined'?"target=\""+ni.target+"\"":"")+" title=\"" + (typeof ni.title != 'undefined' ? ni.title : ni.name) + "\" href=\"" + ni.href + "\">" + ni.nm + "</a></div>").appendTo(sNav);
-            currentWidth = currentWidth + $(sNav).find("div.secNav:last()").outerWidth();
-            	
-        }//end if
-      
-        
-       /*  
-        
-        console.log('maxW:'+maxWidth);
-        console.log('currentW:'+currentWidth);
-        console.log('max width reached:'+maxWidthReached);
-       */
-       
-        if (currentWidth >= maxWidth && !(maxWidthReached)) {
-            maxWidthReached = true;
-            $(sNav).find("div.secNav:last").remove();
-            $(sNav).append("<div id=\"secNavMoreContainer\"><div class=\"secNavMore\"><div><button id=\"secNavMoreButton\">More</button></div><ul></ul></div></div>");
-        }
-
-        if (maxWidthReached) {
-            $("div.secNavMore ul").append("<li class=\"secNavLi" + (isCurrentSNav ? " currentSNavLi" : "") + "\"><a "+(typeof ni.target!='undefined'?"target=\""+ni.target+"\"":"")+" title=\"" + (typeof ni.title != 'undefined' ? ni.title : ni.name) + "\" href=\"" + ni.href + "\">" + ni.nm + "</a></li>");
-        }
-
-        if (isCurrentSNav || i == 0){
-            generateTertiaryNav(ni,true);
-                   
-        }
-    });
-    
-    
- 
-
-
-    //generate more button
-   var menu;
-   var button = $("#secNavMoreButton").button({ icons: { primary: "ui-icon-triangle-1-s"}})
-    .blur(function(){
-        //console.log($(this).hasClass('ui-state-focus'));
-    })
-    .click(function (evt) { 
-    		   if($(this).css('color') != 'rgb(18, 102, 218)'){//keep nav from opening on enter key  PJP 8/27/20 changed from .hasClass('ui-state-focus')==false  
-    			 $(this).blur();
-    			return false;
-    			}
-            menu = $(this).parent().next().show().position({
-            my: "right top",
-            at: "right bottom", /*pjp 8/29/20 adjust menu position on open*/
-            of: $(this).closest('div.secNavMore').find(".ui-button")//.parent()
-          });//end show menu
-          $(document).on( "click", function() {
-             
-            menu.hide();
-          });
-            $("#s4-workspace").on("scroll", function(){ 
-        
- 			menu.hide();
- 			
-			});    
-			
-			$("div.secNavMore").on("mouseleave",function(){
-			//if(!($(this).closest('div').find(".ui-button").css('color')==='rgb(18, 102, 218)')){ //pjp 8/27/20 changed from .hasClass('ui-state-focus'))){
-                
-				menu.hide();
-			//	}
-			})      
-			return false;
-        }).parent().controlgroup().next().hide().menu();     
-    
-    //select option if current url within more options of secondary nav
-    matchSNav();
-	
-	
-	
-	
-    //add hover event
-    $("div.secondaryNavContainer>div.secNav").find("a").hover(function () {
-        var el = this;
-        $("div.secondaryNavContainer>div.secNav.focus").removeClass("focus");
-        if(!($(el).parent().hasClass("currentSNav")))
-        	$(el).parent().addClass("focus");
-        var ns = cNavArr.filter(function (item, i) { return item.nm == $(el).text(); });
-        if (ns.length > 0) { generateTertiaryNav(ns[0]);}
-    }, function () {
- 		
-    }); //in / out
-
-    $("#hNav").hover(function () { }, function () {
-     generateTertiaryNav(cNavI); 
-     //console.log('mouse out hnav');
-     matchTNav(); 
-     $("div.secondaryNavContainer>div.secNav.focus").removeClass("focus");
-     });
-    
-    
-externalWindowWarning();
-//$("#SecTerHorizontalNavCont,#SecTerHorizontalNav").show();
-//}else{
-//intX++;
-//}
-
-//},50);
-
-
-}
-
-function matchSNav(){
- 
- var sNavLi;
- //direct match
- sNavLi = $("div.secNavMore").find("ul>li>a").filter(function(){return $(this).attr('href').toLowerCase().indexOf(loc)>-1;});
- if(sNavLi.length==0){//look for sublink match
- var tlink = $("#SecTerHorizontalNav div.menu.horizontal.menu-horizontal ul:eq(1) a").filter(function(){return $(this).attr('href').toLowerCase()==loc;}).eq(0);
- //console.log('found tlink loc:' + loc + ' text: ' + $(tlink).find("span.menu-item-text").text());
- var snavText = $(tlink).closest("ul").closest("li").find("span.menu-item-text:first").text(); // secondary nav link from tertiary
- //console.log('snavText:' + snavText);
- if(snavText!='')
- 	sNavLi = $("div.secNavMore").find("ul>li>a").filter(function(){return $(this).text().toLowerCase().indexOf(snavText.toLowerCase())>-1;});
- }
- 	if(sNavLi.length>0){
- 	//console.log("snav text:"+sNavLi.eq(0).text());
-	sNavLi.closest('div').find("span.ui-button-text").html(sNavLi.eq(0).text()).css({color:'#1266da','font-weight':'600'}).addClass("currentSNav");
-	}
-}
-	
-function matchTNav(){
-//select option if current url with more options on tertiary
-var tNavLi = $("div.tNavMore").find("ul>li>a").filter(function(){return $(this).attr('href').toLowerCase().indexOf(loc)>-1;});
-if(tNavLi.length>0){
-tNavLi.eq(0).closest('div').find("span.ui-button-text").html(tNavLi.eq(0).text()).css({'font-weight':'600',color:'#1266da !important'});
-$("div.tNavMore").addClass('tri-down');
-$("#tNavMoreContainer .ui-controlgroup").css({position:'relative',top:'-15px'}); 
-
-
-//highlightNav($("div.currentSNav a").attr('href').toLowerCase(),tNavLi.eq(0).attr('href').toLowerCase());
-}
-}
-
-
-
-function generateTertiaryNav(node) {
-    //console.log('gen tertiary menu');
-	//var intX=0;
-    var maxWidth = $("div.centeredContent:first").outerWidth() - 220;
-    //var i = setInterval(function(){
-    //maxWidth = $("div.centeredContent:first").outerWidth() - 100;
-    //if(maxWidth!=800 || intX>20){
-    //console.log('intX:'+intX);
-    //clearInterval(i);
-    var currentWidth = 0;
-    var maxWidthReached = false;
-    if (typeof node == 'undefined')
-        return false;
-
-    var tNav;
-    if ($("div.tertiaryNavContainer").length === 0) {
-        $("<div class=\"tncBg\"></div><div class=\"tertiaryNavContainer\"></div>").insertAfter($("div.secondaryNavContainer"));
-        tNav = $("div.tertiaryNavContainer");
-    } else {
-    	
-        tNav = $("div.tertiaryNavContainer");
-        tNav.find("div").remove();
-    }
-    var isCurrentTNav = false;
-    var parentHref = node.href;
-    //console.log('parenthref ' + parentHref);
-    if(node.subNodes.length==0)
-    {
-    	//console.log('no subnodes');
-    	highlightNav(parentHref,parentHref);
-    	$("div.tncBg,div.tertiaryNavContainer").remove();//removes the tertiary navigation if no items are present
-    }
-    
-    $(node.subNodes).each(function (i, ni) {
-   // console.log(ni.href.toLowerCase());
-        if (ni.href.toLowerCase().indexOf(loc) > -1) { isCurrentTNav = true; } else { isCurrentTNav = false; }
-        if (!(maxWidthReached)) {
-            $("<div class=\"" + (isCurrentTNav ? "tri-down" : "navinactive") + "\"><a "+(typeof ni.target!='undefined'?"target=\""+ni.target+"\"":"")+" title=\"" + (typeof ni.title != 'undefined' ? ni.title : ni.name) + "\" href=\"" + ni.href + "\">" + ni.nm + "</a></div>").appendTo(tNav);
-            currentWidth = currentWidth + $(tNav).find("div:last()").outerWidth();
-        }
-        /*
-        console.log('nm:'+ ni.nm );
-        console.log('tert curr width:' + currentWidth);
-        console.log('tert max width:' + maxWidth);
-        */
-        if (currentWidth >= maxWidth && !(maxWidthReached)) {
-            maxWidthReached = true;
-            $(tNav).find("div:last").remove();
-            $(tNav).append("<div id=\"tNavMoreContainer\"><div class=\"tNavMore\"><div><button id=\"tNavMoreButton\">More</button></div><ul></ul></div></div>");
-        }
-
-        if (maxWidthReached) {
-        	//console.log('max width on tertiary');
-            $("div.tNavMore ul").append("<li class=\"tNavLi" + (isCurrentTNav ? " currentTNavLi" : "") + "\"><a "+(typeof ni.target!='undefined'?"target=\""+ni.target+"\"":"")+" title=\"" + (typeof ni.title != 'undefined' ? ni.title : ni.name) + "\" href=\"" + ni.href + "\">" + ni.nm + "</a></li>");
-        }
-
-
-
-        //highlighting secondary nav
-        if (isCurrentTNav) {
-            highlightNav(parentHref,ni.href);
-
-        }
-    });
-
-
-    //generate more button
-    $("#tNavMoreButton").button({ icons: { primary: "ui-icon-triangle-1-s"} })
-    .click(function () {
-    if($(this).css('color') != 'rgb(18, 102, 218)'){//stop nav opening on enter key,  pjp 8/28/2020 changed from .hasClass('ui-state-focus')==false
-    			 $(this).blur();
-    			return false;
-    			}
-
-        var menu = $(this).parent().next().show().position({
-            my: "right top",
-            at: "right bottom",
-            of: $(this).closest('div.tNavMore').find(".ui-button")       }); //end show menu
-        $(document).one("click", function () {
-         
-            menu.hide();
-        });
-        /*+23 -1*/
-        $("#s4-workspace").on("scroll", function(){ 
-            
-         			menu.hide();
-			});          
-
-        return false;
-    }).parent().controlgroup().next().hide().menu();    
-   //select option if current url within more options of tertiary nav
-	matchTNav();
-	externalWindowWarning();
-
-  // }else{intX++;}},400);//end interval
-  
- 
-
-}
-
-function highlightNav(parentHref, matchUrl){
-
-//FIND SECONDARY NAV MATCH
-//console.log('highlightnav parentHref: ' + parentHref + ' matchurl: ' + matchUrl);
-			var hSNav;
-			// console.log('parenthref:'+parentHref+' length:'+$("div.secondaryNavContainer div.secNav a[href='" + parentHref + "']").length);
-			 hSNav = $("div.secondaryNavContainer div.secNav a[href='" + parentHref + "']").parent();//.addClass("currentSNav");
-            
-             
-           
-            
-            var hStxt ="";
-            var intv = setInterval(function(){
-            hStxt = $(".currentSNav").text();// hSNav.find("a").text();
-            if(hStxt!='')
-               clearInterval(intv);
-            
-           
-            var hShref = hSNav.find("a").prop('href');
-            //console.log('highlight nav hStxt:'+hStxt);
-           // console.log('hStxt:' + hStxt);
-            //FIND THE PANEL GROUP ON THE MEGA MENU
-			var mmPanelGroupHeader;
-            if (hStxt != '') {
-                mmPanelGroupHeader = $(".accessible-megamenu-top-nav-item > h2 a[id*='accessible-mega']:contains('" + hStxt + "'):first()");
-              //  mmPanelGroupHeader.addClass('current');
-            }
-
-			//console.log('mmpgh:'+mmPanelGroupHeader.length);
-			//FIND ITS CLOSEST TOP NAV ITEM AND HIGHLIGHT IT
-          //  var tni = $(mmPanelGroupHeader).closest("li.accessible-megamenu-top-nav-item").find("h2 a").first();
-			//tni.addClass('current');
-
-			
-			//console.log('looking for matching url'+matchUrl);
-            //LOOK FOR A URL MATCH OF THE CURRENT PAGE
-            var mmMatches = $("ol.accessible-megamenu").find("li a[href*='" + matchUrl + "']");
-           // if(mmMatches.length==0)
-            //	mmMatches = $("ol.accessible-megamenu").find("li a").filter(function(li,linkitem){return $(linkitem).attr('href').toLowerCase().split('/pages')[1] == matchUrl.toLowerCase().split('/pages')[1];});
-            
-            //console.log('mmMatches:'+mmMatches.length);
-            //link not on menu, look at panel with heading only links (i.e. NEWSROOM)
-           // if(mmMatches.length==0)
-            //   mmMatches = $("ol.accessible-megamenu").find("li.heading a[href*='" + matchUrl.toLowerCase().split('/pages')[1] + "']");
-            
-            //console.log('matches:' + mmMatches.length);
-            //link no on menu, no heading links, just find the match for the secondary nav
-             
-            var found = 0;
-            mmMatches.each(function (i, item) {
-            clearInterval(intv);
-            //console.log('found match on mega');
-                //match panel items on link
-                var tniSubPanelG = $(item).closest("li.accessible-megamenu-panel-group").find("a:first");
-                if(tniSubPanelG.length==0){
-                //	$("li.heading .current").removeClass('current');//remove existing with current
-                	tniSubPanelG = $(item);
-                }
-                	
-               // var tni = $(item).closest("li.accessible-megamenu-top-nav-item").find("h2 a");
-                //console.log('top nav item: ' + tni.text());
-                //console.log(tniSubPanelG.text().toLowerCase() + ' vs ' + hStxt.toLowerCase());
-                if (tniSubPanelG.text().toLowerCase() == hStxt.toLowerCase()) {
-                    //match
-                  //  tniSubPanelG.addClass('current');
-                  //  $(item).addClass('current');
-                    found=1;
-                }
-                
-            });
-            
-            if(found==0){
-            //no matches on text, match on link
-                       mmMatches.each(function (i, item) {
-            //console.log('found match on mega');
-                //match panel items on link
-                var tniSubPanelG = $(item).closest("li.accessible-megamenu-panel-group").find("a:first");
-                if(tniSubPanelG.length==0){
-                //	$("li.heading .current").removeClass('current');//remove existing with current
-                	tniSubPanelG = $(item);
-                }
-                	
-               // var tni = $(item).closest("li.accessible-megamenu-top-nav-item").find("h2 a");
-                //console.log('top nav item: ' + tni.text());
-                //console.log(tniSubPanelG.text().toLowerCase() + ' vs ' + hStxt  if (tniSubPanelG.text().toLowerCase() == hStxt.toLowerCase()) {
-                    //match
-                 //   tniSubPanelG.addClass('current');
-                  //  $(item).addClass('current');
-                  //  $(item).closest("li.accessible-megamenu-top-nav-item").find("h2:first a").addClass("current");
-               
-                
-            });
-
-            
-            }
-             
-            },100);
-}
-
-
-/*BREADCRUMB*/
-
-function buildBreadcrumb() {
-
-var bmCreated = false;
-$("#gmContentContainer").css({'margin-top':'-15px'});
-
-    var inDesignMode = document.forms[MSOWebPartPageFormName].MSOLayout_InDesignMode.value;
-    
-      
-    if (inDesignMode != "1") {
-       bcContent.hide();
-    }else{$("#breadcrumbzone").show();}
-    
-    
-    
-
-    $("#SecTerHorizontalNav").find("*").hide();
-    $("#SecTerHorizontalNav").prepend("<div id=\"hNav\" style=\"overflow-y:hidden;\"><div class=\"bcBg\"></div><div class=\"bcNavContainer\"></div></div>");
-    var gmbc = $("div.bcNavContainer");
-
-    var bcLength = bcContent.find("div.link-item a").length;
-
-	var cssclass = "";
-    var htmlStr = "";
-	var bcItems = bcContent.find("div.link-item a");
-    bcItems.each(function (i, item) {
-    // console.log("item...",item);
-        var hrefData = $(item).attr('href');
-        if (hrefData.indexOf("/events/events") != -1) {
-            // console.log("hrefData...", hrefData);
-            var hrefArr = hrefData.split('/');
-            var hrefArr = getUnique(hrefArr);
-            var hrefFinal;
-            for (var h = 0; h < hrefArr.length; h++) {
-                if(h == 0)
-                hrefFinal = hrefArr[h];
-                else
-                hrefFinal = hrefFinal + '/' + hrefArr[h];
-            }
-            $(item).attr('href',hrefFinal);
-         //   console.log("hrefFinal...", hrefFinal);
-        }
-        var title = "";
-        var href = "";
-        var text = "";
-        var target = "";
-         var dtix;
-        if ($(item).text().toLowerCase().replace(/\s+/g, '').indexOf("dynamictitle") > -1) {
-        
-         
-        
-         
-        	var dT = $("#DynamicTitle");
-            var intv = setInterval(function(){
-            if(dT.length > 0){
-            clearInterval(intv);
-        	text = dT.text();
-            text = text == "" ? "DynamicTitle" : text;
-            title = text;
-            href = window.location.href.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-       	    // console.log("hrefDataInIf...", href);
-       		
-       		        cssclass = "";
-			        htmlStr = "";
-			        var mobile = $("#bm-nav-icon:visible").length; 
-			        if (mobile > 0 && i === (bcItems.length - 2) ) //mobile bc
-			        {
-			        cssclass = "bcSelected" ;
-			        htmlStr = "<a "+(typeof target != 'undefined' && target!='' ? "target=\""+target+"\"":"")+" class=\"" + cssclass + "\" href=\"" + href + "\" title=\"See " + title + "\">&lt; See " + text + "</a>";
-			        }
-			        else if(mobile===0)//regular bc
-			        {
-			        cssclass = href.toLowerCase().indexOf(loc) > -1 ? "bcSelected" : "";
-			        htmlStr = cssclass != "" ? "<span class=\"bcCurrentPage\">"+title+"</span>" : "<a "+(typeof target != 'undefined' && target!='' ? "target=\""+target+"\"":"")+" class=\"" + cssclass + "\" href=\"" + href + "\" title=\"" + title + "\">" + text + "</a>";
-			        htmlStr = i < bcLength - 1 ? htmlStr + "<span> &gt; </span> " : htmlStr;
-					}
-			        $(htmlStr).appendTo(gmbc);
-			}else{
-			dT = $("#DynamicTitle");
-			}
- 			},100);
-            
-            
-            
-        } else {
-            title = $(item).prop('title');
-            text = $(item).text();
-            href = $(item).prop('href');
-           // console.log("hrefDataInElse...", href);
-            target = typeof($(item).prop('onclick'))=="function" ?"_blank":"";
-        }
-        
-        if(title!=""){
-        cssclass = "";
-        htmlStr = "";
-        var mobile = $("#bm-nav-icon:visible").length; 
-        if (mobile > 0 && i === (bcItems.length - 2) ) //mobile bc
-        {
-        cssclass = "bcSelected" ;
-        htmlStr = "<a "+(typeof target != 'undefined' && target!='' ? "target=\""+target+"\"":"")+" class=\"" + cssclass + "\" href=\"" + href + "\" title=\"See " + title + "\">&lt; See " + text + "</a>";
-        }
-        else if(mobile===0)//regular bc
-        {
-        cssclass = href.toLowerCase().indexOf(loc) > -1 ? "bcSelected" : "";
-        htmlStr = cssclass != "" ? "<span class=\"bcCurrentPage\">"+title+"</span>" : "<a "+(typeof target != 'undefined' && target!='' ? "target=\""+target+"\"":"")+" class=\"" + cssclass + "\" href=\"" + href + "\" title=\"" + title + "\">" + text + "</a>";
-        htmlStr = i < bcLength - 1 ? htmlStr + "<span> &gt; </span> " : htmlStr;
-		}
-        $(htmlStr).appendTo(gmbc);
-        bmcreated = true;
-        }
-        // console.log("href.......",href);
-    });
-
-
-	var intv = setInterval(function(){
-	if( $(".accessible-megamenu-panel").length > 0){
-	clearInterval(intv);
-	//console.log('panel there');
-    var bclink = gmbc.find("a:last");
-    //console.log(bclink.text());
-    $("ol.accessible-megamenu").find("li a:contains('"+bclink.text()+"')").each(function (i, item) {
-        //match panel items on link
-        var tniSubPanelG = $(item).closest("li.accessible-megamenu-panel-group").find("a:first");
-        var tni = $(item).closest("li.accessible-megamenu-top-nav-item").find("h2 a");
-        if (tniSubPanelG.text().toLowerCase() == gmbc.find("a:first").text().toLowerCase()) {
-            //match
-           // tniSubPanelG.addClass('current');
-           // $(item).addClass('current');
-           // tni.addClass('current');
-        }
-
-    });
-	}//end if
-	},100);
-
-    if (inDesignMode != "1") {
-        var tblC = bcContent.closest("table");
-        bcContent.closest("tr").remove();
-        if (tblC.find("tr").length == 0)
-            tblC.remove();
-    }
-
-     
-
-	$("#SecTerHorizontalNavCont,#SecTerHorizontalNav").show();
-    return bmcreated;
-}
-
-
-////////////////////Mobile Secondary Menu//////////////////////
-function buildMobileSecondaryNav(){
-//console.log('bm icon length: ' + $("#bm-nav-icon:hidden").length);
-if($("#bm-nav-icon:visible").length==0){
-return true;
-}
-
-
-$("#SlideShowZone").remove();
-if( cNavArr.length==0){ getNavNodes();}
-
- 
-$("<div id='mSecNav'><div><div id='mSecNavDD'><span   id='mSecNavDDText'>&nbsp;</span><span id='mSecNavDDIcon'/></div></div></div>").prependTo("#DeltaPlaceHolderMain");//gmContentContainer div:first
-var acm = $("<div id='mSecNavAcc' style='display:none;'></div>").appendTo("#mSecNavDD");
-
-$(cNavArr).each(function(ni,nitem){
-var mitem = $("<h3>" + nitem.nm + "</h3><div class=\"bm-nav-panel\"><ol></ol></div>").appendTo(acm);
-var panel = acm.find(".bm-nav-panel:last ol");
-	$(nitem.subNodes).each(function(sni,snitem){
-	$("<li><a class=\"" +(window.location.href.toLowerCase().indexOf($(snitem).attr('href').toLowerCase()) > -1 ? "SecNavAccselectedmi" : "" )+ "\" title='"+snitem.title+"' href='" + snitem.href + "'>" + snitem.nm + "</a></li>").appendTo(panel);
-	});
-	//catch for menu groups without subitems
-	if(nitem.subNodes.length==0 && $(nitem).attr('href') != null)
-	{
-	$("<li><a class=\"" +(window.location.href.toLowerCase().indexOf($(nitem).attr('href').toLowerCase()) > -1 ? "SecNavAccselectedmi" : "" )+ "\" title='"+nitem.title+"' href='" + nitem.href + "'>" + nitem.nm + "</a></li>").appendTo(panel);
-	
-	}
-});
-
- $("#mSecNavAcc").accordion({
- 	  active: false,
-      collapsible: true
-    });
-    
- 
- 
-           
-$("#s4-workspace").on("scroll", function(){         
-if($("#mSecNavAcc:visible").length > 0  && !(acm.isInViewport())){
-	$("#mSecNavAcc").hide('slow');
-}
-});   
-
- 
-//nav tracking
-//secondary nav
-$("#mSecNavAcc a").on('click',function(evt){
-var menu = $(this).closest("div.ui-accordion").attr("id");
-var panel = $(this).closest("ol").closest("div.bm-nav-panel").prev("h3").text();
-
-setCookie("mGMNAV",menu+"|"+panel,1);
-
-});
-//end secondary nav
-//end nav tracking
-
-$(document).ready(function(){
-    var cookie = getCookie("mGMNAV");
-
- 
-
-	if(cookie!=null && cookie.split("|")[0]=="burgermenu" && $("#burgermenu .ui-accordion-header:contains('"+cookie.split("|")[1]+"')").not(".ui-accordion-header-active").length > 0){
-	mainMenu = $("#burgermenu .ui-accordion-header:contains('"+cookie.split("|")[1]+"')").not(".ui-accordion-header-active").text();
-	 
-	}else{
-	mainMenu = $("#burgermenu .bmselectedmi:first").closest("li").closest("ol").closest("div").prev(".ui-accordion-header").not(".ui-accordion-header-active").text();	 
-	}
-	
-	//if blank check for link somewhere in main nav
-	if(mainMenu === ""){
-		mainMenu = $("#burgermenu").find("a[href*='"+window.location.pathname+"']:first").closest("li").closest(".bm-nav-panel").prev('h3').text();
-	}
-	
-	//if still blank check for parent path in main nav	
-	if(mainMenu === ""){
-		mainMenu = $("#burgermenu").find("a[href*='"+window.location.pathname.split('/Pages/')[0].split('/')[1]+"']:first").closest("li").closest(".bm-nav-panel").prev('h3').text();
-	}
-
-	
-	
-	$("#mSecNavDDText").html(mainMenu + " Menu").show();
-  });
-
-
-}
-
-function getUnique(array) {
-    var uniqueArray = [];
-    for (var value of array) {
-        if (uniqueArray.indexOf(value) === -1) { uniqueArray.push(value); }
-    } return uniqueArray;
-}        <ÿ  x<ÿÃ    20240222211730-8lÿ  ^õ|oI   https://www.ginniemae.gov/Style%20Library/GNMA%20Scripts/horizontalNav.js      Gs  var loc = window.location.pathname.toLowerCase();
-var cNavArr = [];
-var bcContent;
-
-function highlightMega(){
-//highlightNav(window.location.href, window.location.href);
-/*var tries = 0;
-var i = setInterval(function(){
-	if($(".megamenu").find("a[href*='"+window.location.pathname+"']").closest('li.accessible-megamenu-top-nav-item').find("a:first").length > 0 && tries < 10){//nothing highlighted
-		$(".megamenu").find("a[href*='"+window.location.pathname+"']").closest('li.accessible-megamenu-top-nav-item').find("a:first").addClass("current");
-		//$(".megamenu").find("a[href*='"+window.location.pathname+"']").closest('li.accessible-megamenu-top-nav-item').find("a:first").addClass('current')
-		//console.log('set it');
-		clearInterval(i);
-	}else{
-		//console.log(tries);
-	}
-	
-	tries++;
-	}, 500);
-	*/
-}
-
-
-function buildHorizontalNav() {
-bcContent = $("div.ms-webpart-zone span:contains('Ginnie Mae Breadcrumb')").closest("div[id*='MSOZoneCell_WebPartWPQ']").closest("div");
-if (bcContent.length > 0){
-	//console.log('build bc');
-	$("#SlideShowZone").remove();
-   		var bc =  buildBreadcrumb();
-   		if(bc != true){
-   		 	buildMobileSecondaryNav();
-   		 }else if($("#bm-nav-icon:visible").length > 0){
-   		 	$("div.bcNavContainer").appendTo("#gmContentContainer div:first");
-   		 	$("#CenteredContent1").css({'margin-top':'0px'});
-   		 	}
-}else{
-	 $("#SlideShowZone").show();
-    	buildTieredMenu();
-    	buildMobileSecondaryNav();
-    
-}  
-
-//////////////////mobile sec nav///////////////
-$('#DeltaPlaceHolderMain').on('click', '#mSecNavDDText, #mSecNavDDIcon', function(evt){
-evt.stopPropagation();
-var acc = $("#DeltaPlaceHolderMain #mSecNavAcc");
-
-if($(acc).is(':visible'))
-{
-   
-acc.hide().slideUp('slow');
-}else{
-acc.show().slideDown('slow');
-var cookie = getCookie("mGMNAV");
-	if(cookie!=null && cookie.split("|")[0]=="mSecNavAcc"){
-	//$("#mSecNavAcc .ui-accordion-header:contains('"+cookie.split("|")[1]+"')").click();
-	}else{
-	//acc.find(".SecNavAccselectedmi:first").closest("li").closest("ol").closest("div").prev(".ui-accordion-header").not(".ui-accordion-header-active").click();
-	}
-}
- 
- 
-});
-
-highlightMega();
-
-}
-
-function getNavNodes(){
-
-$("#SecTerHorizontalNav div[id*='_CurrentNav'] > ul > li > ul > li").each(function (i, item) {
-		var linkurl = "XXXXXXXXX";
-		if($(item).find("a:first").attr('href'))
-			linkurl = $(item).find("a:first").attr('href').toLowerCase();
-			
-       // console.log("main nav linkurl:" + linkurl);
-        var ni = { nm: $(item).find("span.menu-item-text:first").text(), href: $(item).find("a:first").attr('href'), title: $(item).find("a:first").attr('title'),target: $(item).find("a:first").attr('target'), subNodes: [], current: (window.location.pathname.toLowerCase().indexOf(linkurl) > -1 ? true : false) };
-        $(item).find(">ul>li").each(function (x, sitem) {
-        linkurl = "XXXXXXXXX";
-		if($(sitem).find("a:first").attr('href'))
-			linkurl = $(sitem).find("a:first").attr('href').toLowerCase();
-		  //  console.log('subnav  linkurl:' + linkurl);
-            ni.subNodes.push({ nm: $(sitem).find("span.menu-item-text:first").text(), href: $(sitem).find("a:first").attr('href'), title: $(sitem).find("a:first").attr('title'), target:$(sitem).find("a:first").attr('target'),  current: (window.location.pathname.toLowerCase().indexOf(linkurl) > -1 ? true : false) });
-        });
-        cNavArr.push(ni);
-    });
-  //  console.log(cNavArr);
-
-}
-
-function buildTieredMenu(){
- $("#SecTerHorizontalNav").prepend("<div id=\"hNav\"><div class=\"sncBg\"></div><div class=\"secondaryNavContainer\"></div></div>");
- $("<div class=\"tncBg\"></div><div class=\"tertiaryNavContainer\"></div>").insertAfter($("div.secondaryNavContainer"));
-         
-	//var intX=0;
-    
-    //console.log('max width:' + maxWidth);
-    $("#SecTerHorizontalNavCont,#SecTerHorizontalNav").show();
-	var maxWidth = $("div.centeredContent:first").outerWidth() - 250;
-	if( cNavArr.length==0){ getNavNodes();}
-    //var i = setInterval(function(){
-    //maxWidth = $("div.centeredContent:first").outerWidth() - 250;
-     
-    //if($("div.centeredContent:first").outerWidth()!=1024|| intX>1){
-    //if(intX>1){
-    
-    //console.log('intX:'+intX);
-    
-    //clearInterval(i);
-     
-
-   /*
-    $("#SecTerHorizontalNav div[id*='_CurrentNav'] > div  > ul > li > ul > li").each(function (i, item) {
-        var ni = { nm: $(item).find("span.menu-item-text:first").text(), href: $(item).find("a:first").attr('href'), title: $(item).find("a:first").attr('title'),target: $(item).find("a:first").attr('target'), subNodes: [] };
-        $(item).find(">ul>li").each(function (x, sitem) {
-            ni.subNodes.push({ nm: $(sitem).find("span.menu-item-text:first").text(), href: $(sitem).find("a:first").attr('href'), title: $(sitem).find("a:first").attr('title'), target:$(sitem).find("a:first").attr('target') });
-        });
-        cNavArr.push(ni);
-    });
-    */
-    
-     //remove nav if empty
-    if(cNavArr.length==0)
-    {
-      $("#SecTerHorizontalNav>div").hide();
-      return;
-    }
-    
-    
-
-    var cNavI;
-    var isCurrentSNav = false;
-    var currentWidth = 0;
-    $("div.s4-ql[id*='_CurrentNav']").hide();
-    //$("#SecTerHorizontalNav").prepend("<div id=\"hNav\"><div class=\"sncBg\"></div><div class=\"secondaryNavContainer\"></div></div>");
-    var sNav = $("div.secondaryNavContainer");
-    var maxWidthReached = false;
-    
-   
-    $(cNavArr).each(function (i, ni) {
-    //check if location matches or if subnode contains the link
-        //PJP rmv 8/1/2023 if ((ni.href != null && loc.indexOf(ni.href.toLowerCase()) > -1) || $(ni.subNodes).filter(function(){ return this.href.toLowerCase().indexOf(loc)>-1;}).length > 0) { isCurrentSNav = true; cNavI = ni; } else { isCurrentSNav = false; }
-       //PJP add 8/1/2023
-if (ni.current || $(ni.subNodes).filter(function(item){ return item.current;}).length > 0) { isCurrentSNav = true; cNavI = ni; } else { isCurrentSNav = false; }
-       
- //console.log('onav width:'+$("#SecTerHorizontalNav div[id*='_CurrentNav']").width());
-
-        
-         
-        if (!(maxWidthReached)) 
-        {
-            $("<div class=\"secNav" + (isCurrentSNav ? " currentSNav" : "") + "\"><a "+(typeof ni.target!='undefined'?"target=\""+ni.target+"\"":"")+" title=\"" + (typeof ni.title != 'undefined' ? ni.title : ni.name) + "\" href=\"" + ni.href + "\">" + ni.nm + "</a></div>").appendTo(sNav);
-            currentWidth = currentWidth + $(sNav).find("div.secNav:last()").outerWidth();
-            	
-        }//end if
-      
-        
-       /*  
-        
-        console.log('maxW:'+maxWidth);
-        console.log('currentW:'+currentWidth);
-        console.log('max width reached:'+maxWidthReached);
-       */
-       
-        if (currentWidth >= maxWidth && !(maxWidthReached)) {
-            maxWidthReached = true;
-            $(sNav).find("div.secNav:last").remove();
-            $(sNav).append("<div id=\"secNavMoreContainer\"><div class=\"secNavMore\"><div><button id=\"secNavMoreButton\">More</button></div><ul></ul></div></div>");
-        }
-
-        if (maxWidthReached) {
-            $("div.secNavMore ul").append("<li class=\"secNavLi" + (isCurrentSNav ? " currentSNavLi" : "") + "\"><a "+(typeof ni.target!='undefined'?"target=\""+ni.target+"\"":"")+" title=\"" + (typeof ni.title != 'undefined' ? ni.title : ni.name) + "\" href=\"" + ni.href + "\">" + ni.nm + "</a></li>");
-        }
-
-        if (isCurrentSNav || i == 0){
-            generateTertiaryNav(ni,true);
-                   
-        }
-    });
-    
-    
- 
-
-
-    //generate more button
-   var menu;
-   var button = $("#secNavMoreButton").button({ icons: { primary: "ui-icon-triangle-1-s"}})
-    .blur(function(){
-        //console.log($(this).hasClass('ui-state-focus'));
-    })
-    .click(function (evt) { 
-    		   if($(this).css('color') != 'rgb(18, 102, 218)'){//keep nav from opening on enter key  PJP 8/27/20 changed from .hasClass('ui-state-focus')==false  
-    			 $(this).blur();
-    			return false;
-    			}
-            menu = $(this).parent().next().show().position({
-            my: "right top",
-            at: "right bottom", /*pjp 8/29/20 adjust menu position on open*/
-            of: $(this).closest('div.secNavMore').find(".ui-button")//.parent()
-          });//end show menu
-          $(document).on( "click", function() {
-             
-            menu.hide();
-          });
-            $("#s4-workspace").on("scroll", function(){ 
-        
- 			menu.hide();
- 			
-			});    
-			
-			$("div.secNavMore").on("mouseleave",function(){
-			//if(!($(this).closest('div').find(".ui-button").css('color')==='rgb(18, 102, 218)')){ //pjp 8/27/20 changed from .hasClass('ui-state-focus'))){
-                
-				menu.hide();
-			//	}
-			})      
-			return false;
-        }).parent().controlgroup().next().hide().menu();     
-    
-    //select option if current url within more options of secondary nav
-    matchSNav();
-	
-	
-	
-	
-    //add hover event
-    $("div.secondaryNavContainer>div.secNav").find("a").hover(function () {
-        var el = this;
-        $("div.secondaryNavContainer>div.secNav.focus").removeClass("focus");
-        if(!($(el).parent().hasClass("currentSNav")))
-        	$(el).parent().addClass("focus");
-        var ns = cNavArr.filter(function (item, i) { return item.nm == $(el).text(); });
-        if (ns.length > 0) { generateTertiaryNav(ns[0]);}
-    }, function () {
- 		
-    }); //in / out
-
-    $("#hNav").hover(function () { }, function () {
-     generateTertiaryNav(cNavI); 
-     //console.log('mouse out hnav');
-     matchTNav(); 
-     $("div.secondaryNavContainer>div.secNav.focus").removeClass("focus");
-     });
-    
-    
-externalWindowWarning();
-//$("#SecTerHorizontalNavCont,#SecTerHorizontalNav").show();
-//}else{
-//intX++;
-//}
-
-//},50);
-
-
-}
-
-function matchSNav(){
- 
- var sNavLi;
- //direct match
- sNavLi = $("div.secNavMore").find("ul>li>a").filter(function(){return $(this).attr('href').toLowerCase().indexOf(loc)>-1;});
- if(sNavLi.length==0){//look for sublink match
- var tlink = $("#SecTerHorizontalNav div.menu.horizontal.menu-horizontal ul:eq(1) a").filter(function(){return $(this).attr('href').toLowerCase()==loc;}).eq(0);
- //console.log('found tlink loc:' + loc + ' text: ' + $(tlink).find("span.menu-item-text").text());
- var snavText = $(tlink).closest("ul").closest("li").find("span.menu-item-text:first").text(); // secondary nav link from tertiary
- //console.log('snavText:' + snavText);
- if(snavText!='')
- 	sNavLi = $("div.secNavMore").find("ul>li>a").filter(function(){return $(this).text().toLowerCase().indexOf(snavText.toLowerCase())>-1;});
- }
- 	if(sNavLi.length>0){
- 	//console.log("snav text:"+sNavLi.eq(0).text());
-	sNavLi.closest('div').find("span.ui-button-text").html(sNavLi.eq(0).text()).css({color:'#1266da','font-weight':'600'}).addClass("currentSNav");
-	}
-}
-	
-function matchTNav(){
-//select option if current url with more options on tertiary
-var tNavLi = $("div.tNavMore").find("ul>li>a").filter(function(){return $(this).attr('href').toLowerCase().indexOf(loc)>-1;});
-if(tNavLi.length>0){
-tNavLi.eq(0).closest('div').find("span.ui-button-text").html(tNavLi.eq(0).text()).css({'font-weight':'600',color:'#1266da !important'});
-$("div.tNavMore").addClass('tri-down');
-$("#tNavMoreContainer .ui-controlgroup").css({position:'relative',top:'-15px'}); 
-
-
-//highlightNav($("div.currentSNav a").attr('href').toLowerCase(),tNavLi.eq(0).attr('href').toLowerCase());
-}
-}
-
-
-
-function generateTertiaryNav(node) {
-    //console.log('gen tertiary menu');
-	//var intX=0;
-    var maxWidth = $("div.centeredContent:first").outerWidth() - 220;
-    //var i = setInterval(function(){
-    //maxWidth = $("div.centeredContent:first").outerWidth() - 100;
-    //if(maxWidth!=800 || intX>20){
-    //console.log('intX:'+intX);
-    //clearInterval(i);
-    var currentWidth = 0;
-    var maxWidthReached = false;
-    if (typeof node == 'undefined')
-        return false;
-
-    var tNav;
-    if ($("div.tertiaryNavContainer").length === 0) {
-        $("<div class=\"tncBg\"></div><div class=\"tertiaryNavContainer\"></div>").insertAfter($("div.secondaryNavContainer"));
-        tNav = $("div.tertiaryNavContainer");
-    } else {
-    	
-        tNav = $("div.tertiaryNavContainer");
-        tNav.find("div").remove();
-    }
-    var isCurrentTNav = false;
-    var parentHref = node.href;
-    //console.log('parenthref ' + parentHref);
-    if(node.subNodes.length==0)
-    {
-    	//console.log('no subnodes');
-    	highlightNav(parentHref,parentHref);
-    	$("div.tncBg,div.tertiaryNavContainer").remove();//removes the tertiary navigation if no items are present
-    }
-    
-    $(node.subNodes).each(function (i, ni) {
-   // console.log(ni.href.toLowerCase());
-        if (ni.href.toLowerCase().indexOf(loc) > -1) { isCurrentTNav = true; } else { isCurrentTNav = false; }
-        if (!(maxWidthReached)) {
-            $("<div class=\"" + (isCurrentTNav ? "tri-down" : "navinactive") + "\"><a "+(typeof ni.target!='undefined'?"target=\""+ni.target+"\"":"")+" title=\"" + (typeof ni.title != 'undefined' ? ni.title : ni.name) + "\" href=\"" + ni.href + "\">" + ni.nm + "</a></div>").appendTo(tNav);
-            currentWidth = currentWidth + $(tNav).find("div:last()").outerWidth();
-        }
-        /*
-        console.log('nm:'+ ni.nm );
-        console.log('tert curr width:' + currentWidth);
-        console.log('tert max width:' + maxWidth);
-        */
-        if (currentWidth >= maxWidth && !(maxWidthReached)) {
-            maxWidthReached = true;
-            $(tNav).find("div:last").remove();
-            $(tNav).append("<div id=\"tNavMoreContainer\"><div class=\"tNavMore\"><div><button id=\"tNavMoreButton\">More</button></div><ul></ul></div></div>");
-        }
-
-        if (maxWidthReached) {
-        	//console.log('max width on tertiary');
-            $("div.tNavMore ul").append("<li class=\"tNavLi" + (isCurrentTNav ? " currentTNavLi" : "") + "\"><a "+(typeof ni.target!='undefined'?"target=\""+ni.target+"\"":"")+" title=\"" + (typeof ni.title != 'undefined' ? ni.title : ni.name) + "\" href=\"" + ni.href + "\">" + ni.nm + "</a></li>");
-        }
-
-
-
-        //highlighting secondary nav
-        if (isCurrentTNav) {
-            highlightNav(parentHref,ni.href);
-
-        }
-    });
-
-
-    //generate more button
-    $("#tNavMoreButton").button({ icons: { primary: "ui-icon-triangle-1-s"} })
-    .click(function () {
-    if($(this).css('color') != 'rgb(18, 102, 218)'){//stop nav opening on enter key,  pjp 8/28/2020 changed from .hasClass('ui-state-focus')==false
-    			 $(this).blur();
-    			return false;
-    			}
-
-        var menu = $(this).parent().next().show().position({
-            my: "right top",
-            at: "right bottom",
-            of: $(this).closest('div.tNavMore').find(".ui-button")       }); //end show menu
-        $(document).one("click", function () {
-         
-            menu.hide();
-        });
-        /*+23 -1*/
-        $("#s4-workspace").on("scroll", function(){ 
-            
-         			menu.hide();
-			});          
-
-        return false;
-    }).parent().controlgroup().next().hide().menu();    
-   //select option if current url within more options of tertiary nav
-	matchTNav();
-	externalWindowWarning();
-
-  // }else{intX++;}},400);//end interval
-  
- 
-
-}
-
-function highlightNav(parentHref, matchUrl){
-
-//FIND SECONDARY NAV MATCH
-//console.log('highlightnav parentHref: ' + parentHref + ' matchurl: ' + matchUrl);
-			var hSNav;
-			// console.log('parenthref:'+parentHref+' length:'+$("div.secondaryNavContainer div.secNav a[href='" + parentHref + "']").length);
-			 hSNav = $("div.secondaryNavContainer div.secNav a[href='" + parentHref + "']").parent();//.addClass("currentSNav");
-            
-             
-           
-            
-            var hStxt ="";
-            var intv = setInterval(function(){
-            hStxt = $(".currentSNav").text();// hSNav.find("a").text();
-            if(hStxt!='')
-               clearInterval(intv);
-            
-           
-            var hShref = hSNav.find("a").prop('href');
-            //console.log('highlight nav hStxt:'+hStxt);
-           // console.log('hStxt:' + hStxt);
-            //FIND THE PANEL GROUP ON THE MEGA MENU
-			var mmPanelGroupHeader;
-            if (hStxt != '') {
-                mmPanelGroupHeader = $(".accessible-megamenu-top-nav-item > h2 a[id*='accessible-mega']:contains('" + hStxt + "'):first()");
-              //  mmPanelGroupHeader.addClass('current');
-            }
-
-			//console.log('mmpgh:'+mmPanelGroupHeader.length);
-			//FIND ITS CLOSEST TOP NAV ITEM AND HIGHLIGHT IT
-          //  var tni = $(mmPanelGroupHeader).closest("li.accessible-megamenu-top-nav-item").find("h2 a").first();
-			//tni.addClass('current');
-
-			
-			//console.log('looking for matching url'+matchUrl);
-            //LOOK FOR A URL MATCH OF THE CURRENT PAGE
-            var mmMatches = $("ol.accessible-megamenu").find("li a[href*='" + matchUrl + "']");
-           // if(mmMatches.length==0)
-            //	mmMatches = $("ol.accessible-megamenu").find("li a").filter(function(li,linkitem){return $(linkitem).attr('href').toLowerCase().split('/pages')[1] == matchUrl.toLowerCase().split('/pages')[1];});
-            
-            //console.log('mmMatches:'+mmMatches.length);
-            //link not on menu, look at panel with heading only links (i.e. NEWSROOM)
-           // if(mmMatches.length==0)
-            //   mmMatches = $("ol.accessible-megamenu").find("li.heading a[href*='" + matchUrl.toLowerCase().split('/pages')[1] + "']");
-            
-            //console.log('matches:' + mmMatches.length);
-            //link no on menu, no heading links, just find the match for the secondary nav
-             
-            var found = 0;
-            mmMatches.each(function (i, item) {
-            clearInterval(intv);
-            //console.log('found match on mega');
-                //match panel items on link
-                var tniSubPanelG = $(item).closest("li.accessible-megamenu-panel-group").find("a:first");
-                if(tniSubPanelG.length==0){
-                //	$("li.heading .current").removeClass('current');//remove existing with current
-                	tniSubPanelG = $(item);
-                }
-                	
-               // var tni = $(item).closest("li.accessible-megamenu-top-nav-item").find("h2 a");
-                //console.log('top nav item: ' + tni.text());
-                //console.log(tniSubPanelG.text().toLowerCase() + ' vs ' + hStxt.toLowerCase());
-                if (tniSubPanelG.text().toLowerCase() == hStxt.toLowerCase()) {
-                    //match
-                  //  tniSubPanelG.addClass('current');
-                  //  $(item).addClass('current');
-                    found=1;
-                }
-                
-            });
-            
-            if(found==0){
-            //no matches on text, match on link
-                       mmMatches.each(function (i, item) {
-            //console.log('found match on mega');
-                //match panel items on link
-                var tniSubPanelG = $(item).closest("li.accessible-megamenu-panel-group").find("a:first");
-                if(tniSubPanelG.length==0){
-                //	$("li.heading .current").removeClass('current');//remove existing with current
-                	tniSubPanelG = $(item);
-                }
-                	
-               // var tni = $(item).closest("li.accessible-megamenu-top-nav-item").find("h2 a");
-                //console.log('top nav item: ' + tni.text());
-                //console.log(tniSubPanelG.text().toLowerCase() + ' vs ' + hStxt  if (tniSubPanelG.text().toLowerCase() == hStxt.toLowerCase()) {
-                    //match
-                 //   tniSubPanelG.addClass('current');
-                  //  $(item).addClass('current');
-                  //  $(item).closest("li.accessible-megamenu-top-nav-item").find("h2:first a").addClass("current");
-               
-                
-            });
-
-            
-            }
-             
-            },100);
-}
-
-
-/*BREADCRUMB*/
-
-function buildBreadcrumb() {
-
-var bmCreated = false;
-$("#gmContentContainer").css({'margin-top':'-15px'});
-
-    var inDesignMode = document.forms[MSOWebPartPageFormName].MSOLayout_InDesignMode.value;
-    
-      
-    if (inDesignMode != "1") {
-       bcContent.hide();
-    }else{$("#breadcrumbzone").show();}
-    
-    
-    
-
-    $("#SecTerHorizontalNav").find("*").hide();
-    $("#SecTerHorizontalNav").prepend("<div id=\"hNav\" style=\"overflow-y:hidden;\"><div class=\"bcBg\"></div><div class=\"bcNavContainer\"></div></div>");
-    var gmbc = $("div.bcNavContainer");
-
-    var bcLength = bcContent.find("div.link-item a").length;
-
-	var cssclass = "";
-    var htmlStr = "";
-	var bcItems = bcContent.find("div.link-item a");
-    bcItems.each(function (i, item) {
-    // console.log("item...",item);
-        var hrefData = $(item).attr('href');
-        if (hrefData.indexOf("/events/events") != -1) {
-            // console.log("hrefData...", hrefData);
-            var hrefArr = hrefData.split('/');
-            var hrefArr = getUnique(hrefArr);
-            var hrefFinal;
-            for (var h = 0; h < hrefArr.length; h++) {
-                if(h == 0)
-                hrefFinal = hrefArr[h];
-                else
-                hrefFinal = hrefFinal + '/' + hrefArr[h];
-            }
-            $(item).attr('href',hrefFinal);
-         //   console.log("hrefFinal...", hrefFinal);
-        }
-        var title = "";
-        var href = "";
-        var text = "";
-        var target = "";
-         var dtix;
-        if ($(item).text().toLowerCase().replace(/\s+/g, '').indexOf("dynamictitle") > -1) {
-        
-         
-        
-         
-        	var dT = $("#DynamicTitle");
-            var intv = setInterval(function(){
-            if(dT.length > 0){
-            clearInterval(intv);
-        	text = dT.text();
-            text = text == "" ? "DynamicTitle" : text;
-            title = text;
-            href = window.location.href.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-       	    // console.log("hrefDataInIf...", href);
-       		
-       		        cssclass = "";
-			        htmlStr = "";
-			        var mobile = $("#bm-nav-icon:visible").length; 
-			        if (mobile > 0 && i === (bcItems.length - 2) ) //mobile bc
-			        {
-			        cssclass = "bcSelected" ;
-			        htmlStr = "<a "+(typeof target != 'undefined' && target!='' ? "target=\""+target+"\"":"")+" class=\"" + cssclass + "\" href=\"" + href + "\" title=\"See " + title + "\">&lt; See " + text + "</a>";
-			        }
-			        else if(mobile===0)//regular bc
-			        {
-			        cssclass = href.toLowerCase().indexOf(loc) > -1 ? "bcSelected" : "";
-			        htmlStr = cssclass != "" ? "<span class=\"bcCurrentPage\">"+title+"</span>" : "<a "+(typeof target != 'undefined' && target!='' ? "target=\""+target+"\"":"")+" class=\"" + cssclass + "\" href=\"" + href + "\" title=\"" + title + "\">" + text + "</a>";
-			        htmlStr = i < bcLength - 1 ? htmlStr + "<span> &gt; </span> " : htmlStr;
-					}
-			        $(htmlStr).appendTo(gmbc);
-			}else{
-			dT = $("#DynamicTitle");
-			}
- 			},100);
-            
-            
-            
-        } else {
-            title = $(item).prop('title');
-            text = $(item).text();
-            href = $(item).prop('href');
-           // console.log("hrefDataInElse...", href);
-            target = typeof($(item).prop('onclick'))=="function" ?"_blank":"";
-        }
-        
-        if(title!=""){
-        cssclass = "";
-        htmlStr = "";
-        var mobile = $("#bm-nav-icon:visible").length; 
-        if (mobile > 0 && i === (bcItems.length - 2) ) //mobile bc
-        {
-        cssclass = "bcSelected" ;
-        htmlStr = "<a "+(typeof target != 'undefined' && target!='' ? "target=\""+target+"\"":"")+" class=\"" + cssclass + "\" href=\"" + href + "\" title=\"See " + title + "\">&lt; See " + text + "</a>";
-        }
-        else if(mobile===0)//regular bc
-        {
-        cssclass = href.toLowerCase().indexOf(loc) > -1 ? "bcSelected" : "";
-        htmlStr = cssclass != "" ? "<span class=\"bcCurrentPage\">"+title+"</span>" : "<a "+(typeof target != 'undefined' && target!='' ? "target=\""+target+"\"":"")+" class=\"" + cssclass + "\" href=\"" + href + "\" title=\"" + title + "\">" + text + "</a>";
-        htmlStr = i < bcLength - 1 ? htmlStr + "<span> &gt; </span> " : htmlStr;
-		}
-        $(htmlStr).appendTo(gmbc);
-        bmcreated = true;
-        }
-        // console.log("href.......",href);
-    });
-
-
-	var intv = setInterval(function(){
-	if( $(".accessible-megamenu-panel").length > 0){
-	clearInterval(intv);
-	//console.log('panel there');
-    var bclink = gmbc.find("a:last");
-    //console.log(bclink.text());
-    $("ol.accessible-megamenu").find("li a:contains('"+bclink.text()+"')").each(function (i, item) {
-        //match panel items on link
-        var tniSubPanelG = $(item).closest("li.accessible-megamenu-panel-group").find("a:first");
-        var tni = $(item).closest("li.accessible-megamenu-top-nav-item").find("h2 a");
-        if (tniSubPanelG.text().toLowerCase() == gmbc.find("a:first").text().toLowerCase()) {
-            //match
-           // tniSubPanelG.addClass('current');
-           // $(item).addClass('current');
-           // tni.addClass('current');
-        }
-
-    });
-	}//end if
-	},100);
-
-    if (inDesignMode != "1") {
-        var tblC = bcContent.closest("table");
-        bcContent.closest("tr").remove();
-        if (tblC.find("tr").length == 0)
-            tblC.remove();
-    }
-
-     
-
-	$("#SecTerHorizontalNavCont,#SecTerHorizontalNav").show();
-    return bmcreated;
-}
-
-
-////////////////////Mobile Secondary Menu//////////////////////
-function buildMobileSecondaryNav(){
-//console.log('bm icon length: ' + $("#bm-nav-icon:hidden").length);
-if($("#bm-nav-icon:visible").length==0){
-return true;
-}
-
-
-$("#SlideShowZone").remove();
-if( cNavArr.length==0){ getNavNodes();}
-
- 
-$("<div id='mSecNav'><div><div id='mSecNavDD'><span   id='mSecNavDDText'>&nbsp;</span><span id='mSecNavDDIcon'/></div></div></div>").prependTo("#DeltaPlaceHolderMain");//gmContentContainer div:first
-var acm = $("<div id='mSecNavAcc' style='display:none;'></div>").appendTo("#mSecNavDD");
-
-$(cNavArr).each(function(ni,nitem){
-var mitem = $("<h3>" + nitem.nm + "</h3><div class=\"bm-nav-panel\"><ol></ol></div>").appendTo(acm);
-var panel = acm.find(".bm-nav-panel:last ol");
-	$(nitem.subNodes).each(function(sni,snitem){
-	$("<li><a class=\"" +(window.location.href.toLowerCase().indexOf($(snitem).attr('href').toLowerCase()) > -1 ? "SecNavAccselectedmi" : "" )+ "\" title='"+snitem.title+"' href='" + snitem.href + "'>" + snitem.nm + "</a></li>").appendTo(panel);
-	});
-	//catch for menu groups without subitems
-	if(nitem.subNodes.length==0 && $(nitem).attr('href') != null)
-	{
-	$("<li><a class=\"" +(window.location.href.toLowerCase().indexOf($(nitem).attr('href').toLowerCase()) > -1 ? "SecNavAccselectedmi" : "" )+ "\" title='"+nitem.title+"' href='" + nitem.href + "'>" + nitem.nm + "</a></li>").appendTo(panel);
-	
-	}
-});
-
- $("#mSecNavAcc").accordion({
- 	  active: false,
-      collapsible: true
-    });
-    
- 
- 
-           
-$("#s4-workspace").on("scroll", function(){         
-if($("#mSecNavAcc:visible").length > 0  && !(acm.isInViewport())){
-	$("#mSecNavAcc").hide('slow');
-}
-});   
-
- 
-//nav tracking
-//secondary nav
-$("#mSecNavAcc a").on('click',function(evt){
-var menu = $(this).closest("div.ui-accordion").attr("id");
-var panel = $(this).closest("ol").closest("div.bm-nav-panel").prev("h3").text();
-
-setCookie("mGMNAV",menu+"|"+panel,1);
-
-});
-//end secondary nav
-//end nav tracking
-
-$(document).ready(function(){
-    var cookie = getCookie("mGMNAV");
-
- 
-
-	if(cookie!=null && cookie.split("|")[0]=="burgermenu" && $("#burgermenu .ui-accordion-header:contains('"+cookie.split("|")[1]+"')").not(".ui-accordion-header-active").length > 0){
-	mainMenu = $("#burgermenu .ui-accordion-header:contains('"+cookie.split("|")[1]+"')").not(".ui-accordion-header-active").text();
-	 
-	}else{
-	mainMenu = $("#burgermenu .bmselectedmi:first").closest("li").closest("ol").closest("div").prev(".ui-accordion-header").not(".ui-accordion-header-active").text();	 
-	}
-	
-	//if blank check for link somewhere in main nav
-	if(mainMenu === ""){
-		mainMenu = $("#burgermenu").find("a[href*='"+window.location.pathname+"']:first").closest("li").closest(".bm-nav-panel").prev('h3').text();
-	}
-	
-	//if still blank check for parent path in main nav	
-	if(mainMenu === ""){
-		mainMenu = $("#burgermenu").find("a[href*='"+window.location.pathname.split('/Pages/')[0].split('/')[1]+"']:first").closest("li").closest(".bm-nav-panel").prev('h3').text();
-	}
-
-	
-	
-	$("#mSecNavDDText").html(mainMenu + " Menu").show();
-  });
-
-
-}
-
-function getUnique(array) {
-    var uniqueArray = [];
-    for (var value of array) {
-        if (uniqueArray.indexOf(value) === -1) { uniqueArray.push(value); }
-    } return uniqueArray;
-}Ó˜ÀÙ)  )       ø2‡‰      window     0+QA      location   Ğ¨4O      pathname   R‰Do      toLowerCase    ;±ô„      cNavArr    UİRS	      bcContent      Añ¨Â      highlightMega      ³_"      buildHorizontalNav     è:      div.ms-webpart-zone span:contains('Ginnie Mae Breadcrumb')	     /ßä•      closest
-    <Nã/!      div[id*='MSOZoneCell_WebPartWPQ']      œ³æÙ      div    >¨      #SlideShowZone     *N·Æ      remove     ùP[Ş      buildBreadcrumb    ¥°§      buildMobileSecondaryNav    É(²      #bm-nav-icon:visible   FÆ      div.bcNavContainer      çãV      appendTo   ‘F}Ÿ      #gmContentContainer div:first      ¯vbÁ      #CenteredContent1      >Ÿ      css    A=
-      margin-top     lÆT«      0px    H‡’K      show   6àÖO      buildTieredMenu    GŸæ      #DeltaPlaceHolderMain      ŸªâX      click      Í*µ      #mSecNavDDText, #mSecNavDDIcon     óg      evt    õ/F/      stopPropagation    Âé„      acc     Úİå!      #DeltaPlaceHolderMain #mSecNavAcc!      SZK#      :visible"   Ÿvô}      hide#   ÁÙªW      slideUp$    b{su      slow%   #+Å˜	      slideDown&      _YNx      cookie'     èIk’	      getCookie(      U¦Éœ      mGMNAV)     öœ­ï
-      mSecNavAcc*     ùÁ      getNavNodes+    Ê[Å?      #SecTerHorizontalNav div[id*='_CurrentNav'] > ul > li > ul > li,    ı„Ìº      item-   ĞIe„      linkurl.    PÔ…–	      XXXXXXXXX/      ©Ë¿      a:first0    A¢½      attr1   »©`X      href2   n>òc      span.menu-item-text:first3      ˆ3Àµ      text4   ÒE      title5      hö      subNodes6   †ƒëı      current7    ÚEœÁ      indexOf8    ÎÁéÂ      >ul>li9     £¨}ê      sitem:      ğ„u2      push;   ‚°      #SecTerHorizontalNav<   õ£$      prepend=    à#0W      <div id="hNav"><div class="sncBg"></div><div class="secondaryNavContainer"></div></div>>    ¶™}ÖA      <div class="tncBg"></div><div class="tertiaryNavContainer"></div>?      ŠŠ³(      insertAfter@    0¨e      div.secondaryNavContainerA      fü@-      #SecTerHorizontalNavCont,#SecTerHorizontalNavB      ‹;Êx      maxWidthC   ùiYr      div.centeredContent:firstD      Qñ=i
-      outerWidthE     Û	HË      #SecTerHorizontalNav>divF   Û¸À{      cNavIG      «iò9      isCurrentSNavH      sĞ<R      currentWidthI   C‰f      div.s4-ql[id*='_CurrentNav']J   ÿÁií      sNavK   ,ô‘      maxWidthReachedL    >	Å      filterM     I˜)      <div class="secNavN     Œìğ5       currentSNavO   Şa      "><a P      o9Ê.      target="Q   )'¾ƒ       title="R   I‹ªÜ      " href="S   +¨¢      ">T     ÃC
-      </a></div>U     ;e„3      div.secNav:last()V      Ô>*      div.secNav:lastW    ÜB-      appendX     Â¸X›      <div id="secNavMoreContainer"><div class="secNavMore"><div><button id="secNavMoreButton">More</button></div><ul></ul></div></div>Y      “*13      div.secNavMore ulZ      cvù      <li class="secNavLi[    ’B>       currentSNavLi\     #Ñ\³	      </a></li>]      uĞ„D      generateTertiaryNav^    ªÛq      menu_   úU~      button`     üA      #secNavMoreButtona      jªâ      iconsb      u˜hS      primaryc    B3'      ui-icon-triangle-1-sd   Äºá%      blure   ì
-—      colorf      åÌ      rgb(18, 102, 218)g      şèù2      parenth     È’      positioni   Çƒl	      right topj      Ôšøt      right bottomk   Ÿ\ß      div.secNavMorel     )…>+
-      .ui-buttonm     ¸O€      documentn   {áş      #s4-workspaceo      \zû      scrollp     fN¾
-      mouseleaveq     €eÖ      controlgroupr   ÍÆ¡•	      matchSNavs      âèa$      div.secondaryNavContainer>div.secNavt   d¨¤ú      hoveru      49A€*      div.secondaryNavContainer>div.secNav.focusv     ö+      removeClassw    KÌí      focusx      7„ƒz      hasClassy   /¤Š      currentSNavz    BŒ|      addClass{   ñ÷      #hNav|      Ñ¤	      matchTNav}      ·*D      externalWindowWarning~      § ï_      sNavLi     ¬K3      ul>li>a€    (‰]£      tlink      @P¨C      #SecTerHorizontalNav div.menu.horizontal.menu-horizontal ul:eq(1) a‚    ½ßx      snavTextƒ   ƒÑê{      span.ui-button-text„    ÔãX      html…   Ş±ØK      #1266da†    \\1      font-weight‡    &>Ú      600ˆ    ùMf      tNavLi‰     ¦¬      div.tNavMoreŠ   AMÔ©      #1266da !important‹     (ıKü      tri-downŒ   =ìHw#      #tNavMoreContainer .ui-controlgroup    ì-k      relative   $Ãç      top    1Î6	      -15px      &`¡İ      node‘   w[Õ¨      tNav’   ¬ÔŞ      div.tertiaryNavContainer“   >®Š†      isCurrentTNav”      „ñ
-      parentHref•     n—8¥      highlightNav–   O‡CÑ"      div.tncBg,div.tertiaryNavContainer—     ×ué      <div class="˜   j(»‡      navinactive™    sp¼
-      div:last()š     ş%Wí      div:last›   °9Ãí{      <div id="tNavMoreContainer"><div class="tNavMore"><div><button id="tNavMoreButton">More</button></div><ul></ul></div></div>œ    ÿIÑ×      div.tNavMore ul    ™Ğ/F      <li class="tNavLi      *]JÈ       currentTNavLiŸ     SÕhÇ      #tNavMoreButton     ªú­      matchUrl¡   Q‘!‹      hSNav¢      í¤4Ó-      div.secondaryNavContainer div.secNav a[href='£      NTÛh      ']¤     4ÓÓ¸      hStxt¥      9µÇ­      intv¦   ìˆ       setInterval§    r3g      .currentSNav¨   bPk      clearInterval©      +N5      hShrefª     ÒPÉ      prop«   ŒâjÚ      mmPanelGroupHeader¬     –HĞªJ      .accessible-megamenu-top-nav-item > h2 a[id*='accessible-mega']:contains('­     Á„ç
-      '):first()®     J:ª3	      mmMatches¯      ¸bø^      ol.accessible-megamenu°     èÄ?F      li a[href*='±   W¸58      found²      ÑƒÁá      tniSubPanelG³   r
-m"      li.accessible-megamenu-panel-group´     e<rì	      bmCreatedµ      ¥Ÿ/      #gmContentContainer¶    sSZí      inDesignMode·   èy¥      forms¸      öv      MSOWebPartPageFormName¹     º™Ø      MSOLayout_InDesignModeº     Å>vp      #breadcrumbzone»    ¥ş“j      <div id="hNav" style="overflow-y:hidden;"><div class="bcBg"></div><div class="bcNavContainer"></div></div>¼     ßÛhF      gmbc½   ±šF      bcLength¾   Ïò­'      div.link-item a¿    cÂ¡      cssclassÀ   À±¦“      htmlStrÁ    óÚ«Ù      bcItemsÂ    Ï0Pn      hrefDataÃ   ³-Èò      /events/eventsÄ     õ*0      hrefArrÅ    ï3%Q	      getUniqueÆ      VXMT	      hrefFinalÇ      Í!µ      dtixÈ   _ô      \s+É     «7è      dynamictitleÊ   ¸8¨      #DynamicTitleË      ¨ù      DynamicTitleÌ   aÅ @      &lt;Í   »ãÒ      &gt;Î   
-Le      mobileÏ     /Ø
-      bcSelectedĞ     ^Çş      <a Ñ    Èa%º       class="Ò   ©Òù      " title="See Ó      ÅÆ      ">&lt; See Ô    î†Ä      </a>Õ   ¿Í½      <span class="bcCurrentPage">Ö   Ùå¡      </span>×    ƒzäñ	      " title="Ø      V»µÀ      <span> &gt; </span> Ù   EŞS      onclickÚ    9Ò×^      _blankÛ     ÉP†Y	      bmcreatedÜ      ±ôü      .accessible-megamenu-panelİ     :úw$      bclinkŞ     ùo¸-      a:lastß     H&¼Ë      li a:contains('à    úuÓ      ')á     á›*       tniâ    K½÷#      li.accessible-megamenu-top-nav-itemã    ñ®9;      h2 aä   ªHå›      tblCå   ¶d”      tableæ      @      <div id='mSecNav'><div><div id='mSecNavDD'><span   id='mSecNavDDText'>&nbsp;</span><span id='mSecNavDDIcon'/></div></div></div>ç    ©8GR	      prependToè      üP³      acmé    †Ó%‰1      <div id='mSecNavAcc' style='display:none;'></div>ê      8ÇÀ¿
-      #mSecNavDDë     ÍF°!      nitemì      Ào‡ò      mitemí      zÉ 	      <h3>î   Û·Øö.      </h3><div class="bm-nav-panel"><ol></ol></div>ï     ~›İ&      panelğ      I ¨S      .bm-nav-panel:last olñ      ñqî      sniò    ö5V      snitemó     ^ÚÔØ      <li><a class="ô     D»1      SecNavAccselectedmiõ    ®çŠÌ	      " title='ö      šæË      ' href='÷   µ“‘      '>ø     ª]Ÿ      #mSecNavAccù    ¸ıY	      accordionú      Œ¨Px      activeû     /ê¥¾      collapsibleü    RÂ§      #mSecNavAcc:visibleı    À„Ü      isInViewportş   <Kùî      #mSecNavAcc aÿ      Ë¿’}      div.ui-accordion   ô›ßb      div.bm-nav-panel  >Æ§"      prev  K·	      setCookie     ¢„
-      ready     9L,q
-      burgermenu    ş>Á+      #burgermenu .ui-accordion-header:contains('   q€      not   _~¥á      .ui-accordion-header-active   —'õ      mainMenu	  ·ºh€      #burgermenu .bmselectedmi:first
-   Ï1      .ui-accordion-header  Ø‰3î      #burgermenu   V½÷	      a[href*='     ö      ']:first  Oç:>      .bm-nav-panel     ²²b      /Pages/   äèÑR      #mSecNavDDText    G       Menu     ğ1      array     /+¤      uniqueArray   §a·      buildHorizontalNav/<  Jç4d      getNavNodes/<     Á^ÊÀ      getNavNodes/</<   Ùƒ`      buildTieredMenu/<     –1§å      buildTieredMenu/</<   Ú ›(      buildTieredMenu/button<   ãV      buildTieredMenu/button</<     hªÿ®      buildTieredMenu/</ns<     `c=Ü      matchSNav/sNavLi<     ={      matchSNav/tlink<  Kh2      matchTNav/tNavLi<     ¤:ºÏ      generateTertiaryNav/<      R¥·
-      generateTertiaryNav/</<!   bÆğ      highlightNav/intv<"    -éK»      highlightNav/intv</<#  ±4kÁ      buildBreadcrumb/<$     Mû\      buildBreadcrumb/</intv<%   ãí²      buildBreadcrumb/intv<&     ŸÉµ      buildBreadcrumb/intv</<'   @N$0      buildMobileSecondaryNav/<(     :õw      buildMobileSecondaryNav/</<     /   ÿ  /   /             ï%,‰                                                                                                                                      	                                     	                 
-                                                                                                                                                                                                                                                                                                                                                                                                       !                  "                 #      #       	   $      $           %      #           &      &           '                 (      (          )      )           *      (           +      (           ,      (           -                  .      ³OŒc         5          *    r  |  ]  •      Å                                Ì                 &                               i  ,  -  PÒ`             x  9                B  PF  PG  PH  PJ  PK  P^  P_               i  Ò              ,                                ƒ                                                                 •`Ü ƒ                ,  i                                                                ~  €  ‚  P              ƒ                 ƒ                 ƒ                 ˆ                ƒ                  B  PH  PK  P‘  P“  P”  P             i  Ò               ^  Pƒ                                                ”     P¡  P¤  P¥  P              ©  «  ®  ±  P            i  ,  ²              i  ,  ²  	              ´  ¶  ¼  P½  P¿  PÀ  PÁ  P¥  Pä              i `,  Â  Ä  Æ  h  4  P1  P3  Pè `Ç  w`¥  PÎ                Î                İ              i  ,  ²  á                 è  P            Ò ë  ì  ï  P             ñ  ò                                ^  ï  ƒ                 &                %  ¯Â0°È     <     >     Iô$KE®úš                   Ö 1  4  è  5  6         Ö 1  4  è  6          a          b          ¢      
-   e  †     
-    †  e     
-    h           a          b          ¢              
-     ú  û  ‡&Õª!«!/   p     Áap   :                 
-        Õ   ³   ¶   I   I   ÜI   ßr  Å   Ú³   g    Å   Ú£
-
-`– P)e@€ ÛP€€€$   ìz®_$                               £0   É›§Ö   q                3        ³   ¶       r ÜI   ß   r ÜI   ß   r Å   Ú¶   I   ˜Ä   •   ¶       r ÜI	   ßv  Ú¶
-    r  È   Ú¹   ˜   •   ¶    v  Ú—o   •   ¶       r I   ˜P   •   ¶       r ÜI   ß   v Ú¶       r ÜI   ß8      ;   v Ú•%   —7   •%   ¶       r ÜI   ßv  Ú¶    v  Ú¶    v  Ú•-   ¶       r ÜI   ß      l   v Ú¶    v  Ú£` P@P-P)`–@`P
-P$`.	` `” `P” `PP$`P
-
-ÿÿÿûP“0 `P
-P$`*`?`P” HÿÿÿÒP4)`:+P€€H  ¹İ‚¡H  æ                        ·  ÜI   ßv  Ú¶       r È   Ú¶    ¹   r ÜI   ß   r ˜-   •	   ¹   ÜI   ßr  ÜI   ß   v Ú—{   •   ¹   ÜI	   ßr  ÜI
-   ß   v Ú¶       r È  Ú¹  š&   •   Ú¹  ÜI   ß   r J   •   ˜   •   —   •   £`
-P$`PH`ÿÿÿÿPP0`PP`PP$`	P(`¡ P¤00P€T   Äï>dT                             ¶       r ÜI   ßl   v Ú£0`P
-IÿÿÿûP4P€€€œ  Æ œ  Ö                 A          É   Ú¶    · r ÜI   ß   r ÜI   ß   r ˜D   •   ¶    · r ÜI   ß   r ÜI   ß   r ÜI   ßr  É   Ú•   8   ¶    · r ÜI   ß	   r ÜI
-   ßr  ;   ¶    · r ÜI   ß   r ÜI   ß   r ;   ¶    · r ÜI   ß   r ÜI   ß   r ;   ¶    · r ÜI   ß   r ÜI   ß   r ;   g    ;   ¶   I   I   ÜI   ßr  ÜI   ß¼   r ÿ˜   •7   —   •7   •7   ;   É   Ú¶    · r ÜI   ß   r ÜI   ßl   v Ú¶   ÜI   ß¼   v Ú£ `+`ÿÿÿÿPPP-`ÿÿÿşPPP
-PN`ÿÿÿşPP
-"PÿÿÿşPPP	ÿÿÿşPPP
-ÿÿÿşPPP
-– #P
-ÿÿÿøP¬ 	`ÿÿÿÿPP
-ÿÿÿûPD	`ÿÿÿûP$P€€€D  ¿´D  ›                 9          É   Ú¶    · r ÜI   ß   r ÜI   ß   r ˜D   •   ¶    · r ÜI   ß   r ÜI   ß   r ÜI   ßr  É   Ú•   ¼   I   ÜI	   ß8
-   ¶    · r ÜI   ß   r ÜI   ßr  ;   ¶    · r ÜI   ß   r ÜI   ß   r ;   ¶    · r ÜI   ß   r ÜI   ß   r ;   ¶    · r ÜI   ß   r ÜI   ß   r ;   ¶   I   I   ÜI   ßr  ÜI   ß¼   r ÿ˜   •7   —   •7   •7   ;   v Ú£ 	`+`ÿÿÿÿPPP-`ÿÿÿşP	PP
-PN`‘ ÿÿÿşP	P
-"PÿÿÿşP	PP	ÿÿÿşP	PP	ÿÿÿşP	PP– #P
-ÿÿÿøP¦ ÿÿÿP$	P€<  ~ğ«<  +                P        ¶       r ÜI   ß   v Ú¶       r ÜI   ß¶       r v Ú¶       r ÜI	   ßv  Ú¶    
-   r ÜI   ßr  ú &É   Ú¶   I   ˜   •   ¶    v  Ú•   ¶   I   ˜%   •   ¶       r ÜI   ßv  Ú  •!   É   ÚÉ   Ú¶       r ÜI   ßv  Ú¶       r É   ÚÉ   Ú¶    ¶   r ÜI   ßl   v Ú¶       r ÜI   ß8   8      ;   ;   r ÜI   ßl   r ÜI   ßl   r ÜI   ßr  ÜI    ßr  ÜI!   ßr  ÜI   ßr  ÜI"   ßr  È   Ú¶#    v  Ú¶    $   r ÜI%   ß&   r ÜI'   ßl(   l)   v Ú¶    *   r ÜI'   ßl+   l,   v Ú¶-    v  Ú£ `PP$`P
-V[ÿÿÿôPD`P
-2P$`P
-P-`– `O `– `P
-P$`1€  ¤6( `'`'`P
-!PD-`P)`G1`ÿÿÿÿP
-ÿÿÿûP4_ `P
-	ÿÿÿîP*ÿÿÿûPJdÿÿÿúPJP
-	P
-P
-P
-P `J€  ˆ`P)P
-E€  E€  ˆ9PD€  “`P
-ÿÿÿéP4€  ›`:€  ¤P€€D  P¡Â‚D  c                 b       · I   ›2   •   Ú¶    · I   r ÜI   ßl   r I   •	   ˜   •
-   É   Ú· É   Ú—   •
-   É   Ú•
-   ¼   ™/  •   ¶       ¼   ˜   •      —   •   	   •   %
-   %· I      ˜#   •      · I   %   %—   •   	   •   %   %· I      ˜   •   · I   —   •   · I   •   %   %· I   %   %· I   %   %r ÜI   ß¼   v Ú¼   ¶    ¼   r ÜI   ß   r ÜI   ßr  %É   Ú•0   ¼   ¼   š   •2   Ú¼   •3   ˜W   •4   É   Ú¶    ¼   r ÜI   ß   r ÜI   ßv  Ú¶    ¼   r ÜI   ß   v Ú•>   ¼   ˜ü   •?   ¶       r ÜI   ß    ¼   ˜   •C   !   —   •C   	   •C   %
-   %· I      ˜#   •I      · I   %   %—   •L   	   •L   %   %· I      ˜   •R   · I   —   •S   · I   •T   %   %· I   %   %· I   %"   %v Ú•]   ¼   ›   •^   Ú·  •_   ˜   •`   ¶#    · v Ú•b   £@`™ ÿÿÿşP
-ÿÿÿùP™ <``“ `L
-` `¯ 1 *ª "¿ FÿÿÿP
-€ ÿÿÿ÷P$`ÿÿÿşPP
-PO`‘ • `'`ÿÿÿÿPP
-P$`ÿÿÿÿPPI`/`P
-¯ 3 *ª "¿ FÿÿÿPI#`¤ `ÿÿÿÿPI'P4   üŠúë4   
-                         ·  I    £ `Q€€€(    +·ñ(                               £@€€€ğ  8j!äğ  A               +       ÙÈ   Ú¶    ¹   r ÜI   ß   r    ˜$   •   ¶    ¹   r ÜI   ßv  Ú •
-   ¶    ¹   r ÜI   ßr  ÜI   ßr  ÜI   ßr  ÜI	   ß8
-      ;      ;   ¶    ¹   r ÜI   ß   r ÜI   ß   r ;   r É   Ú¶    ¶   r ÜI   ß   l   v Ú¶       r ÜI   ß   l   v Ú¶       r ÜI   ß   l   v Ú £&`ÿÿÿÿPP“ 	`ÿÿÿÿP
-P$`A	F`	ÿÿÿşP
-P
-	P
-P
-%**ÿÿÿşPPPH3PI
-`ÿÿÿÿPÿÿÿóPD`PÿÿÿóPD`P#ÿÿÿğPD`!	Q€€€<   ­;@Ô<                             ¼   ÜI   ßv  Ú£@`P$P@   !6%@                             ¼   ÜI   ßv  Ú£@`PDP€€€@   `É@                             ¼   ÜI   ßv  Ú£@`PDP€€€<  /@A<  Ğ                        ÙÈ  Ú¹  É   Ú¶       r ÜI   ß   v Ú¶    ¼   r ÜI   ßr  ÜI   ß   r ™2   •   ¶    ¼   r ÜI   ßr  ÜI   ß   v Ú•   ¶	   ÜI
-   ßl   r È   Ú¹   I   ˜   •   ¶    ¹   Jv Ú•   £&`*	`P/P$`ÿÿÿşP
-P	P-
-`ÿÿÿÿP
-P	P)`ÿÿÿùP(`• `ÿÿÿÿP)PX   IæÉX   #                         ·  I   ¶    ¼   r ÜI   ßr   £ `ÿÿÿşP
-PQ€(    +·ñ(                               £@€€€$   5ò,$                               £ t   ´µˆ*t   8                          ¶    ¼   v Ú¶    v  Ú¶       r ÜI   ß   v Ú£ `ÿÿÿÿPD`*`P/P$PD  ½ä´D  ›                5        ¶       r ÜI   ß   r ÜI   ßl   r È   Ú¹   I   ˜Ç   •	   ¶       r ÜI   ßl	   r ÜI
-   ßr È  Ú¶    ¹  r ÜI   ß   r ÜI   ß   r ÜI   ß   r ÜI   ßr  É   Ú¼      ˜;   •   ¶       r ÜI   ß   r ÜI   ßl   r È   Ú•!   ¹   I   ˜‚   •$   ¹   ÜI   ß   r ÜI   ß   r ÜI   ß¹   ÜI
-   ßr ÜI   ßr  r ÜI   ß8      ;      ;   r ÜI   ß   v Ú•5   £0@`	PP
-ÿÿÿùP(`• `P
-OÿÿÿùPDPH`ÿÿÿÿPPPP
-"PI
-`• `	PP
-ÿÿÿùPM`•@` PP
-!P
-PÿÿÿîP
-
-
-ÿÿÿëP+P9P€€   O ğ€   @                
-        ÙÈ   Ú¶    ¹   r ÜI   ß   r ÜI   ßr  ÜI   ß¶   r ÿ £`	ÿÿÿşPP
-P
-ÿÿÿøPQ€€€l   f`l   4                        ÙÈ   Ú¶    ¹   r ÜI   ß   r ÜI   ßr  ¶    £`	ÿÿÿşPP
-PQ€ˆ   ‰á¨¨ˆ   E                        ÙÈ   Ú¶    ¹   r ÜI   ßr  ÜI   ßr  ÜI   ß¼   ÜI   ßr  r ÿ £`	ÿÿÿşP
-P
-P
-	PÿÿÿïP#Q€€€ˆ  ”Ò8ˆ                  %        ¶       r ÜI   ß   r ÜI   ßl   r È   Ú¹   I   ˜Î   •	   ¹   ÜI   ßr ÜI	   ß
-   r ÜI   ß   r ÜI   ß¹   ÜI   ßr ÜI   ßr  r ÜI   ß8      ;      ;   v Ú¶       r ÜI   ß   v Ú¶       r ÜI   ß8      ;      ;   v Ú•%   £@`PP
-ÿÿÿùP(`•`PPP
-!P
-PÿÿÿîP
-
-
-ÿÿÿçP`PP`P
-,
-
-ÿÿÿçP9P€   O ğ€   @                
-        ÙÈ   Ú¶    ¹   r ÜI   ß   r ÜI   ßr  ÜI   ß¶   r ÿ £`	ÿÿÿşPP
-P
-ÿÿÿøPQ€€€Ì  W[9Ì  ğ                 C       ¶       r ÜI   ßr  Ü &É   ÚÉ   ÚÉ   Ú·     ˜   •    •   ¶       r I   ˜J   •   ¶       r ÜI   ß¶    	   r v Ú¶       r É   Ú—=   •   ¶       r É   Ú¼   ÜI
-   ß   r ÜI   ßv  Ú•   É   Ú·  I   É   Ú·  I   I   ˜7   •    ¶    ¼   ¼   v Ú¶       r ÜI   ßv  Ú•&   ¶    ·  I   r ÜI   ßl   v Ú¶       r ÜI   ß8   8      ;   ;   r ÜI   ßl   r ÜI   ßr  ÜI   ßr  ÜI   ßr  ÜI   ßr  ÜI    ßv  Ú¶!    v  Ú¶"    v  Ú£@`P
-PM	`'`'	`” 	`1b6 	`P” 	`P
-V[ÿÿÿôP$	`P“@	`P)	`‘ P
-PI`'`N`™@`ÿÿÿôP$`P
-'PI!`ÿÿÿÿP
-ÿÿÿûPDC`P
-	ÿÿÿîP*ÿÿÿúPJYP
-	P
-P
-P
-PD[`*`:bP€€€  ¸ÖÀm  3                 _       · I   ÜI   ßr  ÜI   ß¶   r ÿ˜   •   É   Ú—   •   É   Ú•   ¼   ™/  •	   ¶       ¼   ˜   •      —   •      •   %	   %· I
-      ˜#   •      · I
-   %   %—   •      •   %   %· I      ˜   •   · I   —   •   · I   •   %   %· I   %   %· I   %   %r ÜI   ß¼   v Ú¼   ¶    ¼   r ÜI   ß   r ÜI   ßr  %É   Ú•.   ¼   ¼   š   •0   Ú¼   •1   ˜W   •2   É   Ú¶    ¼   r ÜI   ß   r ÜI   ßv  Ú¶    ¼   r ÜI   ß   v Ú•<   ¼   ˜ü   •=   ¶       r ÜI   ß   ¼   ˜   •A       —   •A      •A   %	   %· I
-      ˜#   •G      · I
-   %   %—   •J      •J   %   %· I      ˜   •P   · I   —   •Q   · I   •R   %   %· I   %   %· I   %!   %v Ú•[   ¼   ˜!   •\   ¶"    ¼   · I   v Ú•_   £@`P
-ÿÿÿøP `‘ `,`/`¯ 8 *ª "¿ FÿÿÿP
-€ ÿÿÿ÷P$`ÿÿÿşPP
-PO`‘ • `'`ÿÿÿÿPP
-P$`ÿÿÿÿPPI`O`P
-¯ 3 *ª "¿ Fÿÿÿ
-PI`/`ÿÿÿôPIP€¼  tÚ(‘¼                 '        ÙÈ   Ú¶    ¹   r ÜI   ß   r    ˜$   •   ¶    ¹   r ÜI   ßv  Ú •
-   ¶    ¹   r ÜI   ßr  ÜI   ßr  ÜI   ßr  ÜI	   ß8
-      ;      ;   ¶    ¹   r ÜI   ß   r ÜI   ß   r ;   r É   Ú¶    ¶   r ÜI   ß   l   v Ú¶       r ÜI   ß   l   v Ú £&`ÿÿÿÿPP“ 	`ÿÿÿÿP
-P$`AF`ÿÿÿÿP
-P
-	P
-P
-%**ÿÿÿşPPPH3PI
-	`ÿÿÿÿPÿÿÿóPD	`PÿÿÿóPD	`!Q€<   ©¾EO<                             ¼   ÜI   ßv  Ú£@`P$	P<   Ş‚Y<                             ¼   ÜI   ßv  Ú£@`P$Pœ   —¡œ   S   	                     ¸ É   Ú¶       ·  %   %r ÜI   ßr  É   Ú   É   Ú¶    l   dr É   Ú£9@`
-2
-ÿÿÿÌP
-GPI`+`5`B#P9aP€€€¨  =	-¨                          ¶       r ÜI   ßr  É  Ú¼     ˜   •   ¶    ¼  v Ú•   ¼  ÜI   ß   r ÜI   ß	   r È   Ú¼     ˜)   •   ¶    
-   ¼  %   %r È  Ú•   ¶       r ÜI   ß   ¼  %   %r È  ÚÉ   Ú¹  ÜI   ßl   v Ú¼   ˜   •   ¹  ÜI   ßl   v Ú•   £ `P
-P)`• `ÿÿÿÿPI`‘ P
-P8
- `• `Oÿÿÿ¯PM`P
- ÿÿÿêPH$`'`ÿÿÿûPD;`‘@=`ÿÿÿûPITP  _¢l¿  ¨                        ¶    ¼  v Ú¶    · r ÜI   ß   r ÜI   ß   r È   Ú¹   I   ˜   •   ¶    · r È   Ú•   ¹   ÜI   ßr  ÜI	   ßr  ¼  ÜI	   ßr  ˜   •   É   Ú•   £ `ÿÿÿÿPD$`ÿÿÿÿPP.P(`•@`ÿÿÿşPM`P
-PPN`LP€€€¤   ¡h“`¤   [                        ¶    · r ÜI   ß   r ÜI   ß   r È   Ú¹   I   ˜   •	   ¶    · r È   Ú•   £@$`ÿÿÿÿPP.P(`•@`ÿÿÿşPMP€€ä  Ğ©Kƒä                  B        È   Ú¶       r ÜI   ß8      ;   v Ú¶   I   ¶	   JI
-   I   È  Ú¹     ˜   •   ¶   ÜI   ßv  Ú—#   •   ¶       r ÜI   ßv  Ú•   ¶       r ÜI   ß   r ÜI   ßv  Ú¶       r ÜI   ß   v Ú¶       r É   Ú¶   ÜI   ß   r I   É   Ú   É   Ú   É   Ú¶   ÜI   ß   r É   Ú¼   ÜI   ßl   v Ú¶    l   dr É   Ú¹     ˜u   •.   ¶   ÜI   ß   r È  Ú¶   ÜI   ß    r ÜI!   ßv  Ú¹  ÜI   ß    r I   ˜   •;   ¹  ÜI!   ßv  Ú•=   ¶    "   r ÜI   ßv  Ú¶#    £@``P
-
-ÿÿÿûPD`Ÿ@	`” `
-P.`P
-PI`PP
-
-P$`PP$`PI`‘ 
-PN`+`+`‘ 
-P)`ÿÿÿûPDq`5€  „BqPI€  †	`” `‘ 
-P(	`‘ 
-P
-P$` P” `PI€  `P
-2P$`Q€¼  “mí ¬  0  	      
-       ‚      ¸  É   Ú¶    · r ÜI   ß   r È   Ú¹   ÜI   ß   r ÿ˜Ó   •   ¹   ÜI   ß   r È  Ú¶    ¹  r È  ÚÈ  Ú–   ¹  ¹  I	   ˜`   •   ¹  ˜   •   ¹  ¹  JÈ  Ú—#   •   ¹     %¹  ¹  J%È  Ú•   ¹  /'È  Ú—‘ÿÿÿ•   ¶    · r ÜI   ß   ¹  v Ú•   
-   É   Ú
-   É   Ú
-   É   Ú
-   É   Ú¶    · r ÜI   ßr  ÜI   ßr  ÜI   ßk   
-   r ÜI   ß   r ÿ˜9   •'   ¶       r É   Ú¶    l   dr É   Ú—³   •+   ¶    · r ÜI   ß   r É   Ú¶    · r ÜI   ßr  É   Ú¶    · r ÜI   ß   r É   Ú¶    · r ÜI   ß   r    ˜   •>      —   •>   
-   •>   É   Ú•>   ¼   
-   ˜ª  •@   
-   É  Ú
-   É  Ú¶       r I	   È  Ú¹  š   •E   Ú¼   ¼  I	   &•H   ˜²   •I      É  Ú   ¼      š   •L   Ú¼   
-   •M   ˜    •N      ¼   %   %—   •P   
-   •P   %   %¼  %   %¼   %    %¼   %!   %¼   %"   %É  Ú—m  •Z   ¹  ˜]  •\   ¼   ÜI   ßr  ÜI   ß¶#   r ÿ˜   •c      —   •c   
-   •c   É  Ú¼  
-   ˜    •e   $   ¼   %%   %—œ   •g      ¼      š   •j   Ú¼   
-   •k   ˜    •l      ¼   %   %—   •n   
-   •n   %   %¼  %   %¼   %&   %¼   %'   %¼   %"   %•x   É  Ú¼   ¼  &˜   •{   ¼  (   %—   •|   ¼  •|   É  Ú•|   ¶    ¼  r ÜI)   ß¼  v Ú³*   Å*   Ú•‚   £I`ÿÿÿÿPP(` 	P@` 	P(`
-ÿÿÿÿP  `f” ` `˜@`
-”@1`•@`ÿÿÿÿPÿÿÿôPI`+`+`+` `ÿÿÿÿP
-P
-P
-
-ÿÿÿøPP@`P)`57B#P“0; `
-ÿÿÿşPP)`	ÿÿÿşP
-P)`	ÿÿÿşPPI@` 		ÿÿÿşPP¸@C`• 	`+	`+`P-`–  	`+	`¶ 9§ œ@L` 	`P
-ÿÿÿøP¯ 	`š <› ¶ 9§ — 	`¼@R	`ÿÿÿÿP
-ÿÿÿ÷P$	`‘@VP€€¼         y   t   <  UÄ_”<  n                R        ¼   I   ˜C  •   ¶    ¼   v Ú¼   ÜI   ßr  É   Ú¼      ˜   •	      —   •	   ¼   •	   É   Ú¼   É   Ú¶   I   I   ÜI	   ßk
-      r ÜI	   ßk      r É   Ú   É  Ú   É  Ú¶       r I   È   Ú¹   š   •   Ú¼   ¼  I   &•   ˜²   •      É  Ú   ¼      š   •   Ú¼      •   ˜    •      ¼   %   %—   •       •    %   %¼  %   %¼   %   %¼   %   %¼   %   %É  Ú—m  •*   ¹   ˜]  •,   ¼   ÜI   ßr  ÜI   ß¶   r ÿ˜   •3      —   •3      •3   É  Ú¼     ˜    •5      ¼   %   %—œ   •7      ¼      š   •:   Ú¼      •;   ˜    •<      ¼   %   %—   •>      •>   %   %¼  %   %¼   %   %¼   %    %¼   %   %•H   É  Ú¼   ¼  &˜   •K   ¼  !   %—   •L   ¼  •L   É  Ú•L   ¶    ¼  r ÜI"   ß¼  v Ú—   •P   ¶    #   r É   Ú•R   £ `– `ÿÿÿÿP$
-`
-P)`´ `+`– $
-ÿÿÿøP
-
-ÿÿÿøPI	`+`+`P-`–  `+`¶ 9§ œ@` `P
-ÿÿÿøP¯ `š <› ¶ 9§ — `¼@`ÿÿÿÿP
-ÿÿÿ÷P `PNP€€€ì   †!òÈì                            ¶       r I   ˜t   •   ¶    ¼   v Ú¼   ÜI   ß   r È   Ú¶       r ÜI   ß   ¹   ÜI	   ßr  %
-   %r ÜI   ßl   v Ú•   £ `P” `ÿÿÿÿPD`‘ PH`P
- P
-ÿÿÿâP
-0ÿÿÿûPIP€€  <òåp  ª                        ¶    · r ÜI   ß   r ÜI   ß   r È   Ú¶    · r ÜI   ß   r ÜI   ß   r È  Ú¹   ÜI   ßr  ÜI	   ßr  ¼   ÜI   ß   r ÜI   ßr  ÜI	   ßr  ˜   •   £@`ÿÿÿÿPP.P(`ÿÿÿÿPP/P(`P
-P‘ P
-P
-PNP€ü  9œCOü  R                 0        ¶       r I   ˜   •    •   ¶       r ÜI   ßv  Ú¶   I   ˜   •   ¶    v  Ú•   ¶       r ÜI	   ß
-   v Ú¶       r ÜI   ß   r É   Ú¶    ¶   r ÜI   ßl   v Ú¶       r ÜI   ß8   ;   ;   v Ú¶       r ÜI   ß   l   v Ú¶       r ÜI   ß   l   v Ú¶    ¶   r ÜI   ßl   v Ú£@`P”`1S6`P
-P$`– `?`P€  „P$`P6P9`ÿÿÿÿP
-ÿÿÿûPD`P
-%&FP4$`PÿÿÿóP4-`PÿÿÿõP47`ÿÿÿÿP
-ÿÿÿúP4SP€€  +†ñ  x         	       6       ¶       · I   %   %r ÜI   ß¼  r È   Ú¼  ÜI   ß   r É   Ú¶    · I   r ÜI	   ßl
-   v Ú· I   I   š(   •   Ú¶    · r ÜI   ß   r •   ˜Ê   •   ¶       ¶   I   I   ÜI   ßr  ÜI   ß¶    · r ÜI   ß   r ÜI   ßr  r ÿ˜   •(      —   •(      •(   %   %· I   %   %· I   %   %· I   %   %r ÜI   ß¼   v Ú•6   £ `	ÿÿÿöP
-Rÿÿÿ÷P(`‘ P)`ÿÿÿÿP
-ÿÿÿûPD`  ÿÿÿşP	P” `– P
-ÿÿÿşP	P
-PÿÿÿâP° _ÿÿÿ<P
-€  åÿÿÿ÷P9P€€   H°„   Á                         ¶       ¶   I   I   ÜI   ßr  ÜI   ß¶    · r ÜI   ß   r ÜI   ßr  r ÿ˜   •   	   —   •   
-   •   %   %· I   %   %· I   %   %· I   %   %r ÜI   ß¼   v Ú£ `– P
-ÿÿÿşP
-P
-PÿÿÿáP° `ÿÿÿ9P
-€  éÿÿÿ÷P$P€€    ;rÎú    c                          ¶       r I   š   •   Ú¼   ÜI   ßr  •   ˜(   •	   ¶       r ÜI   ß   v Ú•   £ `P• 'P“ `PP9P€€€ø   =-Bø   Ÿ                       ÙÈ  Ú¶    ¹  r ÜI   ß   r ÜI   ß   r È   Ú¶    ¹  r ÜI   ß   r ÜI   ß   r ÜI   ß	   r ÜI
-   ßr  È  Ú¶       ¹      %¹  %v Ú£&`ÿÿÿÿPPP(`ÿÿÿÿPPPP
-P8`
-	ÿÿÿíP4P¬  )Şı´¬  Ó                l        ¶       r È   Ú¹   šq   •   Ú¹   ÜI   ß   r J   šK   •	   Ú¶       ¹   ÜI   ß   r J%   %r ÜI	   ß
-   r I   •   ˜]   •   ³   ¶       ¹   ÜI   ß   r J%   %r ÜI	   ß
-   r ÜI   ßr  Å   Ú—x   •"   ³   ¶       r ÜI   ß   r ÜI   ß   r ÜI   ß   r ÜI   ß   r ÜI	   ß
-   r ÜI   ßr  Å   Ú•2   ¶      ˜   •5   ³   ¶       r ÜI   ß   ¶   I   I   %   %r ÜI   ß   r ÜI   ß   r ÜI   ß   r ÜI   ßr  Å   Ú•H   ¶      ˜¡   •K   ³   ¶       r ÜI   ß   ¶   I   I   ÜI   ß   r JÜI   ß    r J%   %r ÜI   ß   r ÜI   ß   r ÜI   ß   r ÜI   ßr  Å   Ú•d   ¶    !   r ÜI"   ß¶   #   %r ÜI$   ßv  Ú£ `	PH`¡ Pœ !. PÿÿÿÉPKP™ `. PÿÿÿÉPKP
-#P“0 ` P%PPPPP
-#PN`• ` P
-– ÿÿÿïP6PPP
-PN`• ` P
-› P‘ PÿÿÿÂPXPPP
-PN`P
-ÿÿÿûP
-P$P€€,  y£Bpü   ¦                       g    È   Ú·  ÜJßt  cÜI   ß–   İr  c ÜI   ™h   •   I   ¨È  ¹   ÜI   ß¹  r ÿ˜   •   ¹   ÜI   ß¹  v Ú•   —   •   ªŞ  a¥•   Ú—‹ÿÿÿ•   Û ¹    £ `*`š ÿÿÿîœ $`ÿÿÿøP `ÿÿÿûP @N`Q€,         Š             @   @            z   3õØ  `  `  $     œ !  "  #  $    %  '  (  ¯  |  )    `  $    	  
-    0                         @                 p    `.  $  ¦   /  0  1    5  :    @2  3  Ö 4  è         7  6    `.  $  ¦   /  0  1      @2  3  Ö 4  è  5         7  6  8  „     p  :    `$  +  „     p	  `6    `6  $  5  L  	  p0  M  N  ˆ   O  è  F  P  "  Q  4  a  R  1  S  Ö T    ¦   U  D  V    W  X  Y  Z  [  \  ]  
-  `  `"    `"    `"    `$    e  f  d  g  h    h    @i  ¢ j   	  k  ¦   l   m       pn  o    pp    p  `Ö $  3    `$  u  v  w  g  x  y  z    L    p0  ]    `  `  `]  |  $  u  v  w    `$  ;  <  =  >  ?  @  A    C  D    0  *  E  "  I  „     p`  _    @  @c  b  a  d  
-  p    pg  q  h  ^  r  s  ¦   a  t    p  p{    p  p}    `$  0  1    7  5    `$  0  1    5    `$  3    7    `$  k  ¦     L    p0      pš 	  • R 2  3  ˆ     p  ƒ  „      @…  e  ‡  †  z  y    `$  0  1    7  5    `$  ‰  ¦     L    p0  š 	    ƒ  „  3      @‡  †  Š  e  z  ‹  Œ    @  h        `1    7  5  $  —  ‹  ˜  O  è  F  P  "  ˆ   Q  4  a  R  S  Ö T    ¦   ™  D  š    W  ›  œ      \  •    `"    `"    `$    e  f  d  g  h    h    @i  ¢ j   	  ‰  ¦   l   m  Œ      pn   o    p  `$  C  D  F  ’  0  >  ?  @  ¦       1  5  •  –  „     pŸ  _  	  @
-  @c  b  a      pg  q  h  "  ^  |  }  !  `¨  $  	  ³  ¦   /  0  3    "  `$  	  ³  ¦   /  0     `$  §  3  ˆ   ¨  ¦   a  ª  1  ¬  ­  ¯  °  £  „   !  p"  p  `$  ¢  £  g  ˆ   ¦     p%  `0  ¨  3  ˆ   Ë       1  «    PÌ    PÍ  $    Ï  Ğ  F  P  "  Ñ  R  Ò  Ó  Ô    7  5  Õ  Ö  ×  S  Ø    Ê  $  `$  0  1  7  Ã  ¯  /  Å  0  ˆ   3    «     PÉ  Ê  ¦  %  pª  4  Ù  H  Ú    Ï  Ğ  F  P  "  Ñ  R  Ò  Ó  Ô  5  Õ  Ö  ×  S  Ø    Û  '  `$  	  ³  ¦   /  â  ã  3    &  `$  Ü  0  ¨  ¦   Ş  ¯  ß  3  à  „   '  p#  `$  µ      @    m  ·  ¸  ¹  %  1    "  º    ;  ¦   *  <  »    ¾  0  ˆ   „   $  p¦  &  p	  å  [   A  Û  *  `$  ó       1    7  0  ô  ˆ   õ  4  ö  ÷  Ö \    )  `$  í  Ö î    ¦   ğ  5  „   *  p0  0  1  ó         7  ô  ˆ   õ  4  ö  ÷  \  +  `$  ü  0  ı  ø  "  $  ,  `$  	  ÿ  0       C 3   (  |  -  `'  (  ¯  |   $   à    0   3  	 	  R     
- ˆ    ¦             C  /   „     (  `$    0        *  æ  ç    é    ê  „   )  pø  ù    @ú  û  n   o  +  pş    ,  pm   -  p.  `h  y   %  7  :     `  p  p  p  p  p  p  p  p#  p(  p.  p5             ÿX„í                                                            \      *         C             .             Æ   .            c   $          a             ‡                          ˆ             Š             Œ             ¯             «             ½             ¾             ¿                  r         ô             û                         *     |         #            ‰  #   ]         F  #          m            i             k             Ï     •         ½     !       ¬  
-   "       ¶     "       =  $            û  +   #       ×  $   $       0     %       &  
-   &       È              s     '       a     (            '       •     '       £  %   '       ç     Å         H©À      Gs      Gs                  n   9  X   9                 Z  —  ?  —                  U  |  M  |  ,   R           ¯  ¨  ›  ¨  E              €		  „   	  „  G   T            F  `  =  `  N   .          €Ä  û&  ¬  û&  [               ¥  ñ  œ  ñ  Œ               B  _  :  _     1            ¡  ç  ™  ç  ¼              ş  ì"  õ  ì"  ¿               #!  ]!  !  ]!  É   ,             •!  Á!  !  Á!  Í   5             ı!  È"  õ!  È"  Ó   0           ‚í#  W%  ä#  W%  ã   H             æ$  %  İ$  %  è   *            b%  r%  Y%  r%  ê                ¡%  §%  ˜%  §%  î                ²%  h&  ©%  h&  î   0           €'  "+  ÿ&  "+                u'  ³'  m'  ³'    >            L(  (  D(  (    f            ì)  7*  ä)  7*    ?            9+  Œ-  '+  Œ-                º+  ø+  ²+  ø+    ?           €°-  ×<  ”-  ×<  #              o2  ¾8  f2  ¾8  D  $          ‚F9  û;  =9  û;  g               !;  U;  ;  U;  q  +             ;  Ï;  •;  Ï;  v  1           €ğ<  ¯O  Û<  ¯O  ‡            €
-?  ¦O  ?  ¦O  “  ,             ¶F  ¾J  ­F  ¾J  ¸  %            KK  gO  BK  gO  Ğ  0          €ßO  f  ÇO  f  í             €ÍR  ›a  ÄR  ›a                ´V  \  ¬V  \  !  ,            Ãa  ßd  »a  ßd  ^  !             Õb  Íd  Ìb  Íd  d  Z          €xf  ‚r  Xf  ‚r  ‚  !           €‹h  ¾k  ƒh  ¾k                Ni  Sj  Fi  Sj  “  !            Zl  Ñl  Rl  Ñl  ¦  )            $m  æm  m  æm  ¯  '            /n  yr  'n  yr  ¹               ˜r  Gs  †r  Gs  ×            5¡İaÕ›r*—–ò¿      f­²f­³FÁÒ°       u    O^partitionKey=%28https%2Cginniemae.gov%29,:https://www.ginniemae.gov/Style%20Library/GNMA%20Scripts/horizontalNav.js strongly-framed 1 security-info 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 request-method GET response-head HTTP/2 200 
-content-type: application/javascript
-content-length: 29511
-last-modified: Fri, 25 Aug 2023 21:59:39 GMT
-etag: "{3AA0C9A7-62BA-49BC-A439-179FE7EB68B1},253"
-resourcetag: rt:3AA0C9A7-62BA-49BC-A439-179FE7EB68B1@00000000253
-content-disposition: attachment; filename*=utf-8''horizontalNav%2ejs; filename="horizontalNav.js"
-x-download-options: noopen
-strict-transport-security: max-age=31536000; includeSubDomains; preload
-x-frame-options: SAMEORIGIN, SAMEORIGIN
-content-security-policy: frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com *.teams.microsoft.us local.teams.office.com *.powerapps.com *.yammer.com *.officeapps.live.com *.office.com *.stream.azure-test.net *.microsoftstream.com *.dynamics.com *.microsoft.com onedrive.live.com *.onedrive.live.com;, frame-ancestors 'self'
-date: Sat, 06 Apr 2024 20:16:54 GMT
-expires: Fri, 22 Mar 2024 20:16:54 GMT,0
-sprequestguid: b6731ca1-2634-2062-3bd5-9c23f2ded007
-request-id: b6731ca1-2634-2062-3bd5-9c23f2ded007
-sprequestduration: 1130
-cache-control: private,max-age=0,no-cache
-pragma: no-cache
-accept-ranges: bytes
-x-sharepointhealthscore: 0
-public-extension: http://schemas.microsoft.com/repl-2
-spiislatency: 1
-microsoftsharepointteamservices: 16.0.0.10407
-x-content-type-options: nosniff
-x-ms-invokeapp: 1; RequireReadOnly
-x-from: WEB01
-access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept
-access-control-allow-methods: POST,GET,OPTIONS,PUT,DELETE
-x-xss-protection: 1; mode=block
-X-Firefox-Spdy: h2
- original-response-headers date: Sat, 06 Apr 2024 19:40:08 GMT
-content-type: application/javascript
-content-length: 29511
-set-cookie: AWSALB=TMwtezmLRNAIde33MTgAPUa6Kh+xfH9tyzpTLN3b4vSYXjrzC4vJ1Y64Dja+PeF0WImKcv569zUBROEGkaysafwT4oZLrY7eqYP3LgOUrCSn4lM8Vk8VPHXltUML; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/
-set-cookie: AWSALBCORS=TMwtezmLRNAIde33MTgAPUa6Kh+xfH9tyzpTLN3b4vSYXjrzC4vJ1Y64Dja+PeF0WImKcv569zUBROEGkaysafwT4oZLrY7eqYP3LgOUrCSn4lM8Vk8VPHXltUML; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/; SameSite=None; Secure
-set-cookie: AWSALB=uo/O2Xui11v/LnjH9BrIVpXEq1adD8QnF8HpGJup9QvMVXkD4ZYHllb86mG3C9ORUjIAmW49qPDkXO2nGHTqPV+WwbOsqi6DyOaT7lPMKz/gP7dfBP7H7LHiGhMo; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/
-set-cookie: AWSALBCORS=uo/O2Xui11v/LnjH9BrIVpXEq1adD8QnF8HpGJup9QvMVXkD4ZYHllb86mG3C9ORUjIAmW49qPDkXO2nGHTqPV+WwbOsqi6DyOaT7lPMKz/gP7dfBP7H7LHiGhMo; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/; SameSite=None; Secure
-cache-control: private,max-age=0,no-cache
-pragma: no-cache
-expires: Fri, 22 Mar 2024 19:40:08 GMT,0
-last-modified: Fri, 25 Aug 2023 21:59:39 GMT
-accept-ranges: bytes
-etag: "{3AA0C9A7-62BA-49BC-A439-179FE7EB68B1},253"
-x-sharepointhealthscore: 0
-resourcetag: rt:3AA0C9A7-62BA-49BC-A439-179FE7EB68B1@00000000253
-content-disposition: attachment; filename*=utf-8''horizontalNav%2ejs; filename="horizontalNav.js"
-x-download-options: noopen
-public-extension: http://schemas.microsoft.com/repl-2
-sprequestguid: 9b711ca1-06ab-2062-aa45-1f6f84d15ba2
-request-id: 9b711ca1-06ab-2062-aa45-1f6f84d15ba2
-x-frame-options: SAMEORIGIN
-content-security-policy: frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com *.teams.microsoft.us local.teams.office.com *.powerapps.com *.yammer.com *.officeapps.live.com *.office.com *.stream.azure-test.net *.microsoftstream.com *.dynamics.com *.microsoft.com onedrive.live.com *.onedrive.live.com;
-sprequestduration: 1135
-spiislatency: 0
-microsoftsharepointteamservices: 16.0.0.10407
-x-content-type-options: nosniff
-x-ms-invokeapp: 1; RequireReadOnly
-x-from: WEB02
-x-frame-options: SAMEORIGIN
-content-security-policy: frame-ancestors 'self'
-access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept
-access-control-allow-methods: POST,GET,OPTIONS,PUT,DELETE
-strict-transport-security: max-age=31536000; includeSubDomains; preload
-x-xss-protection: 1; mode=block
-X-Firefox-Spdy: h2
- ctid 2 uncompressed-len 0 net-response-time-onstart 1655 net-response-time-onstop 1686 alt-data 1;29511,javascript/moz-script-bytecode-20240222211730-8l alt-data-from-child 1  rš

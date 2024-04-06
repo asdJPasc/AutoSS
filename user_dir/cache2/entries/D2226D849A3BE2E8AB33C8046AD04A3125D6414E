@@ -1,2578 +1,0 @@
-/*
-Copyright © 2013 Adobe Systems Incorporated.
-
-Licensed under the Apache License, Version 2.0 (the ìLicenseî);
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an ìAS ISî BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-/**
- * See <a href="http://jquery.com">http://jquery.com</a>.
- * @name jquery
- * @class
- * See the jQuery Library  (<a href="http://jquery.com">http://jquery.com</a>) for full details.  This just
- * documents the function and classes that are added to jQuery by this plug-in.
- */
-
-/**
- * See <a href="http://jquery.com">http://jquery.com</a>
- * @name fn
- * @class
- * See the jQuery Library  (<a href="http://jquery.com">http://jquery.com</a>) for full details.  This just
- * documents the function and classes that are added to jQuery by this plug-in.
- * @memberOf jquery
- */
-
-/**
- * @fileOverview accessibleMegaMenu plugin
- *
- *<p>Licensed under the Apache License, Version 2.0 (the ìLicenseî)
- *<br />Copyright © 2013 Adobe Systems Incorporated.
- *<br />Project page <a href="https://github.com/adobe-accessibility/Accessible-Mega-Menu">https://github.com/adobe-accessibility/Accessible-Mega-Menu</a>
- * @version 0.1
- * @author Michael Jordan
- * @requires jquery
- */
-
-/*jslint browser: true, devel: true, plusplus: true, nomen: true */
-/*global jQuery */
-(function ($, window, document) {
-    "use strict";
-    var pluginName = "accessibleMegaMenu",
-        defaults = {
-            uuidPrefix: "accessible-megamenu", // unique ID's are required to indicate aria-owns, aria-controls and aria-labelledby
-            menuClass: "accessible-megamenu", // default css class used to define the megamenu styling
-            topNavItemClass: "accessible-megamenu-top-nav-item", // default css class for a top-level navigation item in the megamenu
-            panelClass: "accessible-megamenu-panel", // default css class for a megamenu panel
-            panelGroupClass: "accessible-megamenu-panel-group", // default css class for a group of items within a megamenu panel
-            hoverClass: "hover", // default css class for the hover state
-            focusClass: "focus", // default css class for the focus state
-            openClass: "open" // default css class for the open state
-        },
-        Keyboard = {
-            BACKSPACE: 8,
-            COMMA: 188,
-            DELETE: 46,
-            DOWN: 40,
-            END: 35,
-            ENTER: 13,
-            ESCAPE: 27,
-            HOME: 36,
-            LEFT: 37,
-            PAGE_DOWN: 34,
-            PAGE_UP: 33,
-            PERIOD: 190,
-            RIGHT: 39,
-            SPACE: 32,
-            TAB: 9,
-            UP: 38,
-            keyMap: {
-                48: "0",
-                49: "1",
-                50: "2",
-                51: "3",
-                52: "4",
-                53: "5",
-                54: "6",
-                55: "7",
-                56: "8",
-                57: "9",
-                59: ";",
-                65: "a",
-                66: "b",
-                67: "c",
-                68: "d",
-                69: "e",
-                70: "f",
-                71: "g",
-                72: "h",
-                73: "i",
-                74: "j",
-                75: "k",
-                76: "l",
-                77: "m",
-                78: "n",
-                79: "o",
-                80: "p",
-                81: "q",
-                82: "r",
-                83: "s",
-                84: "t",
-                85: "u",
-                86: "v",
-                87: "w",
-                88: "x",
-                89: "y",
-                90: "z",
-                96: "0",
-                97: "1",
-                98: "2",
-                99: "3",
-                100: "4",
-                101: "5",
-                102: "6",
-                103: "7",
-                104: "8",
-                105: "9",
-                190: "."
-            }
-        };
-    /**
-    * @desc Creates a new accessible mega menu instance.
-    * @param {jquery} element
-    * @param {object} [options] Mega Menu options
-    * @param {string} [options.uuidPrefix=accessible-megamenu] - Prefix for generated unique id attributes, which are required to indicate aria-owns, aria-controls and aria-labelledby
-    * @param {string} [options.menuClass=accessible-megamenu] - CSS class used to define the megamenu styling
-    * @param {string} [options.topNavItemClass=accessible-megamenu-top-nav-item] - CSS class for a top-level navigation item in the megamenu
-    * @param {string} [options.panelClass=accessible-megamenu-panel] - CSS class for a megamenu panel
-    * @param {string} [options.panelGroupClass=accessible-megamenu-panel-group] - CSS class for a group of items within a megamenu panel
-    * @param {string} [options.hoverClass=hover] - CSS class for the hover state
-    * @param {string} [options.focusClass=focus] - CSS class for the focus state
-    * @param {string} [options.openClass=open] - CSS class for the open state
-    * @constructor
-    */
-    function AccessibleMegaMenu(element, options) {
-        this.element = element;
-
-        // merge optional settings and defaults into settings
-        this.settings = $.extend({}, defaults, options);
-
-        this._defaults = defaults;
-        this._name = pluginName;
-
-        this.mouseTimeoutID = null;
-        this.focusTimeoutID = null;
-        this.mouseFocused = false;
-        this.justFocused = false;
-
-        this.init();
-    }
-
-    AccessibleMegaMenu.prototype = (function () {
-
-        /* private attributes and methods ------------------------ */
-        var uuid = 0,
-            keydownTimeoutDuration = 1000,
-            keydownSearchString = "",
-            isTouch = typeof window.hasOwnProperty === "function" && !!window.hasOwnProperty("ontouchstart"),
-            _getPlugin,
-            _addUniqueId,
-            _togglePanel,
-            _clickHandler,
-            _clickOutsideHandler,
-            _DOMAttrModifiedHandler,
-            _focusInHandler,
-            _focusOutHandler,
-            _keyDownHandler,
-            _mouseDownHandler,
-            _mouseOverHandler,
-            _mouseOutHandler,
-            _toggleExpandedEventHandlers;
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_getPlugin
-        * @desc Returns the parent accessibleMegaMenu instance for a given element
-        * @param {jQuery} element
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _getPlugin = function (element) {
-            return $(element).closest(':data(plugin_' + pluginName + ')').data("plugin_" + pluginName);
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_addUniqueId
-        * @desc Adds a unique id and element.
-        * The id string starts with the
-        * string defined in settings.uuidPrefix.
-        * @param {jQuery} element
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _addUniqueId = function (element) {
-            element = $(element);
-            var settings = this.settings;
-            if (!element.attr("id")) {
-                element.attr("id", settings.uuidPrefix + "-" + new Date().getTime() + "-" + (++uuid));
-            }
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_togglePanel
-        * @desc Toggle the display of mega menu panels in response to an event.
-        * The optional boolean value 'hide' forces all panels to hide.
-        * @param {event} event
-        * @param {Boolean} [hide] Hide all mega menu panels when true
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _togglePanel = function (event, hide) {
-       // console.log('toggle panel');
-            var target = $(event.target),
-                that = this,
-                settings = this.settings,
-                menu = this.menu,
-                topli = target.closest('.' + settings.topNavItemClass),
-                panel = target.parent().parent().find(".accessible-megamenu-panel:first"),// target.hasClass(settings.panelClass) ? target : target.closest('.' + settings.panelClass),
-                newfocus;
-
-            /*Shifting subpanel on open - added by pete*/
-            var pC = topli.find("div");
-           
-            var shift = ($(pC).width() - (topli.width() / 1.2)) / 2;  
-            	
-            
-            	
-            // old shift: ($(pC).width() - (topli.width() / 1.2)) / 2;
-            if($(pC).closest("li").length>0){
-            var wW = window.outerWidth;// $(window).width();
-                var pW = $(pC).width();
-                //var pL = $(pC).parent().offset().left; // $(pC).offset().left;
-                // pL = (pL < 1 ? $(pC).parent().offset().left : pL);
-                //console.log('wW: ' + wW + ' pW: ' + pW + ' pL: ' + pL);
-                //adjust shift if off right side of screen
-                var calc = wW - (($(pC).closest("li").offset().left - shift) + pW);
-               // console.log('calc:' + calc);
-                if (calc <= 50 ){
-                    shift = shift + (50-calc);
-                    
-                    }
-            }
-            //console.log('calc:' + calc);
-            //console.log('shift: ' + shift);
-
-            //console.log('panel from left: ' + $(pC).position().left);
-			shift = shift * -1;
-            //var shiftStr = "-" +  (shift).toString() + " px !important";
-		//	console.log("shift:" + shift);
-            $(panel).css({
-            	'left': (shift),
-            	'max-width':window.outerWidth-10
-            	});
-           
-			
-			var h = Math.max.apply(null, topli.find("ol").map(function () {
-                    return $(this).find(">li").length;
-                }).get());
-               
-                 h=h*35;
-
-                //console.log('max h: ' + h.toString());// PJP 2/7/2016
-
-              topli.find(".accessible-megamenu-panel-group").css({'height': (h).toString() + "px" });
-              topli.find("a:contains('Systems & Applications')").closest("li.accessible-megamenu-panel-group").css({ 'height': ((h)+15).toString() + "px" });
-			//console.log("issuer portals found")
-            topli.find("div").show();
-
-            /*end added by pete*/
-            _toggleExpandedEventHandlers.call(this, true);
-
-            if (hide) {
-                topli = menu.find('.' + settings.topNavItemClass + ' .' + settings.openClass + ':first').closest('.' + settings.topNavItemClass);
-                if (!(topli.is(event.relatedTarget) || topli.has(event.relatedTarget).length > 0)) {
-                    if ((event.type === 'mouseout' || event.type === 'focusout') && topli.has(document.activeElement).length > 0) {
-                        return;
-                    }
-                    topli.find('[aria-expanded]')
-                        .attr('aria-expanded', 'false')
-                        .removeClass(settings.openClass)
-                        .filter('.' + settings.panelClass)
-                        .attr('aria-hidden', 'true');
-                    if ((event.type === 'keydown' && event.keyCode === Keyboard.ESCAPE) || event.type === 'DOMAttrModified') {
-                        newfocus = topli.find(':tabbable:first');
-                        setTimeout(function () {
-                            menu.find('[aria-expanded].' + that.settings.panelClass).off('DOMAttrModified.accessible-megamenu');
-                            newfocus.focus();
-                            that.justFocused = false;
-                        }, 99);
-                    }
-                } else if (topli.length === 0) {
-                    menu.find('[aria-expanded=true]')
-                        .attr('aria-expanded', 'false')
-                        .removeClass(settings.openClass)
-                        .filter('.' + settings.panelClass)
-                        .attr('aria-hidden', 'true');
-                }
-            } else {
-            if(that != null)
-                clearTimeout(that.focusTimeoutID);
-                
-                topli.siblings()
-                    .find('[aria-expanded]')
-                    .attr('aria-expanded', 'false')
-                    .removeClass(settings.openClass)
-                    .filter('.' + settings.panelClass)
-                    .attr('aria-hidden', 'true');
-                topli.find('[aria-expanded]')
-                    .attr('aria-expanded', 'true')
-                    .addClass(settings.openClass)
-                    .filter('.' + settings.panelClass)
-                //.css({'left':'1px solid red'})
-                    .attr('aria-hidden', 'false');
-                if (event.type === 'mouseover' && target.is(':tabbable') && topli.length === 1 && panel.length === 0 && menu.has(document.activeElement).length > 0) {
-                    target.focus();
-                    that.justFocused = false;
-                }
-
-                _toggleExpandedEventHandlers.call(that);
-                
-                if($(panel).length > 0  && $(panel).offset().left < 1){
-               // console.log('adj for cutting off');
-                var o = $(panel).offset().left;
-                var leftP = parseInt($(panel).css('left').split('px')[0]);
-                var newP = leftP - o;
-            	//console.log('new p is: ' + newP);
-            	$(panel).css({'left':  newP});
-            	}
-
-            }
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_clickHandler
-        * @desc Handle click event on mega menu item
-        * @param {event} Event object
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _clickHandler = function (event) {
-            var target = $(event.currentTarget),
-                topli = target.closest('.' + this.settings.topNavItemClass),
-                panel = target.closest('.' + this.settings.panelClass);
-            if (topli.length === 1
-                    && panel.length === 0
-                    && topli.find('.' + this.settings.panelClass).length === 1) {
-                if (!target.hasClass(this.settings.openClass)) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    _togglePanel.call(this, event);
-                    this.justFocused = false;
-                } else {
-                    if (this.justFocused) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        this.justFocused = false;
-                    } else if (isTouch) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        _togglePanel.call(this, event, target.hasClass(this.settings.openClass));
-                    }
-                }
-            }
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_clickOutsideHandler
-        * @desc Handle click event outside of a the megamenu
-        * @param {event} Event object
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _clickOutsideHandler = function (event) {
-            if ($(event.target).closest(this.menu).length === 0) {
-                event.preventDefault();
-                event.stopPropagation();
-                _togglePanel.call(this, event, true);
-            }
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_DOMAttrModifiedHandler
-        * @desc Handle DOMAttrModified event on panel to respond to Windows 8 Narrator ExpandCollapse pattern
-        * @param {event} Event object
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _DOMAttrModifiedHandler = function (event) {
-            if (event.originalEvent.attrName === 'aria-expanded'
-                    && event.originalEvent.newValue === 'false'
-                    && $(event.target).hasClass(this.settings.openClass)) {
-                event.preventDefault();
-                event.stopPropagation();
-                _togglePanel.call(this, event, true);
-            }
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_focusInHandler
-        * @desc Handle focusin event on mega menu item.
-        * @param {event} Event object
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _focusInHandler = function (event) {
-        if(this!=null)
-            clearTimeout(this.focusTimeoutID);
-            
-            var target = $(event.target),
-                panel = target.closest('.' + this.settings.panelClass);
-            target
-                .addClass(this.settings.focusClass)
-                .on('click.accessible-megamenu', $.proxy(_clickHandler, this));
-            this.justFocused = !this.mouseFocused;
-            this.mouseFocused = false;
-            if (this.panels.not(panel).filter('.' + this.settings.openClass).length) {
-                _togglePanel.call(this, event);
-            }
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_focusOutHandler
-        * @desc Handle focusout event on mega menu item.
-        * @param {event} Event object
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _focusOutHandler = function (event) {
-            this.justFocused = false;
-            var that = this,
-                target = $(event.target),
-                topli = target.closest('.' + this.settings.topNavItemClass),
-                keepOpen = false;
-            target
-                .removeClass(this.settings.focusClass)
-                .off('click.accessible-megamenu');
-
-            if (window.cvox) {
-                // If ChromeVox is running...
-                that.focusTimeoutID = setTimeout(function () {
-                    window.cvox.Api.getCurrentNode(function (node) {
-                        if (topli.has(node).length) {
-                            // and the current node being voiced is in
-                            // the mega menu, clearTimeout,
-                            // so the panel stays open.
-                            if(that != null)
-                            	clearTimeout(that.focusTimeoutID);
-                        } else {
-                            that.focusTimeoutID = setTimeout(function (scope, event, hide) {
-                                _togglePanel.call(scope, event, hide);
-                            }, 275, that, event, true);
-                        }
-                    });
-                }, 25);
-            } else {
-                that.focusTimeoutID = setTimeout(function () {
-                    _togglePanel.call(that, event, true);
-                }, 300);
-            }
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_keyDownHandler
-        * @desc Handle keydown event on mega menu.
-        * @param {event} Event object
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _keyDownHandler = function (event) {
-            var that = (this.constructor === AccessibleMegaMenu) ? this : _getPlugin(this), // determine the AccessibleMegaMenu plugin instance
-                settings = that.settings,
-                target = $($(this).is('.' + settings.hoverClass + ':tabbable') ? this : event.target), // if the element is hovered the target is this, otherwise, its the focused element
-                menu = that.menu,
-                topnavitems = that.topnavitems,
-                topli = target.closest('.' + settings.topNavItemClass),
-                tabbables = menu.find(':tabbable'),
-                panel = target.hasClass(settings.panelClass) ? target : target.closest('.' + settings.panelClass),
-                panelGroups = panel.find('.' + settings.panelGroupClass),
-                currentPanelGroup = target.closest('.' + settings.panelGroupClass),
-                next,
-                keycode = event.keyCode || event.which,
-                start,
-                i,
-                o,
-                label,
-                found = false,
-                newString = Keyboard.keyMap[event.keyCode] || '',
-                regex,
-                isTopNavItem = (topli.length === 1 && panel.length === 0);
-
-            if (target.is("input:focus, select:focus, textarea:focus, button:focus")) {
-                // if the event target is a form element we should handle keydown normally
-                return;
-            }
-
-            if (target.is('.' + settings.hoverClass + ':tabbable')) {
-                $('html').off('keydown.accessible-megamenu');
-            }
-
-            switch (keycode) {
-                case Keyboard.ESCAPE:
-                    _togglePanel.call(that, event, true);
-                    break;
-                case Keyboard.DOWN:
-                    event.preventDefault();
-                    if (isTopNavItem) {
-                        _togglePanel.call(that, event);
-                        found = (topli.find('.' + settings.panelClass + ' :tabbable:first').focus().length === 1);
-                    } else {
-                        found = (tabbables.filter(':gt(' + tabbables.index(target) + '):first').focus().length === 1);
-                    }
-
-                    if (!found && window.opera && opera.toString() === "[object Opera]" && (event.ctrlKey || event.metaKey)) {
-                        tabbables = $(':tabbable');
-                        i = tabbables.index(target);
-                        found = ($(':tabbable:gt(' + $(':tabbable').index(target) + '):first').focus().length === 1);
-                    }
-                    break;
-                case Keyboard.UP:
-                    event.preventDefault();
-                    if (isTopNavItem && target.hasClass(settings.openClass)) {
-                        _togglePanel.call(that, event, true);
-                        next = topnavitems.filter(':lt(' + topnavitems.index(topli) + '):last');
-                        if (next.children('.' + settings.panelClass).length) {
-                            found = (next.children()
-                            .attr('aria-expanded', 'true')
-                            .addClass(settings.openClass)
-                            .filter('.' + settings.panelClass)
-                            .attr('aria-hidden', 'false')
-                            .find(':tabbable:last')
-                            .focus() === 1);
-                        }
-                    } else if (!isTopNavItem) {
-                        found = (tabbables.filter(':lt(' + tabbables.index(target) + '):last').focus().length === 1);
-                    }
-
-                    if (!found && window.opera && opera.toString() === "[object Opera]" && (event.ctrlKey || event.metaKey)) {
-                        tabbables = $(':tabbable');
-                        i = tabbables.index(target);
-                        found = ($(':tabbable:lt(' + $(':tabbable').index(target) + '):first').focus().length === 1);
-                    }
-                    break;
-                case Keyboard.RIGHT:
-                    event.preventDefault();
-                    if (isTopNavItem) {
-                        found = (topnavitems.filter(':gt(' + topnavitems.index(topli) + '):first').find(':tabbable:first').focus().length === 1);
-                    } else {
-                        if (panelGroups.length && currentPanelGroup.length) {
-                            // if the current panel contains panel groups, and we are able to focus the first tabbable element of the next panel group
-                            found = (panelGroups.filter(':gt(' + panelGroups.index(currentPanelGroup) + '):first').find(':tabbable:first').focus().length === 1);
-                        }
-
-                        if (!found) {
-                            found = (topli.find(':tabbable:first').focus().length === 1);
-                        }
-                    }
-                    break;
-                case Keyboard.LEFT:
-                    event.preventDefault();
-                    if (isTopNavItem) {
-                        found = (topnavitems.filter(':lt(' + topnavitems.index(topli) + '):last').find(':tabbable:first').focus().length === 1);
-                    } else {
-                        if (panelGroups.length && currentPanelGroup.length) {
-                            // if the current panel contains panel groups, and we are able to focus the first tabbable element of the previous panel group
-                            found = (panelGroups.filter(':lt(' + panelGroups.index(currentPanelGroup) + '):last').find(':tabbable:first').focus().length === 1);
-                        }
-
-                        if (!found) {
-                            found = (topli.find(':tabbable:first').focus().length === 1);
-                        }
-                    }
-                    break;
-                case Keyboard.TAB:
-                    i = tabbables.index(target);
-                    if (event.shiftKey && isTopNavItem && target.hasClass(settings.openClass)) {
-                        _togglePanel.call(that, event, true);
-                        next = topnavitems.filter(':lt(' + topnavitems.index(topli) + '):last');
-                        if (next.children('.' + settings.panelClass).length) {
-                            found = next.children()
-                            .attr('aria-expanded', 'true')
-                            .addClass(settings.openClass)
-                            .filter('.' + settings.panelClass)
-                            .attr('aria-hidden', 'false')
-                            .find(':tabbable:last')
-                            .focus();
-                        }
-                    } else if (event.shiftKey && i > 0) {
-                        found = (tabbables.filter(':lt(' + i + '):last').focus().length === 1);
-                    } else if (!event.shiftKey && i < tabbables.length - 1) {
-                        found = (tabbables.filter(':gt(' + i + '):first').focus().length === 1);
-                    } else if (window.opera && opera.toString() === "[object Opera]") {
-                        tabbables = $(':tabbable');
-                        i = tabbables.index(target);
-                        if (event.shiftKey) {
-                            found = ($(':tabbable:lt(' + $(':tabbable').index(target) + '):last').focus().length === 1);
-                        } else {
-                            found = ($(':tabbable:gt(' + $(':tabbable').index(target) + '):first').focus().length === 1);
-                        }
-                    }
-
-                    if (found) {
-                        event.preventDefault();
-                    }
-                    break;
-                case Keyboard.SPACE:
-                    if (isTopNavItem) {
-                        event.preventDefault();
-                        _clickHandler.call(that, event);
-                    } else {
-                        return true;
-                    }
-                    break;
-                case Keyboard.ENTER:
-                    return true;
-                    break;
-                default:
-                    // alphanumeric filter
-                    clearTimeout(this.keydownTimeoutID);
-
-                    keydownSearchString += newString !== keydownSearchString ? newString : '';
-
-                    if (keydownSearchString.length === 0) {
-                        return;
-                    }
-
-                    this.keydownTimeoutID = setTimeout(function () {
-                        keydownSearchString = '';
-                    }, keydownTimeoutDuration);
-
-                    if (isTopNavItem && !target.hasClass(settings.openClass)) {
-                        tabbables = tabbables.filter(':not(.' + settings.panelClass + ' :tabbable)');
-                    } else {
-                        tabbables = topli.find(':tabbable');
-                    }
-
-                    if (event.shiftKey) {
-                        tabbables = $(tabbables.get()
-                        .reverse());
-                    }
-
-                    for (i = 0; i < tabbables.length; i++) {
-                        o = tabbables.eq(i);
-                        if (o.is(target)) {
-                            start = (keydownSearchString.length === 1) ? i + 1 : i;
-                            break;
-                        }
-                    }
-
-                    regex = new RegExp('^' + keydownSearchString.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&'), 'i');
-
-                    for (i = start; i < tabbables.length; i++) {
-                        o = tabbables.eq(i);
-                        label = $.trim(o.text());
-                        if (regex.test(label)) {
-                            found = true;
-                            o.focus();
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        for (i = 0; i < start; i++) {
-                            o = tabbables.eq(i);
-                            label = $.trim(o.text());
-                            if (regex.test(label)) {
-                                o.focus();
-                                break;
-                            }
-                        }
-                    }
-                    break;
-            }
-            that.justFocused = false;
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_mouseDownHandler
-        * @desc Handle mousedown event on mega menu.
-        * @param {event} Event object
-        * @memberof accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _mouseDownHandler = function (event) {
-            if ($(event.target).is(this.settings.panelClass) || $(event.target).closest(":focusable").length) {
-                this.mouseFocused = true;
-            }
-            this.mouseTimeoutID = setTimeout(function () {
-            if(this!=null)
-                clearTimeout(this.focusTimeoutID);
-            }, 1);
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_mouseOverHandler
-        * @desc Handle mouseover event on mega menu.
-        * @param {event} Event object
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _mouseOverHandler = function (event) {
-
-            clearTimeout(this.mouseTimeoutID);
-            $(event.target)
-                .addClass(this.settings.hoverClass);
-            _togglePanel.call(this, event);
-            if ($(event.target).is(':tabbable')) {
-                $('html').on('keydown.accessible-megamenu', $.proxy(_keyDownHandler, event.target));
-            }
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_mouseOutHandler
-        * @desc Handle mouseout event on mega menu.
-        * @param {event} Event object
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _mouseOutHandler = function (event) {
-            var that = this;
-            $(event.target)
-                .removeClass(that.settings.hoverClass);
-
-            that.mouseTimeoutID = setTimeout(function () {
-                _togglePanel.call(that, event, true);
-            }, 250);
-            if ($(event.target).is(':tabbable')) {
-                $('html').off('keydown.accessible-megamenu');
-            }
-        };
-
-        _toggleExpandedEventHandlers = function (hide) {
-            var menu = this.menu;
-            if (hide) {
-                $('html').off('mouseup.outside-accessible-megamenu, touchend.outside-accessible-megamenu, mspointerup.outside-accessible-megamenu,  pointerup.outside-accessible-megamenu');
-
-                menu.find('[aria-expanded].' + this.settings.panelClass).off('DOMAttrModified.accessible-megamenu');
-            } else {
-                $('html').on('mouseup.outside-accessible-megamenu, touchend.outside-accessible-megamenu, mspointerup.outside-accessible-megamenu,  pointerup.outside-accessible-megamenu', $.proxy(_clickOutsideHandler, this));
-
-                /* Narrator in Windows 8 automatically toggles the aria-expanded property on double tap or click.
-                To respond to the change to collapse the panel, we must add a listener for a DOMAttrModified event. */
-                menu.find('[aria-expanded=true].' + this.settings.panelClass).on('DOMAttrModified.accessible-megamenu', $.proxy(_DOMAttrModifiedHandler, this));
-            }
-        };
-
-        /* public attributes and methods ------------------------- */
-        return {
-            constructor: AccessibleMegaMenu,
-
-            /**
-            * @lends jQuery.fn.accessibleMegaMenu
-            * @desc Initializes an instance of the accessibleMegaMenu plugins
-            * @memberof jQuery.fn.accessibleMegaMenu
-            * @instance
-            */
-            init: function () {
-                var settings = this.settings,
-                    nav = $(this.element),
-                    menu = nav.children().first(),
-                    topnavitems = menu.children();
-                this.start(settings, nav, menu, topnavitems);
-
-
-            },
-
-            start: function (settings, nav, menu, topnavitems) {
-
-                var that = this;
-                this.settings = settings;
-                this.menu = menu;
-                this.topnavitems = topnavitems;
-
-                nav.attr("role", "navigation");
-                menu.addClass(settings.menuClass);
-                topnavitems.each(function (i, topnavitem) {
-                    var topnavitemlink, topnavitempanel;
-                    topnavitem = $(topnavitem);
-                    topnavitem.addClass(settings.topNavItemClass);
-                    topnavitemlink = topnavitem.find(":tabbable:first");
-                    topnavitempanel = topnavitem.children(":not(:tabbable):last");
-                    _addUniqueId.call(that, topnavitemlink);
-                    if (topnavitempanel.length) {
-                        _addUniqueId.call(that, topnavitempanel);
-                        topnavitemlink.attr({
-                            "aria-haspopup": true,
-                            "aria-controls": topnavitempanel.attr("id"),
-                            "aria-expanded": false
-                        });
-
-                        topnavitempanel.attr({
-                            "role": "group",
-                            "aria-expanded": false,
-                            "aria-hidden": true
-                        })
-                            .addClass(settings.panelClass)
-                            .not("[aria-labelledby]")
-                            .attr("aria-labelledby", topnavitemlink.attr("id"));
-                    }
-                });
-
-                this.panels = menu.find("." + settings.panelClass);
-
-                menu.on("focusin.accessible-megamenu", ":focusable, ." + settings.panelClass, $.proxy(_focusInHandler, this))
-                    .on("focusout.accessible-megamenu", ":focusable, ." + settings.panelClass, $.proxy(_focusOutHandler, this))
-                    .on("keydown.accessible-megamenu", $.proxy(_keyDownHandler, this))
-                    .on("mouseover.accessible-megamenu", $.proxy(_mouseOverHandler, this))
-                    .on("mouseout.accessible-megamenu", $.proxy(_mouseOutHandler, this))
-                    .on("mousedown.accessible-megamenu", $.proxy(_mouseDownHandler, this));
-
-                if (isTouch) {
-                    menu.on("touchstart.accessible-megamenu", $.proxy(_clickHandler, this));
-                }
-
-                menu.find("hr").attr("role", "separator");
-
-                if ($(document.activeElement).closest(menu).length) {
-                    $(document.activeElement).trigger("focusin.accessible-megamenu");
-                }
-
-/*
-                //adjust all  to same height
-                 var h = Math.max.apply(null, menu.find("ol").map(function () {
-                    return $(this).find(">li").length;
-                }).get());
-                 
-
-                // console.log('max h: ' + h.toString()); PJP 2/7/2016
-
-              menu.find("li.accessible-megamenu-panel-group").css({ 'height': (h * 32).toString() + "px" });
-              menu.find("a:contains('Issuer Portals')").closest("li.accessible-megamenu-panel-group").css({ 'height': ((h * 32)+32).toString() + "px" });
-*/
-            },
-
-            /**
-            * @desc Get default values
-            * @example $(selector).accessibleMegaMenu("getDefaults");
-            * @return {object}
-            * @memberof jQuery.fn.accessibleMegaMenu
-            * @instance
-            */
-            getDefaults: function () {
-                return this._defaults;
-            },
-
-            /**
-            * @desc Get any option set to plugin using its name (as string)
-            * @example $(selector).accessibleMegaMenu("getOption", some_option);
-            * @param {string} opt
-            * @return {string}
-            * @memberof jQuery.fn.accessibleMegaMenu
-            * @instance
-            */
-            getOption: function (opt) {
-                return this.settings[opt];
-            },
-
-            /**
-            * @desc Get all options
-            * @example $(selector).accessibleMegaMenu("getAllOptions");
-            * @return {object}
-            * @memberof jQuery.fn.accessibleMegaMenu
-            * @instance
-            */
-            getAllOptions: function () {
-                return this.settings;
-            },
-
-            /**
-            * @desc Set option
-            * @example $(selector).accessibleMegaMenu("setOption", "option_name",  "option_value",  reinitialize);
-            * @param {string} opt - Option name
-            * @param {string} val - Option value
-            * @param {boolean} [reinitialize] - boolean to re-initialize the menu.
-            * @memberof jQuery.fn.accessibleMegaMenu
-            * @instance
-            */
-            setOption: function (opt, value, reinitialize) {
-                this.settings[opt] = value;
-                if (reinitialize) {
-                    this.init();
-                }
-            }
-        };
-    } ());
-
-    /* lightweight plugin wrapper around the constructor,
-    to prevent against multiple instantiations */
-
-    /**
-    * @class accessibleMegaMenu
-    * @memberOf jQuery.fn
-    * @classdesc Implements an accessible mega menu as a jQuery plugin.
-    * <p>The mega-menu It is modeled after the mega menu on {@link http://adobe.com|adobe.com} but has been simplified for use by others. A brief description of the interaction design choices can be found in a blog post at {@link http://blogs.adobe.com/accessibility/2013/05/adobe-com.html|Mega menu accessibility on adobe.com}.</p>
-    * <h3>Keyboard Accessibility</h3>
-    * <p>The accessible mega menu supports keyboard interaction modeled after the behavior described in the {@link http://www.w3.org/TR/wai-aria-practices/#menu|WAI-ARIA Menu or Menu bar (widget) design pattern}, however we also try to respect users' general expectations for the behavior of links in a global navigation. To this end, the accessible mega menu implementation permits tab focus on each of the six top-level menu items. When one of the menu items has focus, pressing the Enter key, Spacebar or Down arrow will open the submenu panel, and pressing the Left or Right arrow key will shift focus to the adjacent menu item. Links within the submenu panels are included in the tab order when the panel is open. They can also be navigated with the arrow keys or by typing the first character in the link name, which speeds up keyboard navigation considerably. Pressing the Escape key closes the submenu and restores focus to the parent menu item.</p>
-    * <h3>Screen Reader Accessibility</h3>
-    * <p>The accessible mega menu models its use of WAI-ARIA Roles, States, and Properties after those described in the {@link http://www.w3.org/TR/wai-aria-practices/#menu|WAI-ARIA Menu or Menu bar (widget) design pattern} with some notable exceptions, so that it behaves better with screen reader user expectations for global navigation. We don't use <code class="prettyprint prettyprinted" style=""><span class="pln">role</span><span class="pun">=</span><span class="str">"menu"</span></code> for the menu container and <code class="prettyprint prettyprinted" style=""><span class="pln">role</span><span class="pun">=</span><span class="str">"menuitem"</span></code> for each of the links therein, because if we do, assistive technology will no longer interpret the links as links, but instead, as menu items, and the links in our global navigation will no longer show up when a screen reader user executes a shortcut command to bring up a list of links in the page.</p>
-    * @example <h4>HTML</h4><hr/>
-    &lt;nav&gt;
-    &lt;ul class=&quot;nav-menu&quot;&gt;
-    &lt;li class=&quot;nav-item&quot;&gt;
-    &lt;a href=&quot;?movie&quot;&gt;Movies&lt;/a&gt;
-    &lt;div class=&quot;sub-nav&quot;&gt;
-    &lt;ul class=&quot;sub-nav-group&quot;&gt;
-    &lt;li&gt;&lt;a href=&quot;?movie&amp;genre=0&quot;&gt;Action &amp;amp; Adventure&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;?movie&amp;genre=2&quot;&gt;Children &amp;amp; Family&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&amp;#8230;&lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;ul class=&quot;sub-nav-group&quot;&gt;
-    &lt;li&gt;&lt;a href=&quot;?movie&amp;genre=7&quot;&gt;Dramas&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;?movie&amp;genre=9&quot;&gt;Foreign&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&amp;#8230;&lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;ul class=&quot;sub-nav-group&quot;&gt;
-    &lt;li&gt;&lt;a href=&quot;?movie&amp;genre=14&quot;&gt;Musicals&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;?movie&amp;genre=15&quot;&gt;Romance&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&amp;#8230;&lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;/div&gt;
-    &lt;/li&gt;
-    &lt;li class=&quot;nav-item&quot;&gt;
-    &lt;a href=&quot;?tv&quot;&gt;TV Shows&lt;/a&gt;
-    &lt;div class=&quot;sub-nav&quot;&gt;
-    &lt;ul class=&quot;sub-nav-group&quot;&gt;
-    &lt;li&gt;&lt;a href=&quot;?tv&amp;genre=20&quot;&gt;Classic TV&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;?tv&amp;genre=21&quot;&gt;Crime TV&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&amp;#8230;&lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;ul class=&quot;sub-nav-group&quot;&gt;
-    &lt;li&gt;&lt;a href=&quot;?tv&amp;genre=27&quot;&gt;Reality TV&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;?tv&amp;genre=30&quot;&gt;TV Action&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&amp;#8230;&lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;ul class=&quot;sub-nav-group&quot;&gt;
-    &lt;li&gt;&lt;a href=&quot;?tv&amp;genre=33&quot;&gt;TV Dramas&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;?tv&amp;genre=34&quot;&gt;TV Horror&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&amp;#8230;&lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;/div&gt;
-    &lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;/nav&gt;
-    * @example <h4>CSS</h4><hr/>
-    &#47;* Rudimentary mega menu CSS for demonstration *&#47;
-
-    &#47;* mega menu list *&#47;
-    .nav-menu {
-    display: block;
-    position: relative;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    z-index: 15;
-    }
-
-    &#47;* a top level navigation item in the mega menu *&#47;
-    .nav-item {
-    list-style: none;
-    display: inline-block;
-    padding: 0;
-    margin: 0;
-    }
-
-    &#47;* first descendant link within a top level navigation item *&#47;
-    .nav-item &gt; a {
-    position: relative;
-    display: inline-block;
-    padding: 0.5em 1em;
-    margin: 0 0 -1px 0;
-    border: 1px solid transparent;
-    }
-
-    &#47;* focus/open states of first descendant link within a top level
-    navigation item *&#47;
-    .nav-item &gt; a:focus,
-    .nav-item &gt; a.open {
-    border: 1px solid #dedede;
-    }
-
-    &#47;* open state of first descendant link within a top level
-    navigation item *&#47;
-    .nav-item &gt; a.open {
-    background-color: #fff;
-    border-bottom: none;
-    z-index: 1;
-    }
-
-    &#47;* sub-navigation panel *&#47;
-    .sub-nav {
-    position: absolute;
-    display: none;
-    top: 2.2em;
-    margin-top: -1px;
-    padding: 0.5em 1em;
-    border: 1px solid #dedede;
-    background-color: #fff;
-    }
-
-    &#47;* sub-navigation panel open state *&#47;
-    .sub-nav.open {
-    display: block;
-    }
-
-    &#47;* list of items within sub-navigation panel *&#47;
-    .sub-nav ul {
-    display: inline-block;
-    vertical-align: top;
-    margin: 0 1em 0 0;
-    padding: 0;
-    }
-
-    &#47;* list item within sub-navigation panel *&#47;
-    .sub-nav li {
-    display: block;
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    }
-    * @example <h4>JavaScript</h4><hr/>
-    &lt;!-- include jquery --&gt;
-    &lt;script src=&quot;http://code.jquery.com/jquery-1.10.1.min.js&quot;&gt;&lt;/script&gt;
-
-    &lt;!-- include the jquery-accessibleMegaMenu plugin script --&gt;
-    &lt;script src=&quot;js/jquery-accessibleMegaMenu.js&quot;&gt;&lt;/script&gt;
-
-    &lt;!-- initialize a selector as an accessibleMegaMenu --&gt;
-    &lt;script&gt;
-    $(&quot;nav:first&quot;).accessibleMegaMenu({
-    &#47;* prefix for generated unique id attributes, which are required to indicate aria-owns, aria-controls and aria-labelledby *&#47;
-    uuidPrefix: &quot;accessible-megamenu&quot;,
-
-    &#47;* css class used to define the megamenu styling *&#47;
-    menuClass: &quot;nav-menu&quot;,
-
-    &#47;* css class for a top-level navigation item in the megamenu *&#47;
-    topNavItemClass: &quot;nav-item&quot;,
-
-    &#47;* css class for a megamenu panel *&#47;
-    panelClass: &quot;sub-nav&quot;,
-
-    &#47;* css class for a group of items within a megamenu panel *&#47;
-    panelGroupClass: &quot;sub-nav-group&quot;,
-
-    &#47;* css class for the hover state *&#47;
-    hoverClass: &quot;hover&quot;,
-
-    &#47;* css class for the focus state *&#47;
-    focusClass: &quot;focus&quot;,
-
-    &#47;* css class for the open state *&#47;
-    openClass: &quot;open&quot;
-    });
-    &lt;/script&gt;
-    * @param {object} [options] Mega Menu options
-    * @param {string} [options.uuidPrefix=accessible-megamenu] - Prefix for generated unique id attributes, which are required to indicate aria-owns, aria-controls and aria-labelledby
-    * @param {string} [options.menuClass=accessible-megamenu] - CSS class used to define the megamenu styling
-    * @param {string} [options.topNavItemClass=accessible-megamenu-top-nav-item] - CSS class for a top-level navigation item in the megamenu
-    * @param {string} [options.panelClass=accessible-megamenu-panel] - CSS class for a megamenu panel
-    * @param {string} [options.panelGroupClass=accessible-megamenu-panel-group] - CSS class for a group of items within a megamenu panel
-    * @param {string} [options.hoverClass=hover] - CSS class for the hover state
-    * @param {string} [options.focusClass=focus] - CSS class for the focus state
-    * @param {string} [options.openClass=open] - CSS class for the open state
-    */
-    $.fn[pluginName] = function (options) {
-        return this.each(function () {
-            if (!$.data(this, "plugin_" + pluginName)) {
-                $.data(this, "plugin_" + pluginName, new $.fn[pluginName].AccessibleMegaMenu(this, options));
-            }
-        });
-    };
-
-    $.fn[pluginName].AccessibleMegaMenu = AccessibleMegaMenu;
-
-    /* :focusable and :tabbable selectors from
-    https://raw.github.com/jquery/jquery-ui/master/ui/jquery.ui.core.js */
-
-    /**
-    * @private
-    */
-    function visible(element) {
-        return $.expr.filters.visible(element) && !$(element).parents().addBack().filter(function () {
-            return $.css(this, "visibility") === "hidden";
-        }).length;
-    }
-    
-
-    /**
-    * @private
-    */
-    function focusable(element, isTabIndexNotNaN) {
-        var map, mapName, img,
-            nodeName = element.nodeName.toLowerCase();
-        if ("area" === nodeName) {
-            map = element.parentNode;
-            mapName = map.name;
-            if (!element.href || !mapName || map.nodeName.toLowerCase() !== "map") {
-                return false;
-            }
-            img = $("img[usemap=#" + mapName + "]")[0];
-            return !!img && visible(img);
-        }
-        return (/input|select|textarea|button|object/.test(nodeName) ? !element.disabled :
-                "a" === nodeName ?
-                        element.href || isTabIndexNotNaN :
-                        isTabIndexNotNaN) &&
-        // the element and all of its ancestors must be visible
-                            visible(element);
-    }
-
-    $.extend($.expr[":"], {
-        data: $.expr.createPseudo ? $.expr.createPseudo(function (dataName) {
-            return function (elem) {
-                return !!$.data(elem, dataName);
-            };
-        }) : // support: jQuery <1.8
-                function (elem, i, match) {
-                    return !!$.data(elem, match[3]);
-                },
-
-        focusable: function (element) {
-            return focusable(element, !isNaN($.attr(element, "tabindex")));
-        },
-
-        tabbable: function (element) {
-            var tabIndex = $.attr(element, "tabindex"),
-                isTabIndexNaN = isNaN(tabIndex);
-            return (isTabIndexNaN || tabIndex >= 0) && focusable(element, !isTabIndexNaN);
-        }
-    });
-} (jQuery, window, document));        |J x ˇˇ     20240222211730-8l_J åR’NW   https://www.ginniemae.gov/Style%20Library/GNMA%20Scripts/megamenu/accessibleMegaMenu.js      5∆  /*
-Copyright ÔøΩ 2013 Adobe Systems Incorporated.
-
-Licensed under the Apache License, Version 2.0 (the ÔøΩLicenseÔøΩ);
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an ÔøΩAS ISÔøΩ BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-/**
- * See <a href="http://jquery.com">http://jquery.com</a>.
- * @name jquery
- * @class
- * See the jQuery Library  (<a href="http://jquery.com">http://jquery.com</a>) for full details.  This just
- * documents the function and classes that are added to jQuery by this plug-in.
- */
-
-/**
- * See <a href="http://jquery.com">http://jquery.com</a>
- * @name fn
- * @class
- * See the jQuery Library  (<a href="http://jquery.com">http://jquery.com</a>) for full details.  This just
- * documents the function and classes that are added to jQuery by this plug-in.
- * @memberOf jquery
- */
-
-/**
- * @fileOverview accessibleMegaMenu plugin
- *
- *<p>Licensed under the Apache License, Version 2.0 (the ÔøΩLicenseÔøΩ)
- *<br />Copyright ÔøΩ 2013 Adobe Systems Incorporated.
- *<br />Project page <a href="https://github.com/adobe-accessibility/Accessible-Mega-Menu">https://github.com/adobe-accessibility/Accessible-Mega-Menu</a>
- * @version 0.1
- * @author Michael Jordan
- * @requires jquery
- */
-
-/*jslint browser: true, devel: true, plusplus: true, nomen: true */
-/*global jQuery */
-(function ($, window, document) {
-    "use strict";
-    var pluginName = "accessibleMegaMenu",
-        defaults = {
-            uuidPrefix: "accessible-megamenu", // unique ID's are required to indicate aria-owns, aria-controls and aria-labelledby
-            menuClass: "accessible-megamenu", // default css class used to define the megamenu styling
-            topNavItemClass: "accessible-megamenu-top-nav-item", // default css class for a top-level navigation item in the megamenu
-            panelClass: "accessible-megamenu-panel", // default css class for a megamenu panel
-            panelGroupClass: "accessible-megamenu-panel-group", // default css class for a group of items within a megamenu panel
-            hoverClass: "hover", // default css class for the hover state
-            focusClass: "focus", // default css class for the focus state
-            openClass: "open" // default css class for the open state
-        },
-        Keyboard = {
-            BACKSPACE: 8,
-            COMMA: 188,
-            DELETE: 46,
-            DOWN: 40,
-            END: 35,
-            ENTER: 13,
-            ESCAPE: 27,
-            HOME: 36,
-            LEFT: 37,
-            PAGE_DOWN: 34,
-            PAGE_UP: 33,
-            PERIOD: 190,
-            RIGHT: 39,
-            SPACE: 32,
-            TAB: 9,
-            UP: 38,
-            keyMap: {
-                48: "0",
-                49: "1",
-                50: "2",
-                51: "3",
-                52: "4",
-                53: "5",
-                54: "6",
-                55: "7",
-                56: "8",
-                57: "9",
-                59: ";",
-                65: "a",
-                66: "b",
-                67: "c",
-                68: "d",
-                69: "e",
-                70: "f",
-                71: "g",
-                72: "h",
-                73: "i",
-                74: "j",
-                75: "k",
-                76: "l",
-                77: "m",
-                78: "n",
-                79: "o",
-                80: "p",
-                81: "q",
-                82: "r",
-                83: "s",
-                84: "t",
-                85: "u",
-                86: "v",
-                87: "w",
-                88: "x",
-                89: "y",
-                90: "z",
-                96: "0",
-                97: "1",
-                98: "2",
-                99: "3",
-                100: "4",
-                101: "5",
-                102: "6",
-                103: "7",
-                104: "8",
-                105: "9",
-                190: "."
-            }
-        };
-    /**
-    * @desc Creates a new accessible mega menu instance.
-    * @param {jquery} element
-    * @param {object} [options] Mega Menu options
-    * @param {string} [options.uuidPrefix=accessible-megamenu] - Prefix for generated unique id attributes, which are required to indicate aria-owns, aria-controls and aria-labelledby
-    * @param {string} [options.menuClass=accessible-megamenu] - CSS class used to define the megamenu styling
-    * @param {string} [options.topNavItemClass=accessible-megamenu-top-nav-item] - CSS class for a top-level navigation item in the megamenu
-    * @param {string} [options.panelClass=accessible-megamenu-panel] - CSS class for a megamenu panel
-    * @param {string} [options.panelGroupClass=accessible-megamenu-panel-group] - CSS class for a group of items within a megamenu panel
-    * @param {string} [options.hoverClass=hover] - CSS class for the hover state
-    * @param {string} [options.focusClass=focus] - CSS class for the focus state
-    * @param {string} [options.openClass=open] - CSS class for the open state
-    * @constructor
-    */
-    function AccessibleMegaMenu(element, options) {
-        this.element = element;
-
-        // merge optional settings and defaults into settings
-        this.settings = $.extend({}, defaults, options);
-
-        this._defaults = defaults;
-        this._name = pluginName;
-
-        this.mouseTimeoutID = null;
-        this.focusTimeoutID = null;
-        this.mouseFocused = false;
-        this.justFocused = false;
-
-        this.init();
-    }
-
-    AccessibleMegaMenu.prototype = (function () {
-
-        /* private attributes and methods ------------------------ */
-        var uuid = 0,
-            keydownTimeoutDuration = 1000,
-            keydownSearchString = "",
-            isTouch = typeof window.hasOwnProperty === "function" && !!window.hasOwnProperty("ontouchstart"),
-            _getPlugin,
-            _addUniqueId,
-            _togglePanel,
-            _clickHandler,
-            _clickOutsideHandler,
-            _DOMAttrModifiedHandler,
-            _focusInHandler,
-            _focusOutHandler,
-            _keyDownHandler,
-            _mouseDownHandler,
-            _mouseOverHandler,
-            _mouseOutHandler,
-            _toggleExpandedEventHandlers;
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_getPlugin
-        * @desc Returns the parent accessibleMegaMenu instance for a given element
-        * @param {jQuery} element
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _getPlugin = function (element) {
-            return $(element).closest(':data(plugin_' + pluginName + ')').data("plugin_" + pluginName);
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_addUniqueId
-        * @desc Adds a unique id and element.
-        * The id string starts with the
-        * string defined in settings.uuidPrefix.
-        * @param {jQuery} element
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _addUniqueId = function (element) {
-            element = $(element);
-            var settings = this.settings;
-            if (!element.attr("id")) {
-                element.attr("id", settings.uuidPrefix + "-" + new Date().getTime() + "-" + (++uuid));
-            }
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_togglePanel
-        * @desc Toggle the display of mega menu panels in response to an event.
-        * The optional boolean value 'hide' forces all panels to hide.
-        * @param {event} event
-        * @param {Boolean} [hide] Hide all mega menu panels when true
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _togglePanel = function (event, hide) {
-       // console.log('toggle panel');
-            var target = $(event.target),
-                that = this,
-                settings = this.settings,
-                menu = this.menu,
-                topli = target.closest('.' + settings.topNavItemClass),
-                panel = target.parent().parent().find(".accessible-megamenu-panel:first"),// target.hasClass(settings.panelClass) ? target : target.closest('.' + settings.panelClass),
-                newfocus;
-
-            /*Shifting subpanel on open - added by pete*/
-            var pC = topli.find("div");
-           
-            var shift = ($(pC).width() - (topli.width() / 1.2)) / 2;  
-            	
-            
-            	
-            // old shift: ($(pC).width() - (topli.width() / 1.2)) / 2;
-            if($(pC).closest("li").length>0){
-            var wW = window.outerWidth;// $(window).width();
-                var pW = $(pC).width();
-                //var pL = $(pC).parent().offset().left; // $(pC).offset().left;
-                // pL = (pL < 1 ? $(pC).parent().offset().left : pL);
-                //console.log('wW: ' + wW + ' pW: ' + pW + ' pL: ' + pL);
-                //adjust shift if off right side of screen
-                var calc = wW - (($(pC).closest("li").offset().left - shift) + pW);
-               // console.log('calc:' + calc);
-                if (calc <= 50 ){
-                    shift = shift + (50-calc);
-                    
-                    }
-            }
-            //console.log('calc:' + calc);
-            //console.log('shift: ' + shift);
-
-            //console.log('panel from left: ' + $(pC).position().left);
-			shift = shift * -1;
-            //var shiftStr = "-" +  (shift).toString() + " px !important";
-		//	console.log("shift:" + shift);
-            $(panel).css({
-            	'left': (shift),
-            	'max-width':window.outerWidth-10
-            	});
-           
-			
-			var h = Math.max.apply(null, topli.find("ol").map(function () {
-                    return $(this).find(">li").length;
-                }).get());
-               
-                 h=h*35;
-
-                //console.log('max h: ' + h.toString());// PJP 2/7/2016
-
-              topli.find(".accessible-megamenu-panel-group").css({'height': (h).toString() + "px" });
-              topli.find("a:contains('Systems & Applications')").closest("li.accessible-megamenu-panel-group").css({ 'height': ((h)+15).toString() + "px" });
-			//console.log("issuer portals found")
-            topli.find("div").show();
-
-            /*end added by pete*/
-            _toggleExpandedEventHandlers.call(this, true);
-
-            if (hide) {
-                topli = menu.find('.' + settings.topNavItemClass + ' .' + settings.openClass + ':first').closest('.' + settings.topNavItemClass);
-                if (!(topli.is(event.relatedTarget) || topli.has(event.relatedTarget).length > 0)) {
-                    if ((event.type === 'mouseout' || event.type === 'focusout') && topli.has(document.activeElement).length > 0) {
-                        return;
-                    }
-                    topli.find('[aria-expanded]')
-                        .attr('aria-expanded', 'false')
-                        .removeClass(settings.openClass)
-                        .filter('.' + settings.panelClass)
-                        .attr('aria-hidden', 'true');
-                    if ((event.type === 'keydown' && event.keyCode === Keyboard.ESCAPE) || event.type === 'DOMAttrModified') {
-                        newfocus = topli.find(':tabbable:first');
-                        setTimeout(function () {
-                            menu.find('[aria-expanded].' + that.settings.panelClass).off('DOMAttrModified.accessible-megamenu');
-                            newfocus.focus();
-                            that.justFocused = false;
-                        }, 99);
-                    }
-                } else if (topli.length === 0) {
-                    menu.find('[aria-expanded=true]')
-                        .attr('aria-expanded', 'false')
-                        .removeClass(settings.openClass)
-                        .filter('.' + settings.panelClass)
-                        .attr('aria-hidden', 'true');
-                }
-            } else {
-            if(that != null)
-                clearTimeout(that.focusTimeoutID);
-                
-                topli.siblings()
-                    .find('[aria-expanded]')
-                    .attr('aria-expanded', 'false')
-                    .removeClass(settings.openClass)
-                    .filter('.' + settings.panelClass)
-                    .attr('aria-hidden', 'true');
-                topli.find('[aria-expanded]')
-                    .attr('aria-expanded', 'true')
-                    .addClass(settings.openClass)
-                    .filter('.' + settings.panelClass)
-                //.css({'left':'1px solid red'})
-                    .attr('aria-hidden', 'false');
-                if (event.type === 'mouseover' && target.is(':tabbable') && topli.length === 1 && panel.length === 0 && menu.has(document.activeElement).length > 0) {
-                    target.focus();
-                    that.justFocused = false;
-                }
-
-                _toggleExpandedEventHandlers.call(that);
-                
-                if($(panel).length > 0  && $(panel).offset().left < 1){
-               // console.log('adj for cutting off');
-                var o = $(panel).offset().left;
-                var leftP = parseInt($(panel).css('left').split('px')[0]);
-                var newP = leftP - o;
-            	//console.log('new p is: ' + newP);
-            	$(panel).css({'left':  newP});
-            	}
-
-            }
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_clickHandler
-        * @desc Handle click event on mega menu item
-        * @param {event} Event object
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _clickHandler = function (event) {
-            var target = $(event.currentTarget),
-                topli = target.closest('.' + this.settings.topNavItemClass),
-                panel = target.closest('.' + this.settings.panelClass);
-            if (topli.length === 1
-                    && panel.length === 0
-                    && topli.find('.' + this.settings.panelClass).length === 1) {
-                if (!target.hasClass(this.settings.openClass)) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    _togglePanel.call(this, event);
-                    this.justFocused = false;
-                } else {
-                    if (this.justFocused) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        this.justFocused = false;
-                    } else if (isTouch) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        _togglePanel.call(this, event, target.hasClass(this.settings.openClass));
-                    }
-                }
-            }
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_clickOutsideHandler
-        * @desc Handle click event outside of a the megamenu
-        * @param {event} Event object
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _clickOutsideHandler = function (event) {
-            if ($(event.target).closest(this.menu).length === 0) {
-                event.preventDefault();
-                event.stopPropagation();
-                _togglePanel.call(this, event, true);
-            }
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_DOMAttrModifiedHandler
-        * @desc Handle DOMAttrModified event on panel to respond to Windows 8 Narrator ExpandCollapse pattern
-        * @param {event} Event object
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _DOMAttrModifiedHandler = function (event) {
-            if (event.originalEvent.attrName === 'aria-expanded'
-                    && event.originalEvent.newValue === 'false'
-                    && $(event.target).hasClass(this.settings.openClass)) {
-                event.preventDefault();
-                event.stopPropagation();
-                _togglePanel.call(this, event, true);
-            }
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_focusInHandler
-        * @desc Handle focusin event on mega menu item.
-        * @param {event} Event object
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _focusInHandler = function (event) {
-        if(this!=null)
-            clearTimeout(this.focusTimeoutID);
-            
-            var target = $(event.target),
-                panel = target.closest('.' + this.settings.panelClass);
-            target
-                .addClass(this.settings.focusClass)
-                .on('click.accessible-megamenu', $.proxy(_clickHandler, this));
-            this.justFocused = !this.mouseFocused;
-            this.mouseFocused = false;
-            if (this.panels.not(panel).filter('.' + this.settings.openClass).length) {
-                _togglePanel.call(this, event);
-            }
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_focusOutHandler
-        * @desc Handle focusout event on mega menu item.
-        * @param {event} Event object
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _focusOutHandler = function (event) {
-            this.justFocused = false;
-            var that = this,
-                target = $(event.target),
-                topli = target.closest('.' + this.settings.topNavItemClass),
-                keepOpen = false;
-            target
-                .removeClass(this.settings.focusClass)
-                .off('click.accessible-megamenu');
-
-            if (window.cvox) {
-                // If ChromeVox is running...
-                that.focusTimeoutID = setTimeout(function () {
-                    window.cvox.Api.getCurrentNode(function (node) {
-                        if (topli.has(node).length) {
-                            // and the current node being voiced is in
-                            // the mega menu, clearTimeout,
-                            // so the panel stays open.
-                            if(that != null)
-                            	clearTimeout(that.focusTimeoutID);
-                        } else {
-                            that.focusTimeoutID = setTimeout(function (scope, event, hide) {
-                                _togglePanel.call(scope, event, hide);
-                            }, 275, that, event, true);
-                        }
-                    });
-                }, 25);
-            } else {
-                that.focusTimeoutID = setTimeout(function () {
-                    _togglePanel.call(that, event, true);
-                }, 300);
-            }
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_keyDownHandler
-        * @desc Handle keydown event on mega menu.
-        * @param {event} Event object
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _keyDownHandler = function (event) {
-            var that = (this.constructor === AccessibleMegaMenu) ? this : _getPlugin(this), // determine the AccessibleMegaMenu plugin instance
-                settings = that.settings,
-                target = $($(this).is('.' + settings.hoverClass + ':tabbable') ? this : event.target), // if the element is hovered the target is this, otherwise, its the focused element
-                menu = that.menu,
-                topnavitems = that.topnavitems,
-                topli = target.closest('.' + settings.topNavItemClass),
-                tabbables = menu.find(':tabbable'),
-                panel = target.hasClass(settings.panelClass) ? target : target.closest('.' + settings.panelClass),
-                panelGroups = panel.find('.' + settings.panelGroupClass),
-                currentPanelGroup = target.closest('.' + settings.panelGroupClass),
-                next,
-                keycode = event.keyCode || event.which,
-                start,
-                i,
-                o,
-                label,
-                found = false,
-                newString = Keyboard.keyMap[event.keyCode] || '',
-                regex,
-                isTopNavItem = (topli.length === 1 && panel.length === 0);
-
-            if (target.is("input:focus, select:focus, textarea:focus, button:focus")) {
-                // if the event target is a form element we should handle keydown normally
-                return;
-            }
-
-            if (target.is('.' + settings.hoverClass + ':tabbable')) {
-                $('html').off('keydown.accessible-megamenu');
-            }
-
-            switch (keycode) {
-                case Keyboard.ESCAPE:
-                    _togglePanel.call(that, event, true);
-                    break;
-                case Keyboard.DOWN:
-                    event.preventDefault();
-                    if (isTopNavItem) {
-                        _togglePanel.call(that, event);
-                        found = (topli.find('.' + settings.panelClass + ' :tabbable:first').focus().length === 1);
-                    } else {
-                        found = (tabbables.filter(':gt(' + tabbables.index(target) + '):first').focus().length === 1);
-                    }
-
-                    if (!found && window.opera && opera.toString() === "[object Opera]" && (event.ctrlKey || event.metaKey)) {
-                        tabbables = $(':tabbable');
-                        i = tabbables.index(target);
-                        found = ($(':tabbable:gt(' + $(':tabbable').index(target) + '):first').focus().length === 1);
-                    }
-                    break;
-                case Keyboard.UP:
-                    event.preventDefault();
-                    if (isTopNavItem && target.hasClass(settings.openClass)) {
-                        _togglePanel.call(that, event, true);
-                        next = topnavitems.filter(':lt(' + topnavitems.index(topli) + '):last');
-                        if (next.children('.' + settings.panelClass).length) {
-                            found = (next.children()
-                            .attr('aria-expanded', 'true')
-                            .addClass(settings.openClass)
-                            .filter('.' + settings.panelClass)
-                            .attr('aria-hidden', 'false')
-                            .find(':tabbable:last')
-                            .focus() === 1);
-                        }
-                    } else if (!isTopNavItem) {
-                        found = (tabbables.filter(':lt(' + tabbables.index(target) + '):last').focus().length === 1);
-                    }
-
-                    if (!found && window.opera && opera.toString() === "[object Opera]" && (event.ctrlKey || event.metaKey)) {
-                        tabbables = $(':tabbable');
-                        i = tabbables.index(target);
-                        found = ($(':tabbable:lt(' + $(':tabbable').index(target) + '):first').focus().length === 1);
-                    }
-                    break;
-                case Keyboard.RIGHT:
-                    event.preventDefault();
-                    if (isTopNavItem) {
-                        found = (topnavitems.filter(':gt(' + topnavitems.index(topli) + '):first').find(':tabbable:first').focus().length === 1);
-                    } else {
-                        if (panelGroups.length && currentPanelGroup.length) {
-                            // if the current panel contains panel groups, and we are able to focus the first tabbable element of the next panel group
-                            found = (panelGroups.filter(':gt(' + panelGroups.index(currentPanelGroup) + '):first').find(':tabbable:first').focus().length === 1);
-                        }
-
-                        if (!found) {
-                            found = (topli.find(':tabbable:first').focus().length === 1);
-                        }
-                    }
-                    break;
-                case Keyboard.LEFT:
-                    event.preventDefault();
-                    if (isTopNavItem) {
-                        found = (topnavitems.filter(':lt(' + topnavitems.index(topli) + '):last').find(':tabbable:first').focus().length === 1);
-                    } else {
-                        if (panelGroups.length && currentPanelGroup.length) {
-                            // if the current panel contains panel groups, and we are able to focus the first tabbable element of the previous panel group
-                            found = (panelGroups.filter(':lt(' + panelGroups.index(currentPanelGroup) + '):last').find(':tabbable:first').focus().length === 1);
-                        }
-
-                        if (!found) {
-                            found = (topli.find(':tabbable:first').focus().length === 1);
-                        }
-                    }
-                    break;
-                case Keyboard.TAB:
-                    i = tabbables.index(target);
-                    if (event.shiftKey && isTopNavItem && target.hasClass(settings.openClass)) {
-                        _togglePanel.call(that, event, true);
-                        next = topnavitems.filter(':lt(' + topnavitems.index(topli) + '):last');
-                        if (next.children('.' + settings.panelClass).length) {
-                            found = next.children()
-                            .attr('aria-expanded', 'true')
-                            .addClass(settings.openClass)
-                            .filter('.' + settings.panelClass)
-                            .attr('aria-hidden', 'false')
-                            .find(':tabbable:last')
-                            .focus();
-                        }
-                    } else if (event.shiftKey && i > 0) {
-                        found = (tabbables.filter(':lt(' + i + '):last').focus().length === 1);
-                    } else if (!event.shiftKey && i < tabbables.length - 1) {
-                        found = (tabbables.filter(':gt(' + i + '):first').focus().length === 1);
-                    } else if (window.opera && opera.toString() === "[object Opera]") {
-                        tabbables = $(':tabbable');
-                        i = tabbables.index(target);
-                        if (event.shiftKey) {
-                            found = ($(':tabbable:lt(' + $(':tabbable').index(target) + '):last').focus().length === 1);
-                        } else {
-                            found = ($(':tabbable:gt(' + $(':tabbable').index(target) + '):first').focus().length === 1);
-                        }
-                    }
-
-                    if (found) {
-                        event.preventDefault();
-                    }
-                    break;
-                case Keyboard.SPACE:
-                    if (isTopNavItem) {
-                        event.preventDefault();
-                        _clickHandler.call(that, event);
-                    } else {
-                        return true;
-                    }
-                    break;
-                case Keyboard.ENTER:
-                    return true;
-                    break;
-                default:
-                    // alphanumeric filter
-                    clearTimeout(this.keydownTimeoutID);
-
-                    keydownSearchString += newString !== keydownSearchString ? newString : '';
-
-                    if (keydownSearchString.length === 0) {
-                        return;
-                    }
-
-                    this.keydownTimeoutID = setTimeout(function () {
-                        keydownSearchString = '';
-                    }, keydownTimeoutDuration);
-
-                    if (isTopNavItem && !target.hasClass(settings.openClass)) {
-                        tabbables = tabbables.filter(':not(.' + settings.panelClass + ' :tabbable)');
-                    } else {
-                        tabbables = topli.find(':tabbable');
-                    }
-
-                    if (event.shiftKey) {
-                        tabbables = $(tabbables.get()
-                        .reverse());
-                    }
-
-                    for (i = 0; i < tabbables.length; i++) {
-                        o = tabbables.eq(i);
-                        if (o.is(target)) {
-                            start = (keydownSearchString.length === 1) ? i + 1 : i;
-                            break;
-                        }
-                    }
-
-                    regex = new RegExp('^' + keydownSearchString.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&'), 'i');
-
-                    for (i = start; i < tabbables.length; i++) {
-                        o = tabbables.eq(i);
-                        label = $.trim(o.text());
-                        if (regex.test(label)) {
-                            found = true;
-                            o.focus();
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        for (i = 0; i < start; i++) {
-                            o = tabbables.eq(i);
-                            label = $.trim(o.text());
-                            if (regex.test(label)) {
-                                o.focus();
-                                break;
-                            }
-                        }
-                    }
-                    break;
-            }
-            that.justFocused = false;
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_mouseDownHandler
-        * @desc Handle mousedown event on mega menu.
-        * @param {event} Event object
-        * @memberof accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _mouseDownHandler = function (event) {
-            if ($(event.target).is(this.settings.panelClass) || $(event.target).closest(":focusable").length) {
-                this.mouseFocused = true;
-            }
-            this.mouseTimeoutID = setTimeout(function () {
-            if(this!=null)
-                clearTimeout(this.focusTimeoutID);
-            }, 1);
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_mouseOverHandler
-        * @desc Handle mouseover event on mega menu.
-        * @param {event} Event object
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _mouseOverHandler = function (event) {
-
-            clearTimeout(this.mouseTimeoutID);
-            $(event.target)
-                .addClass(this.settings.hoverClass);
-            _togglePanel.call(this, event);
-            if ($(event.target).is(':tabbable')) {
-                $('html').on('keydown.accessible-megamenu', $.proxy(_keyDownHandler, event.target));
-            }
-        };
-
-        /**
-        * @name jQuery.fn.accessibleMegaMenu~_mouseOutHandler
-        * @desc Handle mouseout event on mega menu.
-        * @param {event} Event object
-        * @memberof jQuery.fn.accessibleMegaMenu
-        * @inner
-        * @private
-        */
-        _mouseOutHandler = function (event) {
-            var that = this;
-            $(event.target)
-                .removeClass(that.settings.hoverClass);
-
-            that.mouseTimeoutID = setTimeout(function () {
-                _togglePanel.call(that, event, true);
-            }, 250);
-            if ($(event.target).is(':tabbable')) {
-                $('html').off('keydown.accessible-megamenu');
-            }
-        };
-
-        _toggleExpandedEventHandlers = function (hide) {
-            var menu = this.menu;
-            if (hide) {
-                $('html').off('mouseup.outside-accessible-megamenu, touchend.outside-accessible-megamenu, mspointerup.outside-accessible-megamenu,  pointerup.outside-accessible-megamenu');
-
-                menu.find('[aria-expanded].' + this.settings.panelClass).off('DOMAttrModified.accessible-megamenu');
-            } else {
-                $('html').on('mouseup.outside-accessible-megamenu, touchend.outside-accessible-megamenu, mspointerup.outside-accessible-megamenu,  pointerup.outside-accessible-megamenu', $.proxy(_clickOutsideHandler, this));
-
-                /* Narrator in Windows 8 automatically toggles the aria-expanded property on double tap or click.
-                To respond to the change to collapse the panel, we must add a listener for a DOMAttrModified event. */
-                menu.find('[aria-expanded=true].' + this.settings.panelClass).on('DOMAttrModified.accessible-megamenu', $.proxy(_DOMAttrModifiedHandler, this));
-            }
-        };
-
-        /* public attributes and methods ------------------------- */
-        return {
-            constructor: AccessibleMegaMenu,
-
-            /**
-            * @lends jQuery.fn.accessibleMegaMenu
-            * @desc Initializes an instance of the accessibleMegaMenu plugins
-            * @memberof jQuery.fn.accessibleMegaMenu
-            * @instance
-            */
-            init: function () {
-                var settings = this.settings,
-                    nav = $(this.element),
-                    menu = nav.children().first(),
-                    topnavitems = menu.children();
-                this.start(settings, nav, menu, topnavitems);
-
-
-            },
-
-            start: function (settings, nav, menu, topnavitems) {
-
-                var that = this;
-                this.settings = settings;
-                this.menu = menu;
-                this.topnavitems = topnavitems;
-
-                nav.attr("role", "navigation");
-                menu.addClass(settings.menuClass);
-                topnavitems.each(function (i, topnavitem) {
-                    var topnavitemlink, topnavitempanel;
-                    topnavitem = $(topnavitem);
-                    topnavitem.addClass(settings.topNavItemClass);
-                    topnavitemlink = topnavitem.find(":tabbable:first");
-                    topnavitempanel = topnavitem.children(":not(:tabbable):last");
-                    _addUniqueId.call(that, topnavitemlink);
-                    if (topnavitempanel.length) {
-                        _addUniqueId.call(that, topnavitempanel);
-                        topnavitemlink.attr({
-                            "aria-haspopup": true,
-                            "aria-controls": topnavitempanel.attr("id"),
-                            "aria-expanded": false
-                        });
-
-                        topnavitempanel.attr({
-                            "role": "group",
-                            "aria-expanded": false,
-                            "aria-hidden": true
-                        })
-                            .addClass(settings.panelClass)
-                            .not("[aria-labelledby]")
-                            .attr("aria-labelledby", topnavitemlink.attr("id"));
-                    }
-                });
-
-                this.panels = menu.find("." + settings.panelClass);
-
-                menu.on("focusin.accessible-megamenu", ":focusable, ." + settings.panelClass, $.proxy(_focusInHandler, this))
-                    .on("focusout.accessible-megamenu", ":focusable, ." + settings.panelClass, $.proxy(_focusOutHandler, this))
-                    .on("keydown.accessible-megamenu", $.proxy(_keyDownHandler, this))
-                    .on("mouseover.accessible-megamenu", $.proxy(_mouseOverHandler, this))
-                    .on("mouseout.accessible-megamenu", $.proxy(_mouseOutHandler, this))
-                    .on("mousedown.accessible-megamenu", $.proxy(_mouseDownHandler, this));
-
-                if (isTouch) {
-                    menu.on("touchstart.accessible-megamenu", $.proxy(_clickHandler, this));
-                }
-
-                menu.find("hr").attr("role", "separator");
-
-                if ($(document.activeElement).closest(menu).length) {
-                    $(document.activeElement).trigger("focusin.accessible-megamenu");
-                }
-
-/*
-                //adjust all  to same height
-                 var h = Math.max.apply(null, menu.find("ol").map(function () {
-                    return $(this).find(">li").length;
-                }).get());
-                 
-
-                // console.log('max h: ' + h.toString()); PJP 2/7/2016
-
-              menu.find("li.accessible-megamenu-panel-group").css({ 'height': (h * 32).toString() + "px" });
-              menu.find("a:contains('Issuer Portals')").closest("li.accessible-megamenu-panel-group").css({ 'height': ((h * 32)+32).toString() + "px" });
-*/
-            },
-
-            /**
-            * @desc Get default values
-            * @example $(selector).accessibleMegaMenu("getDefaults");
-            * @return {object}
-            * @memberof jQuery.fn.accessibleMegaMenu
-            * @instance
-            */
-            getDefaults: function () {
-                return this._defaults;
-            },
-
-            /**
-            * @desc Get any option set to plugin using its name (as string)
-            * @example $(selector).accessibleMegaMenu("getOption", some_option);
-            * @param {string} opt
-            * @return {string}
-            * @memberof jQuery.fn.accessibleMegaMenu
-            * @instance
-            */
-            getOption: function (opt) {
-                return this.settings[opt];
-            },
-
-            /**
-            * @desc Get all options
-            * @example $(selector).accessibleMegaMenu("getAllOptions");
-            * @return {object}
-            * @memberof jQuery.fn.accessibleMegaMenu
-            * @instance
-            */
-            getAllOptions: function () {
-                return this.settings;
-            },
-
-            /**
-            * @desc Set option
-            * @example $(selector).accessibleMegaMenu("setOption", "option_name",  "option_value",  reinitialize);
-            * @param {string} opt - Option name
-            * @param {string} val - Option value
-            * @param {boolean} [reinitialize] - boolean to re-initialize the menu.
-            * @memberof jQuery.fn.accessibleMegaMenu
-            * @instance
-            */
-            setOption: function (opt, value, reinitialize) {
-                this.settings[opt] = value;
-                if (reinitialize) {
-                    this.init();
-                }
-            }
-        };
-    } ());
-
-    /* lightweight plugin wrapper around the constructor,
-    to prevent against multiple instantiations */
-
-    /**
-    * @class accessibleMegaMenu
-    * @memberOf jQuery.fn
-    * @classdesc Implements an accessible mega menu as a jQuery plugin.
-    * <p>The mega-menu It is modeled after the mega menu on {@link http://adobe.com|adobe.com} but has been simplified for use by others. A brief description of the interaction design choices can be found in a blog post at {@link http://blogs.adobe.com/accessibility/2013/05/adobe-com.html|Mega menu accessibility on adobe.com}.</p>
-    * <h3>Keyboard Accessibility</h3>
-    * <p>The accessible mega menu supports keyboard interaction modeled after the behavior described in the {@link http://www.w3.org/TR/wai-aria-practices/#menu|WAI-ARIA Menu or Menu bar (widget) design pattern}, however we also try to respect users' general expectations for the behavior of links in a global navigation. To this end, the accessible mega menu implementation permits tab focus on each of the six top-level menu items. When one of the menu items has focus, pressing the Enter key, Spacebar or Down arrow will open the submenu panel, and pressing the Left or Right arrow key will shift focus to the adjacent menu item. Links within the submenu panels are included in the tab order when the panel is open. They can also be navigated with the arrow keys or by typing the first character in the link name, which speeds up keyboard navigation considerably. Pressing the Escape key closes the submenu and restores focus to the parent menu item.</p>
-    * <h3>Screen Reader Accessibility</h3>
-    * <p>The accessible mega menu models its use of WAI-ARIA Roles, States, and Properties after those described in the {@link http://www.w3.org/TR/wai-aria-practices/#menu|WAI-ARIA Menu or Menu bar (widget) design pattern} with some notable exceptions, so that it behaves better with screen reader user expectations for global navigation. We don't use <code class="prettyprint prettyprinted" style=""><span class="pln">role</span><span class="pun">=</span><span class="str">"menu"</span></code> for the menu container and <code class="prettyprint prettyprinted" style=""><span class="pln">role</span><span class="pun">=</span><span class="str">"menuitem"</span></code> for each of the links therein, because if we do, assistive technology will no longer interpret the links as links, but instead, as menu items, and the links in our global navigation will no longer show up when a screen reader user executes a shortcut command to bring up a list of links in the page.</p>
-    * @example <h4>HTML</h4><hr/>
-    &lt;nav&gt;
-    &lt;ul class=&quot;nav-menu&quot;&gt;
-    &lt;li class=&quot;nav-item&quot;&gt;
-    &lt;a href=&quot;?movie&quot;&gt;Movies&lt;/a&gt;
-    &lt;div class=&quot;sub-nav&quot;&gt;
-    &lt;ul class=&quot;sub-nav-group&quot;&gt;
-    &lt;li&gt;&lt;a href=&quot;?movie&amp;genre=0&quot;&gt;Action &amp;amp; Adventure&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;?movie&amp;genre=2&quot;&gt;Children &amp;amp; Family&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&amp;#8230;&lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;ul class=&quot;sub-nav-group&quot;&gt;
-    &lt;li&gt;&lt;a href=&quot;?movie&amp;genre=7&quot;&gt;Dramas&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;?movie&amp;genre=9&quot;&gt;Foreign&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&amp;#8230;&lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;ul class=&quot;sub-nav-group&quot;&gt;
-    &lt;li&gt;&lt;a href=&quot;?movie&amp;genre=14&quot;&gt;Musicals&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;?movie&amp;genre=15&quot;&gt;Romance&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&amp;#8230;&lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;/div&gt;
-    &lt;/li&gt;
-    &lt;li class=&quot;nav-item&quot;&gt;
-    &lt;a href=&quot;?tv&quot;&gt;TV Shows&lt;/a&gt;
-    &lt;div class=&quot;sub-nav&quot;&gt;
-    &lt;ul class=&quot;sub-nav-group&quot;&gt;
-    &lt;li&gt;&lt;a href=&quot;?tv&amp;genre=20&quot;&gt;Classic TV&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;?tv&amp;genre=21&quot;&gt;Crime TV&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&amp;#8230;&lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;ul class=&quot;sub-nav-group&quot;&gt;
-    &lt;li&gt;&lt;a href=&quot;?tv&amp;genre=27&quot;&gt;Reality TV&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;?tv&amp;genre=30&quot;&gt;TV Action&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&amp;#8230;&lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;ul class=&quot;sub-nav-group&quot;&gt;
-    &lt;li&gt;&lt;a href=&quot;?tv&amp;genre=33&quot;&gt;TV Dramas&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&quot;?tv&amp;genre=34&quot;&gt;TV Horror&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&amp;#8230;&lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;/div&gt;
-    &lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;/nav&gt;
-    * @example <h4>CSS</h4><hr/>
-    &#47;* Rudimentary mega menu CSS for demonstration *&#47;
-
-    &#47;* mega menu list *&#47;
-    .nav-menu {
-    display: block;
-    position: relative;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    z-index: 15;
-    }
-
-    &#47;* a top level navigation item in the mega menu *&#47;
-    .nav-item {
-    list-style: none;
-    display: inline-block;
-    padding: 0;
-    margin: 0;
-    }
-
-    &#47;* first descendant link within a top level navigation item *&#47;
-    .nav-item &gt; a {
-    position: relative;
-    display: inline-block;
-    padding: 0.5em 1em;
-    margin: 0 0 -1px 0;
-    border: 1px solid transparent;
-    }
-
-    &#47;* focus/open states of first descendant link within a top level
-    navigation item *&#47;
-    .nav-item &gt; a:focus,
-    .nav-item &gt; a.open {
-    border: 1px solid #dedede;
-    }
-
-    &#47;* open state of first descendant link within a top level
-    navigation item *&#47;
-    .nav-item &gt; a.open {
-    background-color: #fff;
-    border-bottom: none;
-    z-index: 1;
-    }
-
-    &#47;* sub-navigation panel *&#47;
-    .sub-nav {
-    position: absolute;
-    display: none;
-    top: 2.2em;
-    margin-top: -1px;
-    padding: 0.5em 1em;
-    border: 1px solid #dedede;
-    background-color: #fff;
-    }
-
-    &#47;* sub-navigation panel open state *&#47;
-    .sub-nav.open {
-    display: block;
-    }
-
-    &#47;* list of items within sub-navigation panel *&#47;
-    .sub-nav ul {
-    display: inline-block;
-    vertical-align: top;
-    margin: 0 1em 0 0;
-    padding: 0;
-    }
-
-    &#47;* list item within sub-navigation panel *&#47;
-    .sub-nav li {
-    display: block;
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    }
-    * @example <h4>JavaScript</h4><hr/>
-    &lt;!-- include jquery --&gt;
-    &lt;script src=&quot;http://code.jquery.com/jquery-1.10.1.min.js&quot;&gt;&lt;/script&gt;
-
-    &lt;!-- include the jquery-accessibleMegaMenu plugin script --&gt;
-    &lt;script src=&quot;js/jquery-accessibleMegaMenu.js&quot;&gt;&lt;/script&gt;
-
-    &lt;!-- initialize a selector as an accessibleMegaMenu --&gt;
-    &lt;script&gt;
-    $(&quot;nav:first&quot;).accessibleMegaMenu({
-    &#47;* prefix for generated unique id attributes, which are required to indicate aria-owns, aria-controls and aria-labelledby *&#47;
-    uuidPrefix: &quot;accessible-megamenu&quot;,
-
-    &#47;* css class used to define the megamenu styling *&#47;
-    menuClass: &quot;nav-menu&quot;,
-
-    &#47;* css class for a top-level navigation item in the megamenu *&#47;
-    topNavItemClass: &quot;nav-item&quot;,
-
-    &#47;* css class for a megamenu panel *&#47;
-    panelClass: &quot;sub-nav&quot;,
-
-    &#47;* css class for a group of items within a megamenu panel *&#47;
-    panelGroupClass: &quot;sub-nav-group&quot;,
-
-    &#47;* css class for the hover state *&#47;
-    hoverClass: &quot;hover&quot;,
-
-    &#47;* css class for the focus state *&#47;
-    focusClass: &quot;focus&quot;,
-
-    &#47;* css class for the open state *&#47;
-    openClass: &quot;open&quot;
-    });
-    &lt;/script&gt;
-    * @param {object} [options] Mega Menu options
-    * @param {string} [options.uuidPrefix=accessible-megamenu] - Prefix for generated unique id attributes, which are required to indicate aria-owns, aria-controls and aria-labelledby
-    * @param {string} [options.menuClass=accessible-megamenu] - CSS class used to define the megamenu styling
-    * @param {string} [options.topNavItemClass=accessible-megamenu-top-nav-item] - CSS class for a top-level navigation item in the megamenu
-    * @param {string} [options.panelClass=accessible-megamenu-panel] - CSS class for a megamenu panel
-    * @param {string} [options.panelGroupClass=accessible-megamenu-panel-group] - CSS class for a group of items within a megamenu panel
-    * @param {string} [options.hoverClass=hover] - CSS class for the hover state
-    * @param {string} [options.focusClass=focus] - CSS class for the focus state
-    * @param {string} [options.openClass=open] - CSS class for the open state
-    */
-    $.fn[pluginName] = function (options) {
-        return this.each(function () {
-            if (!$.data(this, "plugin_" + pluginName)) {
-                $.data(this, "plugin_" + pluginName, new $.fn[pluginName].AccessibleMegaMenu(this, options));
-            }
-        });
-    };
-
-    $.fn[pluginName].AccessibleMegaMenu = AccessibleMegaMenu;
-
-    /* :focusable and :tabbable selectors from
-    https://raw.github.com/jquery/jquery-ui/master/ui/jquery.ui.core.js */
-
-    /**
-    * @private
-    */
-    function visible(element) {
-        return $.expr.filters.visible(element) && !$(element).parents().addBack().filter(function () {
-            return $.css(this, "visibility") === "hidden";
-        }).length;
-    }
-    
-
-    /**
-    * @private
-    */
-    function focusable(element, isTabIndexNotNaN) {
-        var map, mapName, img,
-            nodeName = element.nodeName.toLowerCase();
-        if ("area" === nodeName) {
-            map = element.parentNode;
-            mapName = map.name;
-            if (!element.href || !mapName || map.nodeName.toLowerCase() !== "map") {
-                return false;
-            }
-            img = $("img[usemap=#" + mapName + "]")[0];
-            return !!img && visible(img);
-        }
-        return (/input|select|textarea|button|object/.test(nodeName) ? !element.disabled :
-                "a" === nodeName ?
-                        element.href || isTabIndexNotNaN :
-                        isTabIndexNotNaN) &&
-        // the element and all of its ancestors must be visible
-                            visible(element);
-    }
-
-    $.extend($.expr[":"], {
-        data: $.expr.createPseudo ? $.expr.createPseudo(function (dataName) {
-            return function (elem) {
-                return !!$.data(elem, dataName);
-            };
-        }) : // support: jQuery <1.8
-                function (elem, i, match) {
-                    return !!$.data(elem, match[3]);
-                },
-
-        focusable: function (element) {
-            return focusable(element, !isNaN($.attr(element, "tabindex")));
-        },
-
-        tabbable: function (element) {
-            var tabIndex = $.attr(element, "tabindex"),
-                isTabIndexNaN = isNaN(tabIndex);
-            return (isTabIndexNaN || tabIndex >= 0) && focusable(element, !isTabIndexNaN);
-        }
-    });
-} (jQuery, window, document));”ò¿Ÿ˜   ˜        ¯2áâ      window     ∏OÄ      document   n˛
-      pluginName     ÿ*êß      accessibleMegaMenu     {!~K      defaults   öL$
-      uuidPrefix     ÁªÆü      accessible-megamenu    N@r	      menuClass      ^ùH      topNavItemClass	    G®√       accessible-megamenu-top-nav-item
-   ;—¢ˆ
-      panelClass     ÍS\      accessible-megamenu-panel      ªÎ      panelGroupClass    Tix      accessible-megamenu-panel-group    ÷∆U
-      hoverClass     d®§˙      hover      ]—1Í
-      focusClass     KÃÌ      focus       "	      openClass      óx5      open   wˆ∆À      Keyboard   ¶TÚ≤	      BACKSPACE      óÁ(>      COMMA      4)Ω      DELETE     î(      DOWN   Ib¶•      END    G9_«      ENTER      cÕ‘z      ESCAPE     °û      HOME   ù`hN      LEFT   Dé÷6	      PAGE_DOWN      ˝lŒ      PAGE_UP     ÆçñÖ      PERIOD!     Y<W	      RIGHT"      S°ã”      SPACE#      ]˛…      TAB$    &òÎ      keyMap%     z≥eá      AccessibleMegaMenu&      :yã      options'    —ôKö      settings(   ªl‡Ù      extend)     'é;'	      _defaults*      ï…0      _name+      `≈Y      mouseTimeoutID,     ˛ÔŒ€      focusTimeoutID-     T[r‚      mouseFocused.   òV¥o      justFocused/    íu`      init0   g‡      uuid1   n©t!      keydownTimeoutDuration2     dÙ˜'      keydownSearchString3    ∫¶‹¬      isTouch4    éD5÷      ontouchstart5   JÈD¿
-      _getPlugin6     E4´      _addUniqueId7   Å¸	      _togglePanel8   ∑@*      _clickHandler9      ¶ˆG      _clickOutsideHandler:   ó”ç˜      _DOMAttrModifiedHandler;    Æ¬_t      _focusInHandler<    í∆0¬      _focusOutHandler=   ŒoÀ      _keyDownHandler>    ÔøS      _mouseDownHandler?      {›Ûi      _mouseOverHandler@      3òA      _mouseOutHandlerA   G·‡m      _toggleExpandedEventHandlersB   /ﬂ‰ï      closestC    ÕN≤Ö      :data(plugin_D      6ó(Å      dataE   _Æﬂ      plugin_F    A¢Ωê      attrG   uÙ.      getTimeH    II∑P      eventI      üvÙ}      hideJ   ˆΩhy      thatK   ™€q      menuL   ‘en0      topliM      ~õ›&      panelN      ˛Ë˘2      parentO     ãﬂv       .accessible-megamenu-panel:firstP   ;Û      newfocusQ   ú≥ÊŸ      divR    Ç=äO      shiftS      ÎƒJ˚      widthT      QÒ=i
-      outerWidthU     =,µ      calcV   ı]á      leftW   >ü      cssX    dßﬁ	      max-widthY      Kk.      maxZ    9Ã      map[    hO%ª      >li\    ,K…       .accessible-megamenu-panel-group]   ∑…≈      height^     k±ﬁ/$      a:contains('Systems & Applications')_   r
-m"      li.accessible-megamenu-panel-group`     HáíK      showa   qRŸ       .b     ò6“|      :firstc     &$˜0      relatedTargetd      †©˝c      mouseoute   ZMÎÕ      focusoutf   U4ÆÜ      activeElementg      f|*8      [aria-expanded]h    tId      aria-expandedi      ˆ+      removeClassj    >	≈      filterk     CâÎ4      aria-hiddenl    ù∫”      keydownm    ≠5      keyCoden    ç4ë      DOMAttrModifiedo    v.È      :tabbable:firstp    3AtŸ
-      setTimeoutq     aı%Ñ      [aria-expanded].r   ˙¯Öﬂ      offs    é“ﬁ¬#      DOMAttrModified.accessible-megamenut    fOÄ—      [aria-expanded=true]u   QÔ8u      clearTimeoutv   Ã–òs      siblingsw   Bå|      addClassx   y˜ãÑ	      mouseovery      Sd5∂	      :tabbablez      õÿ“á      leftP{      §ëÍÍ      newP|   ¸z◊Ω      currentTarget}      7ÑÉz      hasClass~   B9∫¿      preventDefault     ı/F/      stopPropagationÄ    Ÿ‹Ô      originalEventÅ      •+ß9      attrNameÇ   z3•      newValueÉ   √Ï:≠      click.accessible-megamenuÑ      ?: Ü      panelsÖ     qûÅÄ      notÜ    ,h¶#      keepOpená   E=[N      cvoxà   %˛w√      Apiâ    Æ∂I–      getCurrentNodeä     &`°›      nodeã   ƒ›·	      scopeå      £Êõç      topnavitemsç    Û	      tabbablesé      âÉ•      panelGroupsè    ëM/©      currentPanelGroupê      3£˝¬      keycodeë    ≈∏0      whichí      W∏58      foundì      |≤?¢	      newStringî      ≤cT      regexï      Ö»      isTopNavItemñ   *Õ7      input:focus, select:focus, textarea:focus, button:focusó    ‘„X      htmlò   ©«ê˜      keydown.accessible-megamenuô    óHék       :tabbable:firstö   ≈æú      :gt(õ   øbV      ):firstú    t9,¨      operaù      Ft      [object Opera]û     
-@•&      ctrlKeyü    `$ü˝      metaKey†    ®:}      :tabbable:gt(°      œx[f      :lt(¢   JéF      ):last£     
-}N      children§   =≈u˘      :tabbable:last•     C⁄      :tabbable:lt(¶      ô,Åÿ      shiftKeyß   ±Y©      keydownTimeoutID®   0-EÉ      :not(.©     ·I®ø       :tabbable)™    ∆e=?      reverse´    ÿ¶      [\-\[\]{}()*+?.,\\\^$|#\s]¨     {S˛8      \$&≠    óñôb      trimÆ   à3¿µ      textØ   ïxï
-      :focusable∞     π+Ñö      mouseup.outside-accessible-megamenu, touchend.outside-accessible-megamenu, mspointerup.outside-accessible-megamenu,  pointerup.outside-accessible-megamenu±     TêóË      [aria-expanded=true].≤      ◊‰2      nav≥    `~ﬂ      first¥      Ù·î¨      roleµ   th
-      navigation∂     
-ë—C
-      topnavitem∑     Ò1F      topnavitemlink∏     3Q+∑      topnavitempanelπ    •h b      :not(:tabbable):last∫   w≈€Ü      aria-haspopupª      â0 y      aria-controlsº      L±®      [aria-labelledby]Ω      πSŸK      aria-labelledbyæ    ∞L      focusin.accessible-megamenuø    ≤KtF      :focusable, .¿      ◊Q      focusout.accessible-megamenu¡   »Ow˚      mouseover.accessible-megamenu¬      ÷AÅ_      mouseout.accessible-megamenu√   :%Hr      mousedown.accessible-megamenuƒ      Ldy      touchstart.accessible-megamenu≈     ‹¬•	      separator∆      ˘!p¬      trigger«    GÀF      getDefaults»    \óÙy	      getOption…      <]FO      opt     Îå ‹      getAllOptionsÀ      w»o	      setOptionÃ      øZøb      reinitializeÕ   ?Iqõ      visibleŒ    ñRŒ˘      exprœ   ìΩ‡
-      filters–    Õv=      parents—    Ìä      addBack“    1“— 
-      visibility”     Ñ€ËW      hidden‘     B¨	‚	      focusable’      h⁄'Ê      isTabIndexNotNaN÷   TŒz      mapName◊    e ú      imgÿ    U5_      nodeNameŸ   RâDo      toLowerCase⁄    a¡°O      area€   •_œ”
-      parentNode‹     ª©`X      href›   "∫+      img[usemap=#ﬁ   Ìis#      input|select|textarea|button|objectﬂ    ûzÉw      disabled‡   sòA‡      createPseudo·   ©˘ÅT      dataName‚   dö!      elem„   ≤Rz‘      tabindex‰   'Æõ      tabbableÂ   xvfG      tabIndexÊ   ™äù      isTabIndexNaNÁ      >Â/      jQueryË      ê       AccessibleMegaMenu.prototype<È      ÿÂà«      _togglePanel/h<Í    Òè·      _togglePanel/<Î     ¢É˙%      _focusOutHandler/that.focusTimeoutID<Ï      Ü≤É'      _focusOutHandler/that.focusTimeoutID</<Ì    è±ò<      _focusOutHandler/that.focusTimeoutID</</that.focusTimeoutID<Ó   Ê£˘K&      _keyDownHandler/this.keydownTimeoutID<Ô     »ëC&      _mouseDownHandler/this.mouseTimeoutID<     √k%      _mouseOutHandler/that.mouseTimeoutID<Ò      â˙´£      start/<Ú    ÕJπ      $.fn[pluginName]Û   î¯•      $.fn[pluginName]/<Ù     06)≥	      visible/<ı      \pÊE      .data<ˆ     PSêÀ      .data</<     +   P  +   +             Ô%,â                                                                  #                 $                 %                                                                        	                 	                            	                 
-                                                                                                                                                                                                                                                                                                                                                                                                    !      $           "                &      &           '                 (                 )                 *      ≥Oåc            	             $ `   P  P  P  P  P%  PÕ  P‘  P            Ö   &  É                Ö                 É               Ö   ’  Z  ÷  ◊  ÿ                 0  P1  P2  P3  P5  P6  P7  P8  P9  P:  P;  P<  P=  P>  P?  P@  PA  P             Ö               Ö   '  É               H  I  Ë  J  P'  K  PL  M  P  Pf R  : z U  h  o  z  {  É                 É                               H  Ë  L  M  É               H  É               H  É               H  Ë  M  É               H  PJ  PË  L  PÜ  É                                ä               ã  H  I                              H  J  '  Ë  K  å  L  ç  M  é  è  h  ê  Ÿ  i  o  ,  í  ì  î  ï  É                               H  É                 É               H  É               H  PJ  PÉ                               I  K  É                 '  ≤  K  å  É               '  P≤  K  å  J  PÉ               i  ∂  ∑  ∏                É               …  É                 É               …  %  Ã  É               &  PÉ                 É                ·  P             ‚               ‚  i  ™               Ö               Ö   Â  Ê  Ø¬0∞´     ﬁ      IÙ$KEÆ˙ö           (           
-             U                               !  "  #  3 $             
-    V  X         ]          ]          V     #     L   /  Ÿ  «  »     À        ∫  ª  h        ¥  h  k        D  ‘  ‰  á&’™ç!´!+   T    bgWT                             l    ∂   ∂   ∂   v ⁄£@.`FÄ zˇˇˇÔPPÄÄÄ  ƒE◊Ä  s                a       ∏  …   ⁄∏ …   ⁄∏ …   ⁄l   …   ⁄l   … 	  ⁄l   … 
-  ⁄   …   ⁄8      ;      ;   	   ;
-      ;      ;      ;      ;      ;   …   ⁄8   ;   º ;   .;   (;   #;   ;   ;   $;   %;   ";   !;    æ ;!   ';"    ;#   	;$   &;%   8&   0'   >1(   >2)   >3*   >4+   >5,   >6-   >7.   >8/   >90   >;1   >A2   >B3   >C4   >D5   >E6   >F7   >G8   >H9   >I:   >J;   >K<   >L=   >M>   >N?   >O@   >PA   >QB   >RC   >SD   >TE   >UF   >VG   >WH   >XI   >YJ   >ZK   >`'   >a(   >b)   >c*   >d+   >e,   >f-   >g.   >h/   >i0   >æ L   >;M   …   ⁄º   lN    r  LO   ⁄º   IP   º   lQ   N⁄º   IP   º   Jº   LR   ⁄º   ‹IS   ﬂº   IT   IU   8V   º   IT   IW   ò(   ïZ   º   IT   ‹IW   ﬂlX   r ó   ï]   lY   ï]   ;Z   l[   ;\   l]   ;^   v ⁄£º `+`%*******ê@`%'('''''''''(''''%(((((((((((((((((((((((((((((((((((((((((((((((î@p`KÄ VPIÄ 
-`ñ@Ä `õ@Ä 8`	%	™ 0ˇˇˇÛPú@Ä B	 	JÄ 8P4Ä LPÄÄË   Õ(ıË   ì                      Ÿ»   ⁄π   ∑  L   ⁄π   º   ‹I   ﬂ8   º   ∑ r L   ⁄π   º   L   ⁄π   º   L   ⁄π   L   ⁄π   L   ⁄π   L	   ⁄π   L
-   ⁄π   ‹I   ﬂv  ⁄£&	`M	`ê 
-ˇˇˇÎPI	`/	`O		`+	`+	`+	`K	`P$PÄÄÙ  À*3ìÙ  4                         …   ⁄Ë…   ⁄   …   ⁄º  I      ö!   ï   ⁄º  ‹I   ﬂ   r ï   …   ⁄l   …   ⁄l   …   ⁄l   …   ⁄l   … 	  ⁄l	   … 
-  ⁄l
-   …   ⁄l   …   ⁄l   …   ⁄l   …   ⁄l   …   ⁄l   …   ⁄l   …   ⁄l   …   ⁄8   º  ;   l   ;   l   ;   l   ;   l   ;   l   ;   l   ;   †£@`'&`)#`+`ú / ë Pê@	`K+	`K=	`KÄ  ø	`KÄ  ·	`KÄ  Ò	`KÄ 	`KÄ 	`KÄ E	`KÄ 	`KÄ -	`KÄ @	`KÄ M	`KÄ ]	`%JÄ fJÄ pJÄ ªJÄ «JÄ “JÄ ﬂJÄ ÊQÄÄÑ   ô^’ŒÑ   >                         º   ∑  r ‹I   ﬂ   º  %   %r ‹I   ﬂ   º  %r †£ `	ˇˇˇ˛P
-ˇˇˇÊP
-1ˇˇˇÔP#	QÄÄÄ‡   6˜X ‡   ì         	              Ÿ»  ⁄º   ∑  r «  ⁄π  I   »   ⁄∑  ‹I   ﬂ   r ôW   ï   ∑  ‹I   ﬂ   π   I      %∂   ﬁ  Ä  ‹I   ﬂr  %   %º   /'…   %v ⁄ï   £&`ˇˇˇ˛P'`.`	P-`Z
-P
-ˇˇˇªPI	PÄ
-  Oª≤l
-  >                      Ÿ»  ⁄º   ∑  I   r »   ⁄π  …   ⁄π  I   »  ⁄π  I   …   ⁄π   ‹I   ﬂ   π  I   %r »  ⁄π   ‹I   ﬂr  ‹I   ﬂr  ‹I   ﬂ	   r »  ⁄π  ‹I   ﬂ
-   r »  ⁄º   π  r ‹I   ﬂr  π  ‹I   ﬂr  
-333333Û?*&*»  ⁄º   π  r ‹I   ﬂ   r I   òñ   ï   º  I   »  ⁄º   π  r ‹I   ﬂr  »  ⁄π  º   π  r ‹I   ﬂ   r ‹I   ﬂr  I   π  &π  %&»  ⁄π  2ò   ï-   π  2π  &%»  ⁄ï/   π  ˇ)»  ⁄º   π  r ‹I   ﬂ8   π  ;   º  I   
-&;   v ⁄∂   I   ‹I   ﬂπ  ‹I   ﬂ   r ‹I   ﬂl   r ‹I   ﬂr  r »	  ⁄π	  #)»	  ⁄π  ‹I   ﬂ   r ‹I   ﬂ8   π	  ‹I   ﬂr     %;   v ⁄π  ‹I   ﬂ    r ‹I   ﬂ!   r ‹I   ﬂ8"   π	  %‹I   ﬂr     %;   v ⁄π  ‹I   ﬂ
-   r ‹I#   ﬂv  ⁄º  ‹I$   ﬂπ  v ⁄∑ òó  ï_   º   ‹I   ﬂ   π  I   %%   %π  I&   %'   %r ‹I   ﬂ   π  I   %r »  ⁄π  ‹I(   ﬂ∑  I)   r õ(   ïo   ⁄π  ‹I*   ﬂ∑  I)   r I   ït   ôk  ïu   ∑  I+   ,   õ   ïx   ⁄∑  I+   -   ïz   ö*   ï{   ⁄π  ‹I*   ﬂº  I.   r I   ïÄ   ò   ïÅ    †ïÅ   π  ‹I   ﬂ/   r ‹I0   ﬂ1   2   r ‹I3   ﬂπ  I&   r ‹I4   ﬂ   π  I5   %r ‹I0   ﬂ6   7   v ⁄∑  I+   8   ö   ïë   ⁄∑  I9   º  I:   ïî   õ   ïï   ⁄∑  I+   ;   ïó   ò4   ïò   π  ‹I   ﬂ<   r …   ⁄∂=    l>   cv ⁄ïú   óà   ïú   π  I   òs   ïü   º   ‹I   ﬂ?   r ‹I0   ﬂ1   2   r ‹I3   ﬂπ  I&   r ‹I4   ﬂ   π  I5   %r ‹I0   ﬂ6   7   v ⁄ï¨   ó±  ï¨   º   ò   ïÆ   ∂@    º   IA   v ⁄ï±   π  ‹IB   ﬂr  ‹I   ﬂ/   r ‹I0   ﬂ1   2   r ‹I3   ﬂπ  I&   r ‹I4   ﬂ   π  I5   %r ‹I0   ﬂ6   7   v ⁄π  ‹I   ﬂ/   r ‹I0   ﬂ1   7   r ‹IC   ﬂπ  I&   r ‹I4   ﬂ   π  I5   %r ‹I0   ﬂ6   2   v ⁄∑  I+   D   öu   ï–   ⁄π   ‹I(   ﬂE   r öW   ï”   ⁄π  I   öA   ï÷   ⁄π  I   ö+   ïŸ   ⁄º   ‹I*   ﬂº  I.   r I   ïﬁ   ò%   ïﬂ   π   ‹IF   ﬂv  ⁄º   LG   ⁄ï‚   º  ‹I$   ﬂº   v ⁄º   π  r I   ö)   ïË   ⁄º   π  r ‹I   ﬂr  I   ïÌ   òö   ïÓ   º   π  r ‹I   ﬂr  I   »
-  ⁄∂H    º   π  r ‹I   ﬂ   r ‹II   ﬂ   r Jr »  ⁄π  π
-  &»  ⁄º   π  r ‹I   ﬂ8J   π  ;   v ⁄ï   £F`ˇˇˇˇP(`*`.`/`
-ˇˇˇÚP(`P
-	P	PH`ê PH`ˇˇˇˇP
-PPñ@`ˇˇˇˇPPî `/`ˇˇˇˇP
-PH`ˇˇˇ˛PP
-P	K`ë `ê@$`L'`ˇˇˇˇP
-%)í@'PD-`í ê P
-ˇˇˇ¸PJ/PC-PH1`L5`ê P
-}JÇµ-PˇˇˇÌP$`ê P-P
-2PˇˇˇÁPD8`ê P
-PD;`"ˇˇˇ˚PD=`-`ê "ê ˇˇˇ”P
-T
-ˇˇˇÚP(`ˇˇˇ˝Pô %ˇˇˇ¸Pô `¬ E
-ˇˇˇ¸Pô `Ax	FC`ê P*Z*&	ˇˇˇÙP*!
-ˇˇˇÛP*Z$`° .∏ `ê P)`5NBJ#Pì@P`ï `ë P*Z*&	ˇˇˇÙP*!
-ˇˇˇÛP*Zì0W `ë `
-ˇˇˇˇPI[`P*U*Z*"	ˇˇˇÙP*
-ˇˇˇÛP*Z$`ê P*Z*	ˇˇˇ˜P*
-ˇˇˇÛPJfZ$`© %P∆ H
-ˇˇˇ¸Pô `P$`ë@l`"ˇˇˇ˚PDn`ˇˇˇˇPõ ˇˇˇ˛P
-	Pô@p`ˇˇˇˇP
-P-`	ˇˇˇ˛P	PPˇˇˇÍP(`Jt`ˇˇˇˇP
-	ˇˇˇ˚PIx	PÄÄÄ\   øw^à\   )                        Ÿ»   ⁄º   π   r ‹I   ﬂ   r I   †£&`	ˇˇˇ˛PP(QÄê   éó|÷ê   Q                  
-        º   ‹I   ﬂ   º   I   I   %r ‹I   ﬂ   v ⁄º   ‹I   ﬂv  ⁄º   L   ⁄£ `
-ê ˇˇˇÊP4P$`	P$`,PÄ§  V}j©§  ‰               8      Ÿ»  ⁄º   ∑  I   r »   ⁄π   ‹I   ﬂ   π  I   I   %r »  ⁄π   ‹I   ﬂ   π  I   I   %r »  ⁄π  I   öJ   ï   ⁄π  I   ö4   ï   ⁄π  ‹I   ﬂ   π  I   I   %r I   ï   ò  ï   π   ‹I	   ﬂπ  I   I
-   r ôM   ï   ∑  ‹I   ﬂv  ⁄∑  ‹I   ﬂv  ⁄º   ‹I   ﬂπ  ∑  v ⁄π  L   ⁄ó¨   ï&   π  I   ò6   ï(   ∑  ‹I   ﬂv  ⁄∑  ‹I   ﬂv  ⁄π  L   ⁄óh   ï-   º   òY   ï.   ∑  ‹I   ﬂv  ⁄∑  ‹I   ﬂv  ⁄º   ‹I   ﬂπ  ∑  π   ‹I	   ﬂπ  I   I
-   r v ⁄ï8   £&`ˇˇˇˇP(`ˇˇˇÚP(`ˇˇˇÚP(`ññ #ê ˇˇˇıPô `ˇˇˇ˜P-`
-P$`
-P$`ˇˇˇıP$`ï `ì `
-P$`
-P$`ï  `/`
-P$`
-P$`ˇˇˇ˜PˇˇˇÁPI	PÄ»   D‡rU»   u                       Ÿ»   ⁄º   ∑  I   r ‹I   ﬂπ   I   r I   ò>   ï   ∑  ‹I   ﬂv  ⁄∑  ‹I   ﬂv  ⁄º   ‹I   ﬂπ   ∑  v ⁄ï   £&`ˇˇˇˇP
-	ˇˇˇ¯Pî `
-P$`
-P$`ˇˇˇıPI	PÄ  …    ¥                       Ÿ»   ⁄∑  I   I      öR   ï   ⁄∑  I   I      ö4   ï   ⁄º   ∑  I   r ‹I   ﬂπ   I   I	   r ï   ò>   ï   ∑  ‹I
-   ﬂv  ⁄∑  ‹I   ﬂv  ⁄º   ‹I   ﬂπ   ∑  v ⁄ï   £&`ûû ˇˇˇ˛P
-ˇˇˇ˜Pí `
-P$`
-P$`ˇˇˇıPI	PÄÄÄ»  í†a9»  /        
-       $      Ÿ»  ⁄π  ò   ï   ∂    π  I   v ⁄ï   º   ∑  I   r »   ⁄π   ‹I   ﬂ   π  I   I   %r »  ⁄π   ‹I   ﬂπ  I   I	   r ‹I
-   ﬂ   º  ‹I   ﬂº 	  π  r v ⁄π  π  I   L   ⁄π  L   ⁄π  I   ‹I   ﬂπ  r ‹I   ﬂ   π  I   I   %r I   ò!   ï"   º   ‹I   ﬂπ  ∑  v ⁄ï$   £&`ê `	ˇˇˇˇPI`ˇˇˇˇP(`ˇˇˇÚP(`+ˇˇˇ˜P*2ë ˇˇˇÎPˇˇˇﬁP$`ê `+`ê ˇˇˇ¸P
-ˇˇˇÛPí `ˇˇˇıPI	PÄd  €Ø·bd  Ò                      ∏  …   ⁄Ÿ»  ⁄π  L   ⁄π  …   ⁄º   º   I   r »   ⁄π   ‹I   ﬂ   π  I   I   %r …   ⁄»  ⁄π   ‹I   ﬂπ  I   I   r ‹I	   ﬂ
-   v ⁄º  I   ò*   ï   º   ∂    l   r L   ⁄ó&   ï   º   ∂    l   ,r L   ⁄ï   £/`+`*`
-ˇˇˇˇP(`ˇˇˇÚP)`&`+ˇˇˇÙP*UD
-`î@`!5B'Pì0 `!5C'PN 	PT   p∞o©T                              º  I   I   ‹I   ﬂl   v ⁄£ `ñ ˇˇˇÒPDPÄÄÄ‘   +LÀ‘   Ç                         º   ‹I   ﬂ∑  r I   ò9   ï   º   ò   ï   ∂    º   I   v ⁄ï	   ó1   ï	   º   ∂    l   º   º   r L   ⁄ï   £ `
-ˇˇˇ¸Pí@ `ë `
-ˇˇˇˇPì `!E
-%F3PNPÄP   m5ÓÊP                            º  ‹I   ﬂ∑  ∑ ∑ v ⁄£ !`ˇˇˇÌP$PÄÄÄP   —Û€P                             º  ‹I   ﬂº   º   v ⁄£ `ˇˇˇıP$PÄÄÄX  NΩ°Ì(  û               Ÿ    Ÿ»  ⁄π  I   º  ò   ï   π  ó   ï   º    π  r ï   »   ⁄π   I   »  ⁄º   º   π  r ‹I   ﬂ   π  I   %   %r ò   ï   π  ó   ï   ∑  I   ï   r »  ⁄π   I   »  ⁄π   I	   »  ⁄π  ‹I
-   ﬂ   π  I   %r »  ⁄π  ‹I   ﬂ   r »  ⁄π  ‹I   ﬂπ  I   r ò   ï   π  ó'   ï   π  ‹I
-   ﬂ   π  I   %r ï   »  ⁄π  ‹I   ﬂ   π  I   %r »  ⁄π  ‹I
-   ﬂ   π  I   %r »	  ⁄∑  I   õ   ï(   ⁄∑  I   ï)   »  ⁄»  ⁄º  I   ∑  I   Jõ   ï-   ⁄   ï-   »  ⁄π  I   ö   ï0   ⁄π  I   ï2   »  ⁄π  ‹I   ﬂ   r ò   ï5    †ï5   π  ‹I   ﬂ   π  I   %   %r ò(   ï;   º      r ‹I   ﬂ   v ⁄ï>   π  ‹º  I   ù©   ï@   ‹º  I   ùµ   ïB   ‹º  I   ùK  ïD   ‹º  I   ù¬  ïF   ‹º  I   ùÎ  ïH   ‹º  I   ù  ïJ   ‹º  I   ùu
-  ïL   ‹º  I    ù≠
-  ïN   ûØ
-  ïN   º   ‹I!   ﬂπ   ∑  v ⁄ó  ïP   ∑  ‹I"   ﬂv  ⁄π  ò_   ïS   º   ‹I!   ﬂπ   ∑  v ⁄π  ‹I   ﬂ   π  I   %#   %r ‹I$   ﬂr  I   »  ⁄óL   ï^   π  ‹I%   ﬂ&   π  ‹I'   ﬂπ  r %(   %r ‹I$   ﬂr  I   »  ⁄ïh   π  ö[   ïj   ⁄º  I)   öF   ïl   ⁄∂)   ‹I*   ﬂr  +   ö&   ïq   ⁄∑  I,   õ   ïs   ⁄∑  I-   ït   ò{   ïu   º      r »  ⁄π  ‹I'   ﬂπ  r »  ⁄º   .   º      r ‹I'   ﬂπ  r %(   %r ‹I$   ﬂr  I   »  ⁄ïÇ   ós  ïÇ   ∑  ‹I"   ﬂv  ⁄π  ö"   ïÖ   ⁄π  ‹I   ﬂπ  I/   r ïà   ò  ïâ   º   ‹I!   ﬂπ   ∑  v ⁄π  ‹I%   ﬂ0   π  ‹I'   ﬂπ  r %1   %r »
-  ⁄π
-  ‹I2   ﬂ   π  I   %r I   òå   ïó   π
-  ‹I2   ﬂr  ‹I3   ﬂ4   5   r ‹I6   ﬂπ  I/   r ‹I%   ﬂ   π  I   %r ‹I3   ﬂ7   8   r ‹I   ﬂ9   r ‹I$   ﬂr  »  ⁄ï©   óZ   ï©   π  ôL   ï™   π  ‹I%   ﬂ0   π  ‹I'   ﬂπ  r %1   %r ‹I$   ﬂr  I   »  ⁄ï¥   π  ö[   ï∂   ⁄º  I)   öF   ï∏   ⁄∂)   ‹I*   ﬂr  +   ö&   ïΩ   ⁄∑  I,   õ   ïø   ⁄∑  I-   ï¿   ò{   ï¡   º      r »  ⁄π  ‹I'   ﬂπ  r »  ⁄º   :   º      r ‹I'   ﬂπ  r %(   %r ‹I$   ﬂr  I   »  ⁄ïŒ   óÊ	  ïŒ   ∑  ‹I"   ﬂv  ⁄π  ò`   ï—   π  ‹I%   ﬂ&   π  ‹I'   ﬂπ  r %(   %r ‹I   ﬂ;   r ‹I$   ﬂr  I   »  ⁄ó√   ï›   π  I   ö   ïﬂ   ⁄π	  I   ï‡   ò[   ï·   π  ‹I%   ﬂ&   π  ‹I'   ﬂπ	  r %(   %r ‹I   ﬂ;   r ‹I$   ﬂr  I   »  ⁄ïÌ   π  ô3   ïÓ   π  ‹I   ﬂ;   r ‹I$   ﬂr  I   »  ⁄ïÙ   óß  ïÙ   ∑  ‹I"   ﬂv  ⁄π  ò`   ï˜   π  ‹I%   ﬂ0   π  ‹I'   ﬂπ  r %1   %r ‹I   ﬂ;   r ‹I$   ﬂr  I   »  ⁄ó√   ï  π  I   ö   ï  ⁄π	  I   ï  ò[   ï  π  ‹I%   ﬂ0   π  ‹I'   ﬂπ	  r %1   %r ‹I   ﬂ;   r ‹I$   ﬂr  I   »  ⁄ï  π  ô3   ï  π  ‹I   ﬂ;   r ‹I$   ﬂr  I   »  ⁄ï  óh  ï  π  ‹I'   ﬂπ  r »  ⁄∑  I<   ö1   ï  ⁄π  ö"   ï  ⁄π  ‹I   ﬂπ  I/   r ï"  ò	  ï#  º   ‹I!   ﬂπ   ∑  v ⁄π  ‹I%   ﬂ0   π  ‹I'   ﬂπ  r %1   %r »
-  ⁄π
-  ‹I2   ﬂ   π  I   %r I   òä   ï1  π
-  ‹I2   ﬂr  ‹I3   ﬂ4   5   r ‹I6   ﬂπ  I/   r ‹I%   ﬂ   π  I   %r ‹I3   ﬂ7   8   r ‹I   ﬂ9   r ‹I$   ﬂr  »  ⁄ïB  óÓ  ïB  ∑  I<   ö   ïD  ⁄π  ïE  òC   ïF  π  ‹I%   ﬂ0   π  %1   %r ‹I$   ﬂr  I   »  ⁄óà  ïN  ∑  I<   ö   ïQ  ⁄π  π  I   &ïT  òC   ïU  π  ‹I%   ﬂ&   π  %(   %r ‹I$   ﬂr  I   »  ⁄ó  ï]  º  I)   ö    ï_  ⁄∂)   ‹I*   ﬂr  +   ïc  òﬁ   ïd  º      r »  ⁄π  ‹I'   ﬂπ  r »  ⁄∑  I<   òV   ïi  º   :   º      r ‹I'   ﬂπ  r %1   %r ‹I$   ﬂr  I   »  ⁄óQ   ïs  º   .   º      r ‹I'   ﬂπ  r %(   %r ‹I$   ﬂr  I   »  ⁄ï}  π  ò   ï~  ∑  ‹I"   ﬂv  ⁄ïÄ  óÒ  ïÄ  π  ò4   ïÅ  ∑  ‹I"   ﬂv  ⁄º 	  ‹I!   ﬂπ   ∑  v ⁄ó   ïÖ  †ïÖ  ó£  ïÖ  †óó  ïÖ  ∂=    π  I>   v ⁄º   π  º   ò   ïä  π  ó   ïä     ïä  %-…   ⁄º   I   ò   ïé   †ïé  π  ∂?    l@   º   r L>   ⁄π  ö#   ïí  ⁄π  ‹I   ﬂπ  I/   r ïñ  ò7   ïó  π  ‹I%   ﬂA   π  I   %B   %r »  ⁄ó"   ïú  π  ‹I   ﬂ   r »  ⁄ïû  ∑  I<   ò0   ï†  º   π  ‹IC   ﬂr  ‹ID   ﬂr  r »  ⁄ï•  »  ⁄ñ•  π  π  I   òã   ï®  π  ‹IE   ﬂπ  r »  ⁄π  ‹I   ﬂπ  r òC   ï≠  º   I   ò   ï∞  π  %ó   ï±  π  ï±  »  ⁄ó   ï±  π  /'»  ⁄ófˇˇˇï≥  ∂F   G   º   ‹IH   ﬂkI   J   r %K   ﬁ  Ä »  ⁄π  »  ⁄ñ∏  π  π  I   òé   ïª  π  ‹IE   ﬂπ  r »  ⁄º  ‹IL   ﬂπ  ‹IM   ﬂr  r »  ⁄π  ‹IN   ﬂπ  r ò$   ïƒ  »  ⁄π  ‹I$   ﬂv  ⁄ó   ï∆  π  /'»  ⁄ócˇˇˇï»  π  ôß   ï…  »  ⁄ñ…  π  π  òà   ïÀ  π  ‹IE   ﬂπ  r »  ⁄º  ‹IL   ﬂπ  ‹IM   ﬂr  r »  ⁄π  ‹IN   ﬂπ  r ò   ï‘  π  ‹I$   ﬂv  ⁄ó   ï÷  π  /'»  ⁄ónˇˇˇïÿ  ó   ïÿ  π   LO   ⁄£&`	§ (ˇˇˇıP-`.`ˇˇˇ˛P
-ê ˇˇˇ˜P® ˇˇˇ˜P(`.`.`
-ˇˇˇÚP(`ê P(`	ˇˇˇ˜P¶ 8
-ˇˇˇÚP-`
-ˇˇˇıP(%`
-ˇˇˇÚPH`•@`&`≠@!`´@`ê PM`AÄ  Ã	F`
-ê ˇˇˇ˜P-`P	PI`ñ0#ñ02ñ0Jñ0Yñ0hñ0Ä  àñ0Ä  êü0  `ˇˇˇıP$` `
-P$`.`ˇˇˇıP$`ê ˇˇˇıP
-5Pô `	ˇˇˇ˙P
-ˇˇˇÊP
-5Pî@,`±  Pæ `P(`ˇˇˇ˙P(`[
-ˇˇˇ˙P
-ˇˇˇ›P
->Pî@1` `
-P$`ö  	ˇˇˇ˜Pí `ˇˇˇıP$`	ˇˇˇ˙P
-ˇˇˇ‰P(`
-ˇˇˇÒPí `P*Z*'	ˇˇˇ˜P*%
-ˇˇˇÛP*Z*U*Pô@@ `.`	ˇˇˇ˙P
-ˇˇˇÊP
-4Pî@D`±  Pæ `P(`ˇˇˇ˙P(`[
-ˇˇˇ˙P
-ˇˇˇ›P
->Pî@I` `
-P$`.`	ˇˇˇ˙P
-ˇˇˇ‰P6P
-Pô `¨@Q`	ˇˇˇ˙P
-ˇˇˇ‰PBP
-Pî@T`.`ê P
-Pî@X` `
-P$`.`	ˇˇˇ˙P
-ˇˇˇ‰P5P
-Pô `¨@``	ˇˇˇ˙P
-ˇˇˇ‰PAP
-Pî@c`.`ê P
-Pî@g` `ˇˇˇ˙P(`≠ 2	ˇˇˇ˜Pí `ˇˇˇıP$`	ˇˇˇ˙P
-ˇˇˇ‰P(`
-ˇˇˇÒPí `P*Z*'	ˇˇˇ˜P*%
-ˇˇˇÛP*Z*U*Pó@v `® `	ˇˇˇP
-Pô  `ò õ `	ˇˇˇP
-Pô  `° Pò `P(`ˇˇˇ˙P(`í `[
-ˇˇˇ˙P
-ˇˇˇ›P
-=Pô `[
-ˇˇˇ˙P
-ˇˇˇ›P
->Pî `.`
-P ` `.`
-P$`ˇˇˇıP `AÄ  Ã	FÄ  è` `AÄ  Ã	AÄ  í` `	ˇˇˇˇP `	%∞ `ñ `AÄ  Ã	FÄ  ù`
-# EÄ  ù-P `	ˇˇˇ˜Pì `ê ˇˇˇÓPí `ê P `í `
-P*PCÄ  ®%P `fî `ˇˇˇ˝P(`ˇˇˇ˝P-`¥ `JÄ  ¨7`ï@Ä  ¥`
-ˇˇˇ¯Pˇˇˇ€P `	fî `ˇˇˇ˝P(`Pˇˇˇ˘P(`ˇˇˇ˚P-`&`P$`JÄ  ∂;`ï@Ä  ø`.`f/`ˇˇˇ˝P(`Pˇˇˇ˘P(!`ˇˇˇ˚P-!`P$!`JÄ  ¿0`ï@Ä  …` `+	PÄÄÄX         N  ü          1  ¢          Ï  ó   4   K“§‹4                                 …   ⁄£ `+PÄ   »ÑŸå   ò                      Ÿ»   ⁄º   ∑  I   r ‹I   ﬂπ   I   I   r õ0   ï   ⁄º   ∑  I   r ‹I   ﬂ   r I   ï   ò   ï   π   L   ⁄ï   π   ∂	    l
-   r L   ⁄£&`ˇˇˇˇP
-ˇˇˇ˝Pî "ˇˇˇ˛PPó `ê@`
-!5A#PI	PÄÄÄd   ïıWmd   /                        Ÿ»   ⁄π   ò   ï   ∂    π   I   v ⁄ï   £&`ê `	ˇˇˇˇP)PÄÄ<  ˚ò™<  ƒ                       Ÿ»   ⁄∂    π   I   v ⁄º   ∑  I   r ‹I   ﬂπ   I   I   v ⁄º   ‹I   ﬂπ   ∑  v ⁄º   ∑  I   r ‹I   ﬂ	   r òD   ï   º   
-   r ‹I   ﬂ   º  ‹I   ﬂº   ∑  I   r v ⁄ï   £F`	ˇˇˇˇP$`ˇˇˇˇP*ˇˇˇ˜P$`ˇˇˇıP$`ˇˇˇˇPP-`P+ˇˇˇÈPˇˇˇ‹PI		PÄ   ôî•  ≤                       ∏  …   ⁄Ÿ»   ⁄π   …   ⁄º   º   I   r ‹I   ﬂº   I   I   v ⁄º   ∂    l   ˙ r L   ⁄º   º   I   r ‹I   ﬂ	   r ò(   ï   º   
-   r ‹I   ﬂ   v ⁄ï   £/`*`
-ˇˇˇˇP*ˇˇˇÙPD`!5C#PI`
-ˇˇˇˇPP-`P	PI	PÄÄÄP   \°P                             º  ‹I   ﬂº   º   v ⁄£ `ˇˇˇıP$PÄÄÄÑ  —S?=Ñ          	              Ÿ»  ⁄π  I   »   ⁄∑  ò_   ï   º      r ‹I   ﬂ   v ⁄π   ‹I   ﬂ   π  I   I   %r ‹I   ﬂ	   v ⁄óä   ï   º      r ‹I
-   ﬂ   º  ‹I   ﬂº 
-  π  r v ⁄π   ‹I   ﬂ   π  I   I   %r ‹I
-   ﬂ	   º  ‹I   ﬂº   π  r v ⁄ï   £&`.`-`P	PD`
-ˇˇˇÊP4P `PÄ  ™ˇˇˇ‰Pˇˇˇ]PD`
-ˇˇˇ·Pcˇˇˇ·Pˇˇˇ‘PI	PÄÄ–   ·ò–   {                        Ÿ»  ⁄π  I   »   ⁄º   π  I   r »  ⁄π  ‹I   ﬂr  ‹I   ﬂr  »  ⁄π  ‹I   ﬂr  »  ⁄π  ‹I   ﬂπ   π  π  π  v ⁄£& `.`	ˇˇˇˇP(`P
-P(#`P(`
-ˇˇˇÂPDPÄÄú  ±ﬂh7ú  x        	       >      ∏  …   ⁄Ÿ»   ⁄π   …   ⁄π   º   L   ⁄π   ∑ L   ⁄π   ∑ L   ⁄∑ ‹I   ﬂ      v ⁄∑ ‹I   ﬂº   I   v ⁄∑ ‹I	   ﬂl
-   v ⁄π   ∑ ‹I   ﬂ   º   I   %r L   ⁄∑ ‹I   ﬂ      º   I   %º  ‹I   ﬂº  π   r r ‹I   ﬂ      º   I   %º  ‹I   ﬂº  π   r r ‹I   ﬂ   º  ‹I   ﬂº  π   r r ‹I   ﬂ   º  ‹I   ﬂº  π   r r ‹I   ﬂ   º  ‹I   ﬂº  π   r r ‹I   ﬂ   º  ‹I   ﬂº  π   r v ⁄º  ò5   ï,   ∑ ‹I   ﬂ   º  ‹I   ﬂº	  π   r v ⁄ï0   ∑ ‹I   ﬂ   r ‹I   ﬂ      v ⁄º   º  I   r ‹I   ﬂ∑ r I   ò-   ï:   º   º  I   r ‹I   ﬂ   v ⁄ï>   £O`*`/`-`M`î P$`
-
-ˇˇˇ˜P$`
-ˇˇˇ˚PD#`ˇˇˇıPI%`'ˇˇˇÈPˇˇˇµP*9
-ˇˇˇËPˇˇˇ¥P*8ë ˇˇˇÈPˇˇˇ‹P*:ë ˇˇˇÁPˇˇˇ⁄P*9ë ˇˇˇËPˇˇˇ€P*:ë ˇˇˇÁPˇˇˇ⁄PD,`/`*ˇˇˇÎPˇˇˇŸPI0`Pî PD2`
-ˇˇˇˇP
-!ˇˇˇ¯Pí `
-ˇˇˇˇPPIBPÄÄÄÏ  ≠≤EkÏ  H                %       º   ∑ r « ⁄∑ ‹I   ﬂº   I   v ⁄∑ ‹I   ﬂ   r »   ⁄∑ ‹I   ﬂ   r »  ⁄º  ‹I   ﬂº   π   v ⁄π  I   ò    ï   º  ‹I   ﬂº   π  v ⁄π   ‹I	   ﬂ8
-   ;   π  ‹I	   ﬂ   r ;   ;   v ⁄π  ‹I	   ﬂ8      ;   ;   ;   r ‹I   ﬂº   I   r ‹I   ﬂ   r ‹I	   ﬂ   π   ‹I	   ﬂ   r v ⁄ï%   £ `ˇˇˇ˛P'`
-
-ˇˇˇ˜P$`P(`P(`ˇˇˇıP$`ì `ˇˇˇıP$`%&ê !P(F	(PD`%*&F)PJ'
-ˇˇˇ˜P*U*6ï PˇˇˇŸPIPÄÄÄ8   8Yy8                           Ÿ»   ⁄π   I   †£&`)Q<   ô´|<                          Ÿ»   ⁄π   I   ∑  J†£&`-Q8   8Yy8                           Ÿ»   ⁄π   I   †£&`)Ql   „◊˝hl   9                       Ÿ»   ⁄π   I   ∑  ∑ N⁄∑ ò   ï   π   ‹I   ﬂv  ⁄ï   £&`ë `-`PIPÄT   ¨®>'T   $                       ∏  …   ⁄Ÿ»   ⁄π   ‹I   ﬂl   r †£/	`ˇˇˇ˚PCQÃ   ã-$‡Ã   y         
-               Ÿ»   ⁄º  ‹I   ﬂπ      º  %r ôO   ï   º  ‹I   ﬂπ      º  %º  I   º  JI   π   º   ﬁ  Ä v ⁄ï   £&`ˇˇˇÈP-`ñ (	ˇˇˇ“Pˇˇˇ›PI	PÄÄÄ¨   XÎR¨   c                         º   I   I   ‹I   ﬂ∑  r ö@   ï   ⁄º    ∑  r ‹I   ﬂr  ‹I   ﬂr  ‹I   ﬂl   r I   ï   †£ 	`ñ ˇˇˇ¯Pˇˇˇ˛P
-P
-
-P
-ˇˇˇ˘PNQX   ∂Ò¥HX   &                        Ÿ»   ⁄º   ‹I   ﬂπ      r    †£&`	ˇˇˇ¸P)	QÄÄÄ¯  g®v¯  q                $       ∑  I   ‹I   ﬂr  »  ⁄   π  òº   ï   ∑  I   »   ⁄π   I   »  ⁄∑  I   õ4   ï
-   ⁄π  õ$   ï   ⁄π   I   ‹I   ﬂr     ï   ò   ï   †ï   º       π  %	   %r J»  ⁄π  ö   ï   ⁄º 	   π  r ï   †ï   k
-   ‹I   ﬂπ  r ò   ï   ∑  I   óF   ï      π  ò*   ï    ∑  I   õ   ï"   ⁄∑ ï"   ó   ï"   ∑ ï"   ö   ï#   ⁄º 	   ∑  r ï$   †£ `P(`/`-`.`î † Pò `AF	`ˇˇˇÌP*`  ó ˇˇˇ¯PHF	`3ˇˇˇ˚Pì î•ì@%	ˇˇˇ¯P(Q8   r“Bp8      	                      ∏  …   ⁄l   †£)`E	QP   .b>[P                            º  ‹I   ﬂ∑  º   r †£ `  ˇˇˇıP%QT   ì≥\T                            º   ‹I   ﬂ∑  ∑ Jr †£ `  ˇˇˇıP%QÄÄÄp   o°≠p   /           	              º 
-   ∑  ∂    º   ‹I   ﬂ∑     r r r †£ `	ˇˇˇ˚Pˇˇˇ¯PˇˇˇÏP#	Q¥   Vhﬂ’¥   k                 	       º   ‹I   ﬂ∑     r »   ⁄∂    π   r »  ⁄π  õ   ï   ⁄π   ï   ö   ï   ⁄º 
-   ∑  π  r ï	   †£ `ˇˇˇ˚P(!`ˇˇˇˇP(`´ 5	ˇˇˇÌP(	QÄ3ıÿ  `Ö   (     @'  )  *  +  ,  -  .  /    `W  “  ”    `Œ  œ  Õ  –  —  j  $  p0    `ÿ  Ÿ  ⁄  €  a  ‹  Z  ›  ]    PÈ  ﬂ  a    `B  C  )  D  E    `'  F  ç   -  U  G  
-  `¶   [  0    `¶   q  '  
-  r  s    .  	  `Ë  '  K  B  .    N  ¶   O  Q  S  R 0  T  ä  V  W    @X  V  Y  	    Z    p¬   \    @¯  a ]  ^  _    @`  3   a    b  ú c  ‡     d  e  f  g  F  h  û   i  j  
-  k    l  m    n  o  p    pt  u  ,  v  w  x  y    .  ï  Ø    @  `|  B  .  '    
-  0  ¶   }    ~    3   .    `Ë  B  K  0  ~    3     `Ä  Å  h  Ç  û   Ë  }  '    ~    3     `u  ,  Ë  B  .  '  
-  w     É  ß  -  .  Ñ  Ö  j    0  3     `3     `‡   0  u  ,  p    p  `á  à  â    p  `3     `.  Ë  B  .  '    i    r  É  á  p    p,    p  `à     `L   '  ú .    y  Ë  K  å  B    ¶   }  
-    m  ë  $  à   0  ñ  ó  r  ò      3 !    #  "    3   ~  ô    j  ö  Û   õ  ú  ¯  ù  û  ü  †    °  ¢  £  F  h    w  k  û   §  •  o  ¶  u  ß  p    p®  ©  ¬   ™  ö Y  ^  ´     P¨  i  ≠  Æ  È  .    `u  ,    `Ë  ú '  
-  B  Ø  0  -  p    p+    `u  +  Ë  w  '    3   ú y  ó   ò  ß    `3     `Ë  i  '    p    p+  ú y  ó  r  ò    `K  ó  r  ∞  ¶   q  '  
-  s   ß  ±    `'  Ö   £  ≥  Ÿ    `w    ¶   o  £  π  3   0  F  	  @∫  ç ª  h  
-  @ÿ   ¥  k  
-  Ö  º  Ω    `'  K  å  F  ¥  µ  w    Ñ     p¶   .  
-  Ñ   æ  ø  ß  ¿  ò  ¡  ¬  √  ƒ  [ ≈  f  B  0  ∆     `)  !  `'  "  `'  #  `'  /    `à   ‰   H  4    p  p  p	  p
-  p  p  p  p  p  p  p  p  p  @L     p/    pŸ    p«    p»    p      pÀ  %  `D  E  ◊ %  $  `Ñ   "  p'  `D  &  `'  p(  `D  )  `  F  „  *  `F  „      `  p#  p%  p    @      	      
-                    @                         !  "  #  3   @0  1  2  3  4  5  6  7  8  9  ;  a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v  w  x  y  z  .  $    p¶  ◊ !  p%  (  Œ  :    @‡  &  p(  pD  )  p‘  *  p‰     `  pÁ       ˇXÑK                Ï  _           †        %      †  ∂      Ë      † '      5      †
- -      6      †
- B   K   7      †
- 5      È      † 9   	   Í      † ç      8      †
- ú      9      †
- §      :      †
- ±      ;      †
- ÷      <      †
- œ      Î      † »      Ï      † ∆      Ì      † ‘      Î      † Ë   P   =      †
- Ê      Ó      † ;     >      †
- 8     Ô      † G     ?      †
- W     @      †
- U           † d     A      †
- q     /      †
- é     Ÿ      †
- w     Ò      † ≠     «      †
- Ø     »      †
- ±            †
- ≥     À      †
- €     Ú      † ÷     Û      †    	   Õ      †        Ù      †       ‘      †  ‡     ı      † ﬁ     ˆ      † ‚     ı      † ‰     ‘      †
- Ë     ‰      †
- ùH©¿      5∆      5∆                Ä ¶  ∆  ù  ∆  /              o    T    é              Ä J  ´ô  A  ´ô  ü   .             L  À  C  À  º              I  L  @  L      !          Ç    «6     «6  ‹   !           ˛'  M(  ı'  M(  	  ?             a.  h/  X.  h/  &  -            ˜7  ~<  Ó7  ~<  ^  "           ƒ=  µ>  ª=  µ>  Ä  )           2@  ØA  )@  ØA  ê  ,           ÊB  RE  ›B  RE  ¢  $          Ç åF  DL  ÉF  DL  ∫  %            ÉH  yK  zH  yK  ∆  ;             ≈H  dK  ºH  dK  «  =            õJ  K  íJ  K  œ  G            —K  #L  »K  #L  ÷  ;            vM  üv  mM  üv  ‰  $            .o  |o  %o  |o  Å  A            Õw  ,y  ƒw  ,y  ∫  &           πx  y  ∞x  y  æ  7            dz  ”{  [z  ”{  Ã  &          Ç }  ù~  ˇ|  ù~  ﬂ  %            ø}  	~  ∂}  	~  ‰  7            “~  ÌÇ  …~  ÌÇ  Ï  1           àÑ  °Ö  Ñ  °Ö               Ç ¬Ö  ãí  πÖ  ãí                á  ˝ã  á  ˝ã    +           ±ì  Ïì  ®ì  Ïì  Z  #            cï  •ï  Zï  •ï  f  !           Ãñ  ó  √ñ  ó  q  %            Êò  òô  ›ò  òô  ~  !          Ç ·º  ‡Ω  ÿº  ‡Ω  9  !           Ω  ◊Ω  Ω  ◊Ω  :  #             Ÿæ  £ø  …æ  £ø  I             Hø  ìø  ?ø  ìø  J  c             ‰ø  √  “ø  √  S            Ä {√  ˙√  r√  ˙√  h  B            •√  Ó√  ú√  Ó√  i              0ƒ  ãƒ  'ƒ  ãƒ  m              ¨ƒ  ≈  £ƒ  ≈  q              /≈  ∆  &≈  ∆  u            5°›S∫(∑√nåo}J      f≠≤f≠≥F¡“∞       É    O^partitionKey=%28https%2Cginniemae.gov%29,:https://www.ginniemae.gov/Style%20Library/GNMA%20Scripts/megamenu/accessibleMegaMenu.js strongly-framed 1 security-info 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 request-method GET response-head HTTP/2 200 
-content-type: application/javascript
-content-length: 50725
-last-modified: Fri, 25 Aug 2023 21:56:39 GMT
-etag: "{F4C44442-30CC-46A3-A360-8B3798A18E70},80"
-resourcetag: rt:F4C44442-30CC-46A3-A360-8B3798A18E70@00000000080
-content-disposition: attachment; filename*=utf-8''accessibleMegaMenu%2ejs; filename="accessibleMegaMenu.js"
-x-download-options: noopen
-strict-transport-security: max-age=31536000; includeSubDomains; preload
-x-frame-options: SAMEORIGIN, SAMEORIGIN
-content-security-policy: frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com *.teams.microsoft.us local.teams.office.com *.powerapps.com *.yammer.com *.officeapps.live.com *.office.com *.stream.azure-test.net *.microsoftstream.com *.dynamics.com *.microsoft.com onedrive.live.com *.onedrive.live.com;, frame-ancestors 'self'
-date: Sat, 06 Apr 2024 20:16:54 GMT
-expires: Fri, 22 Mar 2024 20:16:54 GMT,0
-sprequestguid: b6731ca1-c630-2062-3bd5-9b56a15a95cf
-request-id: b6731ca1-c630-2062-3bd5-9b56a15a95cf
-sprequestduration: 1171
-spiislatency: 0
-cache-control: private,max-age=0,no-cache
-pragma: no-cache
-accept-ranges: bytes
-x-sharepointhealthscore: 0
-public-extension: http://schemas.microsoft.com/repl-2
-microsoftsharepointteamservices: 16.0.0.10407
-x-content-type-options: nosniff
-x-ms-invokeapp: 1; RequireReadOnly
-x-from: WEB01
-access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept
-access-control-allow-methods: POST,GET,OPTIONS,PUT,DELETE
-x-xss-protection: 1; mode=block
-X-Firefox-Spdy: h2
- original-response-headers date: Sat, 06 Apr 2024 19:40:08 GMT
-content-type: application/javascript
-content-length: 50725
-set-cookie: AWSALB=YtmAAbMm0YmTjluOQrauNSUSiYazRQQsxo1yX6cBUm38O+rUibG9sL94zquAq2VF8kRFUtA5TdwuMSL9v83B2+J3kYamJpyfF0d3tJcQn3B1q5GVbXS42nqhVhzL; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/
-set-cookie: AWSALBCORS=YtmAAbMm0YmTjluOQrauNSUSiYazRQQsxo1yX6cBUm38O+rUibG9sL94zquAq2VF8kRFUtA5TdwuMSL9v83B2+J3kYamJpyfF0d3tJcQn3B1q5GVbXS42nqhVhzL; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/; SameSite=None; Secure
-set-cookie: AWSALB=2Z+CwqXTsN/60dgb+sVw88oqdz9wIg85XOXrWuSms4VJ9C6f2He0gj/QjCuCV8XraLMgE5rTHYHIcnrhZrS4mPTRCXqz+G596J4n6XDnLQSmClplb0Tkg9WtYKNl; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/
-set-cookie: AWSALBCORS=2Z+CwqXTsN/60dgb+sVw88oqdz9wIg85XOXrWuSms4VJ9C6f2He0gj/QjCuCV8XraLMgE5rTHYHIcnrhZrS4mPTRCXqz+G596J4n6XDnLQSmClplb0Tkg9WtYKNl; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/; SameSite=None; Secure
-cache-control: private,max-age=0,no-cache
-pragma: no-cache
-expires: Fri, 22 Mar 2024 19:40:08 GMT,0
-last-modified: Fri, 25 Aug 2023 21:56:39 GMT
-accept-ranges: bytes
-etag: "{F4C44442-30CC-46A3-A360-8B3798A18E70},80"
-x-sharepointhealthscore: 0
-resourcetag: rt:F4C44442-30CC-46A3-A360-8B3798A18E70@00000000080
-content-disposition: attachment; filename*=utf-8''accessibleMegaMenu%2ejs; filename="accessibleMegaMenu.js"
-x-download-options: noopen
-public-extension: http://schemas.microsoft.com/repl-2
-sprequestguid: 9b711ca1-66ae-2062-aa45-18a65d43a304
-request-id: 9b711ca1-66ae-2062-aa45-18a65d43a304
-x-frame-options: SAMEORIGIN
-content-security-policy: frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com *.teams.microsoft.us local.teams.office.com *.powerapps.com *.yammer.com *.officeapps.live.com *.office.com *.stream.azure-test.net *.microsoftstream.com *.dynamics.com *.microsoft.com onedrive.live.com *.onedrive.live.com;
-sprequestduration: 1094
-spiislatency: 1
-microsoftsharepointteamservices: 16.0.0.10407
-x-content-type-options: nosniff
-x-ms-invokeapp: 1; RequireReadOnly
-x-from: WEB02
-x-frame-options: SAMEORIGIN
-content-security-policy: frame-ancestors 'self'
-access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept
-access-control-allow-methods: POST,GET,OPTIONS,PUT,DELETE
-strict-transport-security: max-age=31536000; includeSubDomains; preload
-x-xss-protection: 1; mode=block
-X-Firefox-Spdy: h2
- ctid 2 uncompressed-len 0 net-response-time-onstart 1664 net-response-time-onstop 1827 alt-data 1;50725,javascript/moz-script-bytecode-20240222211730-8l alt-data-from-child 1  Ω

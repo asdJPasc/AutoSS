@@ -1,1908 +1,0 @@
-function stripScriptTags(htmlContent) {
-    var div = document.createElement('div');
-    div.innerHTML = htmlContent;
-    var scripts = div.getElementsByTagName('script');
-    var i = scripts.length;
-    while (i--) {
-        scripts[i].parentNode.removeChild(scripts[i]);
-    }
-    //remove print div
-    var divs = div.getElementsByTagName('div');
-    var i = divs.length;
-    while (i--) {
-        if (divs[i].className == "accessibility")
-            divs[i].parentNode.removeChild(divs[i]);
-    }
-    return div.innerHTML;
-}
-
-function setUserInputTagValues(jqueryContentID) {
-    //set input tag values
-    $(jqueryContentID).find("input").each(
-        function () {
-            if ($(this).attr("type") == undefined || $(this).attr("type").toUpperCase() == "TEXT") {
-                var value = $(this).val();
-                $(this).get(0).setAttribute("value", $(this).val());
-                //$(this).value=value;
-                /*if(typeof console != "undefined")
-                    console.log($(this).attr("value"));*/
-            }
-        });
-
-    //set select tag value			     	
-    $(jqueryContentID).find("select option:selected").each(function () {
-        $(this).get(0).setAttribute("selected", "selected");
-    });
-
-}
-
-function printContent(jqueryContentID, stripScriptTag) {
-    //$("<div id='dialog-message' title='IE Alert'><p>We recommend printing this page in Microsoft Edge, Google Chrome or Firefox browser.</p></div>").appendTo(".shareContentDiv").css('display', 'none');
-    $("<div id='dialog-message' title=''><div><img src='https://ginniemae.gov/publishingimages/gnma_logo_small.png' alt='Data Search' style='margin-top: 5px;' /></div><div><p><b>Printing Tip</b> <br><br>We recommend printing this page in Microsoft Edge, Google Chrome, or Firefox. Internet Explorer is currently not supported for printing.</p><div></div>").appendTo("#WebPartWPQ5").css('display', 'none');
-    var userAgent = window.navigator.userAgent;
-    var checkForIE = userAgent.indexOf("MSIE ");
-    if (checkForIE > 0) {
-        //console.log("IE : ", parseInt(userAgent.substring(checkForIE + 5, userAgent.indexOf(".", checkForIE))));
-        $("#dialog-message").dialog({
-            modal: true,
-            draggable: true,
-            class: 'ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-dialog-buttons ui-draggable',
-            width: 400,
-        });
-        $('#dialog-message').show();
-        return false;    }
-    else {
-       // console.log('other browser');
-    }
-    
-    var modalHtml = "<div id=\"dialogPrintOptions\" title=\"Pick Your Format\"><p>Print Options:<ul><li>Listing: List of all events grouped by the days on which they occur.</li><li>Calendar: Events displayed on a month calendar view.</li></ul></p></div>";
-    if (typeof window.calPrintFormat == 'undefined')
-        window.calPrintFormat = "";
-    if ($("div.ms-acal-rootdiv").length > 0) {
-
-        var modalObj = $(modalHtml).appendTo("#s4-bodyContainer");
-        $(modalObj).dialog({
-            resizable: false,
-            height: "auto",
-            width: 400,
-            modal: true,
-            buttons: {
-                " Listing ": function () {
-                    window.calPrintFormat = "list";
-                    $(this).dialog("close");
-                    printContentExecute(jqueryContentID, stripScriptTag);
-                },
-                "Calendar": function () {
-                    window.calPrintFormat = "calendar";
-                    $(this).dialog("close");
-                    printContentExecute(jqueryContentID, stripScriptTag);
-                },
-                Cancel: function () {
-                    $(this).dialog("close");
-                }
-            },
-            create: function () { $(this).closest(".ui-dialog").addClass("dialogPrintOptions"); }
-        });
-
-    }
-    else {
-        printContentExecute(jqueryContentID, stripScriptTag);
-    }
-
-}
-
-function printContentExecute(jqueryContentID, stripScriptTag) {
-    if (jqueryContentID.indexOf('MRScreen') == -1 && jqueryContentID.indexOf("#ZoomInScreen")==-1 )//pjp added for disclosure popup mrscreen on 9/25/2020
-        jqueryContentID = jqueryContentID.concat(",div.expandedContent:has(div[id*='WebPartWPQ'])"); //removed pjp on 2/5/2018 div.expandedContent:visible:contains('div')");
-
-
-    $("div.ui-accordion-content").show();//open accordions
-
-    if (window.calPrintFormat == "list") {
-        window.calPrintFormat == "";
-        printCalendarAgendaView("print");
-
-    } else if (window.calPrintFormat == "calendar") {
-        window.calPrintFormat == "";
-        printSPCalendar(); //old calendar print with full calendar layout
-    }
-    else {
-        var printPreviewWindowSetting = "toolbar=yes,location=no,directories=yes,menubar=yes,scrollbars=yes";
-        var printTitle = document.title;
-        var printLogo = "<img style='border: currentColor; border-image: none;' alt='GinnieMae.gov' src='/publishingimages/gnma_logo_small.png'>";
-
-        //pages does not have one standard body div tag. Because of that the following logic we are applying to get the body content 
-        //first look for inside_right in the page, if does not exist then look for inside_body
-        var content = "";
-        //console.log(jqueryContentID);
-        if ($(jqueryContentID).length != 0) {
-            //set input attribute values for all input tags
-            setUserInputTagValues(jqueryContentID);
-            //get the content and strip Script Tags
-            $(jqueryContentID).each(function (i, cont) {
-                content = content + $(cont).html();
-            });
-            //content = $(jqueryContentID).html();
-            if (stripScriptTag == true)
-                content = stripScriptTags(content);
-
-            //console.log(content);
-            printPreviewWindowSetting = printPreviewWindowSetting + ",width=" + $(jqueryContentID).width() + ", height=600, left=100, top=25";
-        }
-
-        //do not call printer friendly window if the content is empty
-        if (content != null) {
-
-            var printContent = '';
-            //style sheets for preview - begin
-            var previewStyle = '<script type="text/javascript" src="/Style Library/GNMA Scripts/jquery-1.4.4.js"></script><script type="text/javascript" src="/Style Library/GNMA Scripts/printpreview.js"></script>';
-
-
-
-            // previewStyle = previewStyle +'<link rel="stylesheet" type="text\/css" href="\/_layouts\/1033\/styles\/Themable\/corev4.css" />';
-
-            //previewStyle = previewStyle +'<link rel="stylesheet" type="text\/css" href="//cloud.typography.com/6197894/6218952/css/fonts.css" />';
-
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/_layouts\/1033\/styles\/Themable\/search.css" />';
-
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/gm.css"/>';
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/gm_contentarea.css"/>';
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/ginniemae_rte.css"/>';
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/en-US/Themable\/Core%20Styles\/controls.css"/>';
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/ginniemae_print.css"/>';
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/investors\/investor_search_tools\/siteassets\/newdisclosuresearch\/css\/disclosuresearch.css"/>';
-
-
-            if ($("#disclosureSearchMain").length > 0 && $("#searchPanel").length == 0) {
-                previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/ginniemae_search.css"/>';
-
-
-                previewStyle = previewStyle + '<style type="text\/css">@page{size:auto !important;}.printmd {margin-top:40%;padding: 10px;border: 2px solid black;text-align: center;border-radius: 5px;font-family: helvetica;}					@page {size: 25cm 35.7cm;	margin: 5mm 5mm 5mm 5mm;} @media print {.noprint {  visibility: hidden;	} }</style>';
-
-            }
-            //style sheets for preview - end
-
-
-            printContent = printContent + '<html><he' + 'ad>';
-            printContent = printContent + '<title>' + printTitle + '</title>';
-            printContent = printContent + previewStyle;
-            printContent = printContent + '</he' + 'ad><bo' + 'dy  class="ms-WPBody"><left><div id="main-body">';//onLoad="self.print()"
-
-            //logo
-            printContent = printContent + '<div style="display:none;" class="print_logo">' + printLogo + '</div><div id=\'reportTitle\' style=\'float: left;margin-left: 50%;font-size: 14px;font-weight: 600;padding-bottom: 20px;position: relative;left: -300px;width: 600px;text-align: center;\'></div>';
-
-            printContent = printContent + "<div style='display:none;' id='cc'>" + content + "</div>";
-            printContent = printContent + "</div></left></body></html>";
-            //console.log(docprint);
-            $("div.ui-accordion-content:not(.ui-accordion-content-active)").hide();//close accordions
-            var printPreviewWindow = window.open("", "", printPreviewWindowSetting);
-            printPreviewWindow.document.open();
-            printPreviewWindow.document.write(printContent);
-
-
-            var $jqDoc = $(printPreviewWindow.document);
-            if ($("#disclosureSearchMain").length == 0) {
-                setTimeout(function () {
-                    $jqDoc.find("#cc, .print_logo").show();
-                    printPreviewWindow.document.close();
-                    printPreviewWindow.focus();
-                    printPreviewWindow.print();
-                }, 1000);
-
-            }
-            else {
-                //for disclosure search
-
-                var disclI = setInterval(function () {
-
-
-                    //$jqDoc = $(printPreviewWindow.document);
-
-                    if (($("#disclosureSearchMain").length > 0 && $("#searchPanel").length == 0) || $jqDoc.find("#MRScreenContent div").length > 0  || $("#ChartScreenContent div").length > 0) {
-                        if ($jqDoc.find("#messageDialogue.printmd").length == 0) {
-                            $jqDoc.find("body").prepend("<div id=\"messageDialogue\" class=\"printmd  noprint\">We recommend printing this report in Microsoft Edge, Google Chrome, or Firefox.</div>");
-                            //$jqDoc.find("#messageDialogue.printmd").dialog({width: 330,dialogClass: 'disclDialog', modal:true, position: 'center'});	
-                        }
-
-                        clearInterval(disclI);
-                        //console.log('cleared interval');
-                        // $jqDoc.find(".sectioncol").each(function(i,el){
-                        // 	$(el).css('width',$(el).attr('width')-5);
-                        // });
-                        $jqDoc.find('div.print_logo:first').parent().hide();
-                        //$jqDoc.find('div.print_logo:first').parent().append("<div style='float:left;margin-left:50%;font-size:14px;font-weight:600;padding-bottom:20px;position:relative;left:-45px;'>" + tabtitle + " Report</div>");
-
-
-                        $jqDoc.find(".scrollable").parent().css({ 'height': 'auto', 'width': '100%', 'overflow-x': 'visible', 'overflow-y': 'visible' });
-                        $jqDoc.find("#disclosureSearchMain, #MRScreenContent").hide();
-                        var mb = $jqDoc.find("#main-body");
-
-                        $jqDoc.find(".disclosureHeader").clone().appendTo(mb);
-                         var csrcurl = "";
-						if($("#ZoomInScreen canvas").length > 0){
-     						 $(mb).find("canvas").each(function(ci,citem){
-                                csrcurl = $("#ZoomInScreen canvas")[ci].toDataURL();
-                                $(citem).replaceWith("<img src='" + csrcurl + "' style='height: " + $(citem).height() + "px;width:" + $(citem).width() + "px;'></img>");
-                           });  
-                                                     
-                            $jqDoc.find("#cc").show();
-                            $jqDoc.find("#reportTitle").hide();
-
-      					
-                        }else if( $("#ChartScreen").length > 0)
-                        {
-                           
-                           $(mb).find("canvas").each(function(ci,citem){
-                               var citemid = $(citem).attr('id');
-                               var cobj = window.top.document.getElementById(citemid);
-                               csrcurl = cobj.toDataURL();
-                                $(citem).replaceWith("<img src='" + csrcurl + "' style='height: " + $(cobj).height() + "px;width:" + $(cobj).width() + "px;'></img>");
-                           });  
-                           /** 
-                            $(mb).find("#gmChart").replaceWith("<img src='" + $("#ChartScreen #gmChart:first")[0].toDataURL()  + "' style='height: " + $("#gmChart").height() + "px;width:" + $("#gmChart").width() + "px;'></img>");
-                           **/
-                            $(mb).find("div.disclosureHeader, #chartOptions").hide();
-                           
-                            $jqDoc.find("#cc").show();
-                        
-                        }else
-                        {
-                            $jqDoc.find(".disclosureMain").clone().appendTo(mb);
-                        }
-
-
-                        //$(mb).find(".sectioncol").css({'width':'auto', 'min-width':'auto'})
-                        $(mb).find(".section").each(function (i, sec) {
-                            if ($(sec).find(".sectioncol").length == 3)
-                                $(sec).find(".sectioncol").css({ 'width': '32%' });//'min-width':'auto'
-                        });
-
-                        $(mb).find('.headsectioncol table th, th.header')
-                            .css({ 'color': 'black' })
-                            .each(function () {
-                                this.style.setProperty('font-size', '11px', 'important');
-                            });
-
-
-                        $(mb).find('.disclosureMain table th, .sectionHead')
-                            .css({ 'color': 'black', 'background-color': 'white', 'font-size': '11px' })
-                            .each(function () {
-                                this.style.setProperty('font-size', '11px', 'important');
-                            });
-
-                        $(mb).find('.disclosureMain table td')
-                            .css({ 'color': 'black', 'background-color': 'white', 'font-size': '10px' })
-                            .each(function () {
-                                this.style.setProperty('font-size', '10px', 'important');
-                            });
-
-                        $(mb).find('td.subhead')
-                            .prop('style', "color: black !important;background-color:white !important';font-size: '11px !important'")
-                            .each(function () {
-                                this.style.setProperty('background-color', 'white', 'important');
-                            });
-
-                        $(mb).find('.disclosureHeader').css({ 'background-color': 'white', 'color': 'black', 'font-size': '11px' });
-                        $(mb).find('.disclosureMain .tablesorter-icon').remove();
-                        
-
-                       
-
-
-
-
-                    }else{
-				//non search result page
-				$jqDoc.find("#cc").show();
-
-			}
-
-				//end if
-
-                    $jqDoc.find(".printmd").css({ 'margin-top': '0px' })
-                    //$jqDoc.find(".printmd").text("We recommend printing this report in LANDSCAPE orientation.");
-                    var tabtitle = $("div.disclosureLeftNav a.selected").text();
-                    if( $("#ChartScreen").length > 0){
-                        tabtitle = $("div[aria-describedby='ChartScreen'] .ui-dialog-title").text();
-                    }
-                    //console.log(tabtitle);
-                    $jqDoc.find("#reportTitle").html(tabtitle);
-                    //console.log('show cc and print logo');
-                    $jqDoc.find(".print_logo").show();//removed #cc, 
-                    //console.log('show parent');
-                    $jqDoc.find('div.print_logo:first').parent().show();
-
-                    clearInterval(disclI);
-                    setTimeout(function () {
-
-                        printPreviewWindow.document.close();
-                        printPreviewWindow.focus();
-                        printPreviewWindow.print();
-                        clearInterval(disclI);
-                    }, 2000);
-
-                }, 3000);
-            }
-
-        }
-    }
-
-}
-
-
-function printSPCalendarAsImage() {
-
-    $.holdReady(true);
-
-
-    $.getScript("/Style%20Library/GNMA%20Scripts/calendar/html2canvas.js", function () {
-        $.holdReady(false);
-
-        var d = $.Deferred();
-        $("#s4-workspace").scrollTop(0);
-        d.done(function (r) {
-            var win;
-            window.setTimeout(function () {
-
-                html2canvas($("#CenteredContent1"), {
-                    height: $("#CenteredContent1").height() * 1.13,
-                    logging: false,
-                    allowTaint: true,
-                    onrendered: function (canvas) {
-                        theCanvas = canvas;
-                        // $("#CenteredContent1").append(canvas);
-
-                        var url = theCanvas.toDataURL();
-                        //alert(url);
-                        win = window.open('', window.document.title, 'toolbar=no,location=no');
-
-                        //$(win.document.body).append("<div style='position:fixed;left:0;right:0;top:0;bottom:0;text-align:center;'><img style='max-width:99%;max-height:99%;' src=\""+url+"\"/></div>");
-
-
-                        var i = setInterval(function () {
-                            if (typeof win.document != 'undefined') {
-                                clearInterval(i);
-                                $(win.document.body).append("<img style=\"width:100%;\" src=\"" + url + "\"/>");
-                                win.print();
-                            }
-                        }, 1000);
-
-                    }//end on rendered
-                });//end html2canvas
-
-                setTimeout(function () {
-                    //alert('return page');
-
-                    $("#printLogo").remove();
-                    $("div.expandedContent:nth-child(2),.gmHeaderBar,.gmFooter,#SlideShowZone,div.centeredContent:first,.shareContentDiv,div.content_last_updated, a[title='Previous Month'],a[title='Next Month']").show();
-                    $("div.ms-acal-item").css({ 'max-height': '34px', 'overflow': 'hidden' });
-                    fixUpCalendar();
-
-                }, 1000);
-            }, 2000);
-
-        });
-
-        $(".s4-wpTopTable").each(function (i, tbl) { $(tbl).attr('width', $(tbl).outerWidth()); });
-        var printLogo = "<img id='printLogo' style='border: currentColor; border-image: none;' alt='GinnieMae.gov' src='/publishingimages/gnma_logo_small.png'>";
-
-        $("div.expandedContent:nth-child(2),.gmHeaderBar,.gmFooter,#SlideShowZone,div.centeredContent:first,.shareContentDiv,div.content_last_updated, a[title='Previous Month'],a[title='Next Month']").hide();
-        $("div.boxedContent:first").prepend(printLogo);
-        $("div.ms-acal-item").css({ 'max-height': 'none', 'overflow': 'visible' });
-        fixUpCalendar();
-
-        d.resolve('done');
-
-    });//end loading html canvas script
-
-}
-
-
-function printCalendar(jqueryContentID) {
-    var printPreviewWindowSetting = "toolbar=yes,location=no,directories=yes,menubar=yes,scrollbars=yes";
-
-    var printTitle = document.title;
-    //  var printLogo = '';
-
-    //  if ($('td.s4-titlelogo').length != 0)
-    //	printLogo = $('.gmLogo').html();
-
-    var printLogo = "<img style='border: currentColor; border-image: none;' alt='GinnieMae.gov' src='/publishingimages/gnma_logo_small.png'>";
-
-    if ($(jqueryContentID).length != 0) {
-        var calendarObject = $(jqueryContentID).find('#calendar').first();
-        if (calendarObject.length != 0) {
-            var date = calendarObject.fullCalendar('getDate');
-            var selectedMonth = date.getMonth();
-            var selectedYear = date.getFullYear();
-            //console.log($(jqueryContentID).attr("siteURL"));
-            printPreviewWindowSetting = printPreviewWindowSetting + ",width=" + 1000 + ", height=700, left=100, top=25";
-
-            var previewStyle = '';
-            //previewStyle = previewStyle +'<link rel="stylesheet" type="text\/css" href="\/_layouts\/1033\/styles\/Themable\/corev4.css" />';
-            //previewStyle = previewStyle +'<link rel="stylesheet" type="text\/css" href="//cloud.typography.com/6197894/6218952/css/fonts.css" />';
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/ginniemae_print.css"/>';
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text/css" href="/Style Library/GNMA CSS/fullcalendar.css">';
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text/css" href="/Style Library/GNMA CSS/fullcalendar.print.css">';
-            previewStyle = previewStyle + '<script type="text/javascript" src="/Style Library/GNMA Scripts/jquery-1.4.4.js"></script>';
-            previewStyle = previewStyle + '<script type="text/javascript" src="/Style Library/GNMA Scripts/jquery-ui-1.8.23.min.js"></script>';
-            previewStyle = previewStyle + '<script type="text/javascript" src="/Style Library/GNMA Scripts/fullcalendar.min.js"></script>';
-            previewStyle = previewStyle + '<script type="text/javascript" src="/Style Library/GNMA Scripts/jquery.SPServices-0.7.2.js"></script>';
-            previewStyle = previewStyle + '<script type="text/javascript" src="/Style Library/GNMA Scripts/CalendarPrint_Preview.js"></script>';
-
-
-
-            var printContent = '<html><he' + 'ad>';
-            printContent = printContent + '<title>' + printTitle + '</title>';
-            printContent = printContent + previewStyle;
-            printContent = printContent + '</head><body class="ms-WPBody" onLoad="self.print()"><left><div id="main-body">';
-
-            //logo
-            printContent = printContent + '<div class="print_logo">' + printLogo + '</div>';
-            //alert(selectedMonth);
-            //console.log(content);
-            //printContent = printContent +'<div style="width: 950px;	margin: 0 auto;" id="calendar" class="fc" '+'siteURL="'+calendarObject.attr("siteURL")+'" listName="'+calendarObject.attr("listName")+'" currentMonth="'+selectedMonth+'"></div>';
-            printContent = printContent + '<div style="width: 950px;	margin: 0 auto;" id="calendar" class="fc" ' + 'siteURL="' + calendarObject.attr("siteURL") + '" listName="' + calendarObject.attr("listName") + '" currentMonth="' + selectedMonth + '" currentYear="' + selectedYear + '"></div>';
-            printContent = printContent + "</div></left></body></html>";
-            //console.log(docprint);
-            $("div.ui-accordion-content:not(.ui-accordion-content-active)").hide();//close accordions
-            var printPreviewWindow = window.open("", "", printPreviewWindowSetting);
-            printPreviewWindow.document.open();
-            printPreviewWindow.document.write(printContent);
-            printPreviewWindow.document.close();
-            window.print();
-            //printPreviewWindow.document.body.style.overflow = 'scroll';
-            printPreviewWindow.focus();
-
-        }
-    }
-}
-
-
-var spin;
-
-function printCalendarAgendaView(output, dt) {
-    var cWebPart = $("div.ms-acal-header:first").closest("div[webpartid]");
-    spin = $("<div id='loadingicon'><img src='/publishingimages/loading.gif'/></div>").insertBefore(cWebPart);
-    spin.hide().show();
-    var events = [];
-    var includeddays = [];
-    dt = dt != null ? dt : $("tr.ms-acal-summary-dayrow:eq(1) th:first").attr('date').split('/');
-    var calName = $(".pageHeader:first").text().trim();
-    var startDate = dt[2] + "-" + dt[0] + "-" + dt[1] + "T12:00:00Z";// "2012-05-12T12:00:00Z"; // Our example will show the month of May 2012
-
-    var objDate = new Date(startDate.split('T')[0].split('-')[0], parseInt(startDate.split('T')[0].split('-')[1]) - 1, startDate.split('T')[0].split('-')[2]);
-
-
-    var ctx = "ctx" + cWebPart.attr('id').split('WebPart')[1];
-    var listNm = eval(ctx + ".ListTitle");
-    $().SPServices({
-        operation: "GetListItems",
-        async: false,
-        listName: listNm,
-        CAMLViewFields: "<ViewFields>" +
-            "<FieldRef Name='Title'/>" +
-            "<FieldRef Name='CalTitle'/>" +
-            "<FieldRef Name='ID' />" +
-            "<FieldRef Name='Description' />" +
-            "<FieldRef Name='EventDescription' />" +
-            "<FieldRef Name='Body' />" +
-            "<FieldRef Name='Expires' />" +
-            "<FieldRef Name='URL' />" +
-            "<FieldRef Name='Created' />" +
-            "<FieldRef Name='Duration0' />" +
-            "<FieldRef Name='EventDate' />" +
-            "<FieldRef Name='EndDate' />" +
-            "<FieldRef Name='fAllDayEvent' />" +
-            "<FieldRef Name='RecurrenceID' />" +
-            "<FieldRef Name='fRecurrence' />" +
-            "<FieldRef Name='RecurrenceData' />" +
-            "</ViewFields>",
-        CAMLQuery: "<Query>" +
-            "<Where>" +
-            "<DateRangesOverlap>" +
-            "<FieldRef Name='EventDate' />" +
-            "<FieldRef Name='EndDate' />" +
-            "<FieldRef Name='RecurrenceID' />" +
-            "<Value Type='DateTime'>" +
-            "<Month />" +
-            "</Value>" +
-            "</DateRangesOverlap>" +
-            "</Where>" +
-            "<OrderBy>" +
-            "<FieldRef Name='EventDate' />" +
-            "</OrderBy>" +
-            "</Query>",
-        CAMLQueryOptions: "<QueryOptions>" +
-            "<CalendarDate>" + startDate + "</CalendarDate>" +
-            "<RecurrencePatternXMLVersion>v3</RecurrencePatternXMLVersion>" +
-            "<ExpandRecurrence>TRUE</ExpandRecurrence>" +
-            "</QueryOptions>",
-        completefunc: function (xData, Status) {
-            var pushed = false;
-            var startSpl = [];
-            var endSpl = [];
-            var startSplTime = [];
-            var endSplTime = [];
-            var i;
-            //$(xData.responseXML).SPFilterNode("z:row").each(function() {
-            $($.parseXML(xData.responseText)).find("*[ows_ID]").each(function (ri, r) {
-                var $node = r,// $(this),
-                    fADE = $(r).attr("ows_fAllDayEvent") || 0,
-                    thisADE = (fADE == 0),
-                    thisID = $(r).attr("ows_ID"),
-                    sepID = thisID.indexOf(';#'),
-                    thisTitle = $(r).attr("ows_CalTitle").split(';#')[1],
-                    thisTitle = thisTitle;//.replace('&amp;','and').replace('&','and').replace('/','\\');
-                thisRecurrence = $(r).attr("ows_fRecurrence"),
-                    thisDesc = $(r).attr("ows_EventDescription");
-                if (sepID != -1) thisID = thisID.substring(0, sepID);
-                var thisUrl = "DispForm.aspx?ID=" + thisID,
-                    thisClass = thisTitle.replace(" ", "").substr(0, 10).replace(",", "").replace(" ", "") + thisID,
-                    thisRD = $(r).attr("ows_RecurrenceData");
-                startSpl = $(r).attr("ows_EventDate").split(" ")[0].split("-");
-                startSplTime = $(r).attr("ows_EventDate").split(" ")[1].split(":");
-                endSpl = $(r).attr("ows_EndDate").split(" ")[0].split("-");
-                endSplTime = $(r).attr("ows_EndDate").split(" ")[1].split(":");
-                sDt = $(r).attr("ows_EventDate");
-                eDt = $(r).attr("ows_EndDate");           // if working with FullCalendar or building an events object for another purpose...
-                i = {};
-                i.id = thisID;
-                i.title = thisTitle;
-                i.startDt = sDt;
-                i.endDt = eDt;
-                i.dtStart = new Date(startSpl[0], startSpl[1] - 1, startSpl[2], startSplTime[0], startSplTime[1], startSplTime[2]);
-                i.dtEnd = new Date(endSpl[0], endSpl[1] - 1, endSpl[2], endSplTime[0], endSplTime[1], endSplTime[2]);
-                if ($(r).attr("ows_Duration0") != null && $(r).attr("ows_Duration0") != "" && parseInt($(r).attr("ows_Duration0")) > 1) {
-                    i.dtEnd = i.dtEnd.addDays(parseInt($(r).attr("ows_Duration0")) - 1);
-                }
-                i.multiDay = (parseInt(sDt.split(" ")[0].split("-")[2]) != parseInt(eDt.split(" ")[0].split("-")[2]) ? true : false);
-
-                i.allDay = thisADE;
-                i.description = thisDesc;
-
-
-                var start = new Date(i.dtStart);
-
-
-
-                start.setHours(0, 0, 0, 0);
-                while (start <= i.dtEnd) {
-                    if (start.getMonth() == objDate.getMonth()) {
-                        if (pushed == false) {
-                            events.push(i);
-                            pushed = true;
-                        }
-                        if (!(includeddays.map(Number).indexOf(+start) >= 0))
-                            includeddays.push(start);
-                    }
-                    start = start.addDays(1);
-                }//end while
-                pushed = false;
-            });//end each event
-            if (output === "print")
-                renderEventsInAgendaFormat(calName, objDate, events, includeddays);
-            else if (output === "mobile")
-                renderMobileCalendar(calName, objDate, events, includeddays);
-
-        }
-    })
-}
-
-function renderMobileCalendar(name, objDate, events, includeddays) {
-    var selYear = objDate.getFullYear();
-    var selMonth = objDate.getMonth();
-    var years = [];
-    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
-    var monthsInt = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-    var dx = new Date().getFullYear() - 3;
-    while (dx <= new Date().getFullYear() + 4) {
-        years.push(dx);
-        dx++;
-    }
-    //console.log('mobile time');
-    var locale = "en-us";
-    var month = objDate.toLocaleString(locale, { month: "long" });
-    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    var period = month + " " + objDate.getFullYear();
-    var prevDate = "";
-    var dt = new Date();
-    var check = new Date();
-
-    var dtspl = [];
-    var fEvents = [];
-    var tbl;
-
-    if ($(".mobileCal").length === 0) {
-        $(".pageHeader").parent().css({ 'padding-left': '0px', 'margin-bottom': '10px' });
-        $(".pageHeader").parent().find("*:not('.pageHeader')").wrapAll("<div class='card-wrapper card-2'/>");
-
-        tbl = $("<div class='card-wrapper card-2'><table cellpadding='0' cellspacing='0' class='mobileCal'> \
-		<thead><tr><th colspan='2' class='mCalHeader'><select id='mCalMonthSel'></select>  <select id='mCalYearSel'></select></th></tr></thead> \
-		<tbody></tbody> \
-	</table></div>").appendTo($("div.ms-acal-rootdiv").closest("div[webpartid]"));
-        setTimeout(function () {
-            $("div.ms-acal-rootdiv").closest("div[webpartid]")
-                .css('left', '0px')
-                .css('overflow', 'visible');
-        }, 100);
-        //$("div.ms-acal-header").appendTo(tbl.find("th.mCalHeader"));
-        $(months).each(function (mi, m) {
-            tbl.find("#mCalMonthSel").append("<option " + (selMonth === mi ? "selected='SELECTED'" : "") + " value='" + (mi + 1) + "'>" + m + "</option>");
-        });
-
-        $(years).each(function (yi, y) {
-            tbl.find("#mCalYearSel").append("<option " + (selYear === y ? "selected='SELECTED'" : "") + " value='" + y + "'>" + y + "</option>");
-        });
-        $("#mCalMonthSel,#mCalYearSel")
-            .selectmenu({
-                change: function (evt) {
-                    printCalendarAgendaView("mobile", [parseInt($("#mCalMonthSel").val()), 1, parseInt($("#mCalYearSel").val())]);
-                }
-            });
-    } else {//calendar already exists, just remove rows
-        tbl = $("table.mobileCal");
-    }
-    if (events.length == 0) {
-        tbl.find("tbody").find("tr").remove();
-        tbl.find("tbody").append("<tr><td colspan='2' style='text-align:center;'>There are no events for the month.</td></tr>");
-    } else {
-        tbl.find("tbody").find("tr").remove();
-        $(includeddays).each(function (id, iditem) {
-            check = iditem;
-            check.setHours(0, 0, 0, 0);
-            var d1;
-            var d2;
-            fEvents = $(events).filter(function (fi, fitem) {
-                d1 = new Date(fitem.dtStart);
-                d1.setHours(0, 0, 0, 0);
-                d2 = new Date(fitem.dtEnd);
-                d2.setHours(0, 0, 0, 0);
-                return (check.getTime() <= d2.getTime() && check.getTime() >= d1.getTime());
-            });
-            fEvents.sort(function (a, b) {
-                return (new Date(a.dtStart).getHours() + new Date(a.dtStart).getMinutes()) - (new Date(b.dtStart).getHours() + new Date(b.dtStart).getMinutes());
-            });
-            var dayRow = $("<tr><td class='mDayCol'><div>" + (check.getDate()) + "</div><div>" + days[check.getDay()].substring(0, 3) + "</div></td><td class='mEventCol'></td></tr>").appendTo(tbl.find("tbody"));
-            fEvents.each(function (i, item) {
-                dtspl = item.startDt.split(" ")[0].split('-');
-                dt = new Date(dtspl[0], dtspl[1] - 1, dtspl[2]);
-                if (item.title.indexOf(",") > -1)
-                    dayRow.find("td:last").append("<div data-title='" + item.title + "' data-desc='" + item.description + "' class='mobileEvent'>" + item.title.substr(0, item.title.lastIndexOf(",")) + (item.multiDay ? "*" : "") + item.title.substr(item.title.lastIndexOf(",")) + "</div>");
-                else
-                    dayRow.find("td:last").append("<div data-title='" + item.title + "' data-desc='" + item.description + "'  class='mobileEvent'>" + item.title + (item.multiDay ? "*" : "") + "</div>");
-
-                prevDate = item.startDt.split(" ")[0];
-            });
-        });//end included date
-    }
-    spin
-        .hide('slow')
-        .remove();
-    applyMobileTooltips();
-
-}
-
-function renderEventsInAgendaFormat(name, objDate, events, includeddays) {
-    var locale = "en-us";
-    var month = objDate.toLocaleString(locale, { month: "long" });
-    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    var period = month + " " + objDate.getFullYear();
-    var win = window.open('', window.document.title, 'toolbar=no,location=no');
-    $.get('/style%20library/gnma%20css/gm.css', function (data) {
-        win.document.write("<html><head><style>" + data + "</style></head><body></body></html>");
-    });
-    var prevDate = "";
-    var dt = new Date();
-    var check = new Date();
-
-    var dtspl = [];
-    var fEvents = [];
-    var i = setInterval(function () {
-        if (typeof win.document != 'undefined') {
-            clearInterval(i);
-            $(win.document.body).append("<div class='calendarAgendaViewCont'><table cellspacing='0' cellpadding='0' class='calendarAgendaView'><thead><tr><th colspan='2' style='text-align:left;'><img src='/publishingimages/gmbw.png'/></th></tr><tr><th colspan='2' style='text-align:center;'><span style='font-size:16px;'>" + name + "</span><br/>" + period + "</th></tr><tr><th colspan='2' style='text-align:right;padding:3px;'>*Recurring event</th></thead><tfoot></tfoot><tbody></tbody></table></div>");
-            var tbl = $(win.document.body).find("table.calendarAgendaView tbody");
-            if (events.length == 0) {
-                tbl.append("<tr><td colspan='2' style='text-align:center;'>There are no events for the month.</td></tr>");
-            }
-            $(includeddays).each(function (id, iditem) {
-                check = iditem;
-                check.setHours(0, 0, 0, 0);
-                var d1;
-                var d2;
-                fEvents = $(events).filter(function (fi, fitem) {
-                    d1 = new Date(fitem.dtStart);
-                    d1.setHours(0, 0, 0, 0);
-                    d2 = new Date(fitem.dtEnd);
-                    d2.setHours(0, 0, 0, 0);
-                    return (check.getTime() <= d2.getTime() && check.getTime() >= d1.getTime());
-                });
-                fEvents.sort(function (a, b) {
-                    return (new Date(a.dtStart).getHours() + new Date(a.dtStart).getMinutes()) - (new Date(b.dtStart).getHours() + new Date(b.dtStart).getMinutes());
-                });
-                tbl.append("<tr><td colspan='2'><div style='page-break-inside:avoid;'><div class='grpCont'><div class='evDt'>" + (check.getDate()) + "-" + days[check.getDay()] + "</div><div class='imgCont'><img src='/style library/images/black.png' /></div></div><ul></ul></div></td></tr>");
-                fEvents.each(function (i, item) {
-                    dtspl = item.startDt.split(" ")[0].split('-');
-                    dt = new Date(dtspl[0], dtspl[1] - 1, dtspl[2]);
-                    if (item.title.indexOf(",") > -1)
-                        tbl.find("ul:last").append("<li>" + item.title.substr(0, item.title.lastIndexOf(",")) + (item.multiDay ? "*" : "") + item.title.substr(item.title.lastIndexOf(",")) + "</li>");
-                    else
-                        tbl.find("ul:last").append("<li>" + item.title + (item.multiDay ? "*" : "") + "</li>");
-
-                    prevDate = item.startDt.split(" ")[0];
-                });
-            });//end included date
-            setTimeout(function () {
-                win.document.close();
-                win.focus();
-                win.print();
-                win.close();
-
-            }, 1000);
-        }
-    }, 1000);
-}
-
-function printSPCalendar() {
-    $(".s4-wpTopTable").each(function (i, tbl) { $(tbl).attr('width', $(tbl).outerWidth()); });
-    var printLogo = "<img id='printLogo' style='border: currentColor; border-image: none;' alt='GinnieMae.gov' src='/publishingimages/gnma_logo_small.png'>";
-    $("div.expandedContent:nth-child(2),.gmHeaderBar,.gmFooter,#SlideShowZone,div.centeredContent:first,.shareContentDiv,div.content_last_updated, a[title='Previous Month'],a[title='Next Month']").hide();
-    $("div.boxedContent:first").prepend(printLogo);
-    setTimeout(function () {
-        window.print();
-
-    }, 500);
-    setTimeout(function () {
-        $("#printLogo").remove();
-        $("div.expandedContent:nth-child(2),.gmHeaderBar,.gmFooter,#SlideShowZone,div.centeredContent:first,.shareContentDiv,div.content_last_updated, a[title='Previous Month'],a[title='Next Month']").show();
-    }, 1000);
-
-}
-
-Date.prototype.addDays = function (days) {
-    var dat = new Date(this.valueOf());
-    dat.setDate(dat.getDate() + days);
-    return dat;
-}
-
-function applyMobileTooltips() {
-    $(document).tooltip({
-        items: ".mobileEvent",
-        track: true,
-        content: function () {
-            var element = $(this);
-            var desc = $(this).data('desc');
-            return element.data('title') + (desc != "" && $("<span>" + desc.replace('/', '').replace('&amp;', '') + "</span>").text().trim() != "" ? "<br />" + desc : "");
-        }
-    });
-}         ^ x ˇˇ     20240222211730-8l„] ˝Õ_A   https://www.ginniemae.gov/Style%20Library/GNMA%20Scripts/print.js      ¥ù  function stripScriptTags(htmlContent) {
-    var div = document.createElement('div');
-    div.innerHTML = htmlContent;
-    var scripts = div.getElementsByTagName('script');
-    var i = scripts.length;
-    while (i--) {
-        scripts[i].parentNode.removeChild(scripts[i]);
-    }
-    //remove print div
-    var divs = div.getElementsByTagName('div');
-    var i = divs.length;
-    while (i--) {
-        if (divs[i].className == "accessibility")
-            divs[i].parentNode.removeChild(divs[i]);
-    }
-    return div.innerHTML;
-}
-
-function setUserInputTagValues(jqueryContentID) {
-    //set input tag values
-    $(jqueryContentID).find("input").each(
-        function () {
-            if ($(this).attr("type") == undefined || $(this).attr("type").toUpperCase() == "TEXT") {
-                var value = $(this).val();
-                $(this).get(0).setAttribute("value", $(this).val());
-                //$(this).value=value;
-                /*if(typeof console != "undefined")
-                    console.log($(this).attr("value"));*/
-            }
-        });
-
-    //set select tag value			     	
-    $(jqueryContentID).find("select option:selected").each(function () {
-        $(this).get(0).setAttribute("selected", "selected");
-    });
-
-}
-
-function printContent(jqueryContentID, stripScriptTag) {
-    //$("<div id='dialog-message' title='IE Alert'><p>We recommend printing this page in Microsoft Edge, Google Chrome or Firefox browser.</p></div>").appendTo(".shareContentDiv").css('display', 'none');
-    $("<div id='dialog-message' title=''><div><img src='https://ginniemae.gov/publishingimages/gnma_logo_small.png' alt='Data Search' style='margin-top: 5px;' /></div><div><p><b>Printing Tip</b> <br><br>We recommend printing this page in Microsoft Edge, Google Chrome, or Firefox. Internet Explorer is currently not supported for printing.</p><div></div>").appendTo("#WebPartWPQ5").css('display', 'none');
-    var userAgent = window.navigator.userAgent;
-    var checkForIE = userAgent.indexOf("MSIE ");
-    if (checkForIE > 0) {
-        //console.log("IE : ", parseInt(userAgent.substring(checkForIE + 5, userAgent.indexOf(".", checkForIE))));
-        $("#dialog-message").dialog({
-            modal: true,
-            draggable: true,
-            class: 'ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-dialog-buttons ui-draggable',
-            width: 400,
-        });
-        $('#dialog-message').show();
-        return false;    }
-    else {
-       // console.log('other browser');
-    }
-    
-    var modalHtml = "<div id=\"dialogPrintOptions\" title=\"Pick Your Format\"><p>Print Options:<ul><li>Listing: List of all events grouped by the days on which they occur.</li><li>Calendar: Events displayed on a month calendar view.</li></ul></p></div>";
-    if (typeof window.calPrintFormat == 'undefined')
-        window.calPrintFormat = "";
-    if ($("div.ms-acal-rootdiv").length > 0) {
-
-        var modalObj = $(modalHtml).appendTo("#s4-bodyContainer");
-        $(modalObj).dialog({
-            resizable: false,
-            height: "auto",
-            width: 400,
-            modal: true,
-            buttons: {
-                " Listing ": function () {
-                    window.calPrintFormat = "list";
-                    $(this).dialog("close");
-                    printContentExecute(jqueryContentID, stripScriptTag);
-                },
-                "Calendar": function () {
-                    window.calPrintFormat = "calendar";
-                    $(this).dialog("close");
-                    printContentExecute(jqueryContentID, stripScriptTag);
-                },
-                Cancel: function () {
-                    $(this).dialog("close");
-                }
-            },
-            create: function () { $(this).closest(".ui-dialog").addClass("dialogPrintOptions"); }
-        });
-
-    }
-    else {
-        printContentExecute(jqueryContentID, stripScriptTag);
-    }
-
-}
-
-function printContentExecute(jqueryContentID, stripScriptTag) {
-    if (jqueryContentID.indexOf('MRScreen') == -1 && jqueryContentID.indexOf("#ZoomInScreen")==-1 )//pjp added for disclosure popup mrscreen on 9/25/2020
-        jqueryContentID = jqueryContentID.concat(",div.expandedContent:has(div[id*='WebPartWPQ'])"); //removed pjp on 2/5/2018 div.expandedContent:visible:contains('div')");
-
-
-    $("div.ui-accordion-content").show();//open accordions
-
-    if (window.calPrintFormat == "list") {
-        window.calPrintFormat == "";
-        printCalendarAgendaView("print");
-
-    } else if (window.calPrintFormat == "calendar") {
-        window.calPrintFormat == "";
-        printSPCalendar(); //old calendar print with full calendar layout
-    }
-    else {
-        var printPreviewWindowSetting = "toolbar=yes,location=no,directories=yes,menubar=yes,scrollbars=yes";
-        var printTitle = document.title;
-        var printLogo = "<img style='border: currentColor; border-image: none;' alt='GinnieMae.gov' src='/publishingimages/gnma_logo_small.png'>";
-
-        //pages does not have one standard body div tag. Because of that the following logic we are applying to get the body content 
-        //first look for inside_right in the page, if does not exist then look for inside_body
-        var content = "";
-        //console.log(jqueryContentID);
-        if ($(jqueryContentID).length != 0) {
-            //set input attribute values for all input tags
-            setUserInputTagValues(jqueryContentID);
-            //get the content and strip Script Tags
-            $(jqueryContentID).each(function (i, cont) {
-                content = content + $(cont).html();
-            });
-            //content = $(jqueryContentID).html();
-            if (stripScriptTag == true)
-                content = stripScriptTags(content);
-
-            //console.log(content);
-            printPreviewWindowSetting = printPreviewWindowSetting + ",width=" + $(jqueryContentID).width() + ", height=600, left=100, top=25";
-        }
-
-        //do not call printer friendly window if the content is empty
-        if (content != null) {
-
-            var printContent = '';
-            //style sheets for preview - begin
-            var previewStyle = '<script type="text/javascript" src="/Style Library/GNMA Scripts/jquery-1.4.4.js"></script><script type="text/javascript" src="/Style Library/GNMA Scripts/printpreview.js"></script>';
-
-
-
-            // previewStyle = previewStyle +'<link rel="stylesheet" type="text\/css" href="\/_layouts\/1033\/styles\/Themable\/corev4.css" />';
-
-            //previewStyle = previewStyle +'<link rel="stylesheet" type="text\/css" href="//cloud.typography.com/6197894/6218952/css/fonts.css" />';
-
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/_layouts\/1033\/styles\/Themable\/search.css" />';
-
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/gm.css"/>';
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/gm_contentarea.css"/>';
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/ginniemae_rte.css"/>';
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/en-US/Themable\/Core%20Styles\/controls.css"/>';
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/ginniemae_print.css"/>';
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/investors\/investor_search_tools\/siteassets\/newdisclosuresearch\/css\/disclosuresearch.css"/>';
-
-
-            if ($("#disclosureSearchMain").length > 0 && $("#searchPanel").length == 0) {
-                previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/ginniemae_search.css"/>';
-
-
-                previewStyle = previewStyle + '<style type="text\/css">@page{size:auto !important;}.printmd {margin-top:40%;padding: 10px;border: 2px solid black;text-align: center;border-radius: 5px;font-family: helvetica;}					@page {size: 25cm 35.7cm;	margin: 5mm 5mm 5mm 5mm;} @media print {.noprint {  visibility: hidden;	} }</style>';
-
-            }
-            //style sheets for preview - end
-
-
-            printContent = printContent + '<html><he' + 'ad>';
-            printContent = printContent + '<title>' + printTitle + '</title>';
-            printContent = printContent + previewStyle;
-            printContent = printContent + '</he' + 'ad><bo' + 'dy  class="ms-WPBody"><left><div id="main-body">';//onLoad="self.print()"
-
-            //logo
-            printContent = printContent + '<div style="display:none;" class="print_logo">' + printLogo + '</div><div id=\'reportTitle\' style=\'float: left;margin-left: 50%;font-size: 14px;font-weight: 600;padding-bottom: 20px;position: relative;left: -300px;width: 600px;text-align: center;\'></div>';
-
-            printContent = printContent + "<div style='display:none;' id='cc'>" + content + "</div>";
-            printContent = printContent + "</div></left></body></html>";
-            //console.log(docprint);
-            $("div.ui-accordion-content:not(.ui-accordion-content-active)").hide();//close accordions
-            var printPreviewWindow = window.open("", "", printPreviewWindowSetting);
-            printPreviewWindow.document.open();
-            printPreviewWindow.document.write(printContent);
-
-
-            var $jqDoc = $(printPreviewWindow.document);
-            if ($("#disclosureSearchMain").length == 0) {
-                setTimeout(function () {
-                    $jqDoc.find("#cc, .print_logo").show();
-                    printPreviewWindow.document.close();
-                    printPreviewWindow.focus();
-                    printPreviewWindow.print();
-                }, 1000);
-
-            }
-            else {
-                //for disclosure search
-
-                var disclI = setInterval(function () {
-
-
-                    //$jqDoc = $(printPreviewWindow.document);
-
-                    if (($("#disclosureSearchMain").length > 0 && $("#searchPanel").length == 0) || $jqDoc.find("#MRScreenContent div").length > 0  || $("#ChartScreenContent div").length > 0) {
-                        if ($jqDoc.find("#messageDialogue.printmd").length == 0) {
-                            $jqDoc.find("body").prepend("<div id=\"messageDialogue\" class=\"printmd  noprint\">We recommend printing this report in Microsoft Edge, Google Chrome, or Firefox.</div>");
-                            //$jqDoc.find("#messageDialogue.printmd").dialog({width: 330,dialogClass: 'disclDialog', modal:true, position: 'center'});	
-                        }
-
-                        clearInterval(disclI);
-                        //console.log('cleared interval');
-                        // $jqDoc.find(".sectioncol").each(function(i,el){
-                        // 	$(el).css('width',$(el).attr('width')-5);
-                        // });
-                        $jqDoc.find('div.print_logo:first').parent().hide();
-                        //$jqDoc.find('div.print_logo:first').parent().append("<div style='float:left;margin-left:50%;font-size:14px;font-weight:600;padding-bottom:20px;position:relative;left:-45px;'>" + tabtitle + " Report</div>");
-
-
-                        $jqDoc.find(".scrollable").parent().css({ 'height': 'auto', 'width': '100%', 'overflow-x': 'visible', 'overflow-y': 'visible' });
-                        $jqDoc.find("#disclosureSearchMain, #MRScreenContent").hide();
-                        var mb = $jqDoc.find("#main-body");
-
-                        $jqDoc.find(".disclosureHeader").clone().appendTo(mb);
-                         var csrcurl = "";
-						if($("#ZoomInScreen canvas").length > 0){
-     						 $(mb).find("canvas").each(function(ci,citem){
-                                csrcurl = $("#ZoomInScreen canvas")[ci].toDataURL();
-                                $(citem).replaceWith("<img src='" + csrcurl + "' style='height: " + $(citem).height() + "px;width:" + $(citem).width() + "px;'></img>");
-                           });  
-                                                     
-                            $jqDoc.find("#cc").show();
-                            $jqDoc.find("#reportTitle").hide();
-
-      					
-                        }else if( $("#ChartScreen").length > 0)
-                        {
-                           
-                           $(mb).find("canvas").each(function(ci,citem){
-                               var citemid = $(citem).attr('id');
-                               var cobj = window.top.document.getElementById(citemid);
-                               csrcurl = cobj.toDataURL();
-                                $(citem).replaceWith("<img src='" + csrcurl + "' style='height: " + $(cobj).height() + "px;width:" + $(cobj).width() + "px;'></img>");
-                           });  
-                           /** 
-                            $(mb).find("#gmChart").replaceWith("<img src='" + $("#ChartScreen #gmChart:first")[0].toDataURL()  + "' style='height: " + $("#gmChart").height() + "px;width:" + $("#gmChart").width() + "px;'></img>");
-                           **/
-                            $(mb).find("div.disclosureHeader, #chartOptions").hide();
-                           
-                            $jqDoc.find("#cc").show();
-                        
-                        }else
-                        {
-                            $jqDoc.find(".disclosureMain").clone().appendTo(mb);
-                        }
-
-
-                        //$(mb).find(".sectioncol").css({'width':'auto', 'min-width':'auto'})
-                        $(mb).find(".section").each(function (i, sec) {
-                            if ($(sec).find(".sectioncol").length == 3)
-                                $(sec).find(".sectioncol").css({ 'width': '32%' });//'min-width':'auto'
-                        });
-
-                        $(mb).find('.headsectioncol table th, th.header')
-                            .css({ 'color': 'black' })
-                            .each(function () {
-                                this.style.setProperty('font-size', '11px', 'important');
-                            });
-
-
-                        $(mb).find('.disclosureMain table th, .sectionHead')
-                            .css({ 'color': 'black', 'background-color': 'white', 'font-size': '11px' })
-                            .each(function () {
-                                this.style.setProperty('font-size', '11px', 'important');
-                            });
-
-                        $(mb).find('.disclosureMain table td')
-                            .css({ 'color': 'black', 'background-color': 'white', 'font-size': '10px' })
-                            .each(function () {
-                                this.style.setProperty('font-size', '10px', 'important');
-                            });
-
-                        $(mb).find('td.subhead')
-                            .prop('style', "color: black !important;background-color:white !important';font-size: '11px !important'")
-                            .each(function () {
-                                this.style.setProperty('background-color', 'white', 'important');
-                            });
-
-                        $(mb).find('.disclosureHeader').css({ 'background-color': 'white', 'color': 'black', 'font-size': '11px' });
-                        $(mb).find('.disclosureMain .tablesorter-icon').remove();
-                        
-
-                       
-
-
-
-
-                    }else{
-				//non search result page
-				$jqDoc.find("#cc").show();
-
-			}
-
-				//end if
-
-                    $jqDoc.find(".printmd").css({ 'margin-top': '0px' })
-                    //$jqDoc.find(".printmd").text("We recommend printing this report in LANDSCAPE orientation.");
-                    var tabtitle = $("div.disclosureLeftNav a.selected").text();
-                    if( $("#ChartScreen").length > 0){
-                        tabtitle = $("div[aria-describedby='ChartScreen'] .ui-dialog-title").text();
-                    }
-                    //console.log(tabtitle);
-                    $jqDoc.find("#reportTitle").html(tabtitle);
-                    //console.log('show cc and print logo');
-                    $jqDoc.find(".print_logo").show();//removed #cc, 
-                    //console.log('show parent');
-                    $jqDoc.find('div.print_logo:first').parent().show();
-
-                    clearInterval(disclI);
-                    setTimeout(function () {
-
-                        printPreviewWindow.document.close();
-                        printPreviewWindow.focus();
-                        printPreviewWindow.print();
-                        clearInterval(disclI);
-                    }, 2000);
-
-                }, 3000);
-            }
-
-        }
-    }
-
-}
-
-
-function printSPCalendarAsImage() {
-
-    $.holdReady(true);
-
-
-    $.getScript("/Style%20Library/GNMA%20Scripts/calendar/html2canvas.js", function () {
-        $.holdReady(false);
-
-        var d = $.Deferred();
-        $("#s4-workspace").scrollTop(0);
-        d.done(function (r) {
-            var win;
-            window.setTimeout(function () {
-
-                html2canvas($("#CenteredContent1"), {
-                    height: $("#CenteredContent1").height() * 1.13,
-                    logging: false,
-                    allowTaint: true,
-                    onrendered: function (canvas) {
-                        theCanvas = canvas;
-                        // $("#CenteredContent1").append(canvas);
-
-                        var url = theCanvas.toDataURL();
-                        //alert(url);
-                        win = window.open('', window.document.title, 'toolbar=no,location=no');
-
-                        //$(win.document.body).append("<div style='position:fixed;left:0;right:0;top:0;bottom:0;text-align:center;'><img style='max-width:99%;max-height:99%;' src=\""+url+"\"/></div>");
-
-
-                        var i = setInterval(function () {
-                            if (typeof win.document != 'undefined') {
-                                clearInterval(i);
-                                $(win.document.body).append("<img style=\"width:100%;\" src=\"" + url + "\"/>");
-                                win.print();
-                            }
-                        }, 1000);
-
-                    }//end on rendered
-                });//end html2canvas
-
-                setTimeout(function () {
-                    //alert('return page');
-
-                    $("#printLogo").remove();
-                    $("div.expandedContent:nth-child(2),.gmHeaderBar,.gmFooter,#SlideShowZone,div.centeredContent:first,.shareContentDiv,div.content_last_updated, a[title='Previous Month'],a[title='Next Month']").show();
-                    $("div.ms-acal-item").css({ 'max-height': '34px', 'overflow': 'hidden' });
-                    fixUpCalendar();
-
-                }, 1000);
-            }, 2000);
-
-        });
-
-        $(".s4-wpTopTable").each(function (i, tbl) { $(tbl).attr('width', $(tbl).outerWidth()); });
-        var printLogo = "<img id='printLogo' style='border: currentColor; border-image: none;' alt='GinnieMae.gov' src='/publishingimages/gnma_logo_small.png'>";
-
-        $("div.expandedContent:nth-child(2),.gmHeaderBar,.gmFooter,#SlideShowZone,div.centeredContent:first,.shareContentDiv,div.content_last_updated, a[title='Previous Month'],a[title='Next Month']").hide();
-        $("div.boxedContent:first").prepend(printLogo);
-        $("div.ms-acal-item").css({ 'max-height': 'none', 'overflow': 'visible' });
-        fixUpCalendar();
-
-        d.resolve('done');
-
-    });//end loading html canvas script
-
-}
-
-
-function printCalendar(jqueryContentID) {
-    var printPreviewWindowSetting = "toolbar=yes,location=no,directories=yes,menubar=yes,scrollbars=yes";
-
-    var printTitle = document.title;
-    //  var printLogo = '';
-
-    //  if ($('td.s4-titlelogo').length != 0)
-    //	printLogo = $('.gmLogo').html();
-
-    var printLogo = "<img style='border: currentColor; border-image: none;' alt='GinnieMae.gov' src='/publishingimages/gnma_logo_small.png'>";
-
-    if ($(jqueryContentID).length != 0) {
-        var calendarObject = $(jqueryContentID).find('#calendar').first();
-        if (calendarObject.length != 0) {
-            var date = calendarObject.fullCalendar('getDate');
-            var selectedMonth = date.getMonth();
-            var selectedYear = date.getFullYear();
-            //console.log($(jqueryContentID).attr("siteURL"));
-            printPreviewWindowSetting = printPreviewWindowSetting + ",width=" + 1000 + ", height=700, left=100, top=25";
-
-            var previewStyle = '';
-            //previewStyle = previewStyle +'<link rel="stylesheet" type="text\/css" href="\/_layouts\/1033\/styles\/Themable\/corev4.css" />';
-            //previewStyle = previewStyle +'<link rel="stylesheet" type="text\/css" href="//cloud.typography.com/6197894/6218952/css/fonts.css" />';
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/ginniemae_print.css"/>';
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text/css" href="/Style Library/GNMA CSS/fullcalendar.css">';
-            previewStyle = previewStyle + '<link rel="stylesheet" type="text/css" href="/Style Library/GNMA CSS/fullcalendar.print.css">';
-            previewStyle = previewStyle + '<script type="text/javascript" src="/Style Library/GNMA Scripts/jquery-1.4.4.js"></script>';
-            previewStyle = previewStyle + '<script type="text/javascript" src="/Style Library/GNMA Scripts/jquery-ui-1.8.23.min.js"></script>';
-            previewStyle = previewStyle + '<script type="text/javascript" src="/Style Library/GNMA Scripts/fullcalendar.min.js"></script>';
-            previewStyle = previewStyle + '<script type="text/javascript" src="/Style Library/GNMA Scripts/jquery.SPServices-0.7.2.js"></script>';
-            previewStyle = previewStyle + '<script type="text/javascript" src="/Style Library/GNMA Scripts/CalendarPrint_Preview.js"></script>';
-
-
-
-            var printContent = '<html><he' + 'ad>';
-            printContent = printContent + '<title>' + printTitle + '</title>';
-            printContent = printContent + previewStyle;
-            printContent = printContent + '</head><body class="ms-WPBody" onLoad="self.print()"><left><div id="main-body">';
-
-            //logo
-            printContent = printContent + '<div class="print_logo">' + printLogo + '</div>';
-            //alert(selectedMonth);
-            //console.log(content);
-            //printContent = printContent +'<div style="width: 950px;	margin: 0 auto;" id="calendar" class="fc" '+'siteURL="'+calendarObject.attr("siteURL")+'" listName="'+calendarObject.attr("listName")+'" currentMonth="'+selectedMonth+'"></div>';
-            printContent = printContent + '<div style="width: 950px;	margin: 0 auto;" id="calendar" class="fc" ' + 'siteURL="' + calendarObject.attr("siteURL") + '" listName="' + calendarObject.attr("listName") + '" currentMonth="' + selectedMonth + '" currentYear="' + selectedYear + '"></div>';
-            printContent = printContent + "</div></left></body></html>";
-            //console.log(docprint);
-            $("div.ui-accordion-content:not(.ui-accordion-content-active)").hide();//close accordions
-            var printPreviewWindow = window.open("", "", printPreviewWindowSetting);
-            printPreviewWindow.document.open();
-            printPreviewWindow.document.write(printContent);
-            printPreviewWindow.document.close();
-            window.print();
-            //printPreviewWindow.document.body.style.overflow = 'scroll';
-            printPreviewWindow.focus();
-
-        }
-    }
-}
-
-
-var spin;
-
-function printCalendarAgendaView(output, dt) {
-    var cWebPart = $("div.ms-acal-header:first").closest("div[webpartid]");
-    spin = $("<div id='loadingicon'><img src='/publishingimages/loading.gif'/></div>").insertBefore(cWebPart);
-    spin.hide().show();
-    var events = [];
-    var includeddays = [];
-    dt = dt != null ? dt : $("tr.ms-acal-summary-dayrow:eq(1) th:first").attr('date').split('/');
-    var calName = $(".pageHeader:first").text().trim();
-    var startDate = dt[2] + "-" + dt[0] + "-" + dt[1] + "T12:00:00Z";// "2012-05-12T12:00:00Z"; // Our example will show the month of May 2012
-
-    var objDate = new Date(startDate.split('T')[0].split('-')[0], parseInt(startDate.split('T')[0].split('-')[1]) - 1, startDate.split('T')[0].split('-')[2]);
-
-
-    var ctx = "ctx" + cWebPart.attr('id').split('WebPart')[1];
-    var listNm = eval(ctx + ".ListTitle");
-    $().SPServices({
-        operation: "GetListItems",
-        async: false,
-        listName: listNm,
-        CAMLViewFields: "<ViewFields>" +
-            "<FieldRef Name='Title'/>" +
-            "<FieldRef Name='CalTitle'/>" +
-            "<FieldRef Name='ID' />" +
-            "<FieldRef Name='Description' />" +
-            "<FieldRef Name='EventDescription' />" +
-            "<FieldRef Name='Body' />" +
-            "<FieldRef Name='Expires' />" +
-            "<FieldRef Name='URL' />" +
-            "<FieldRef Name='Created' />" +
-            "<FieldRef Name='Duration0' />" +
-            "<FieldRef Name='EventDate' />" +
-            "<FieldRef Name='EndDate' />" +
-            "<FieldRef Name='fAllDayEvent' />" +
-            "<FieldRef Name='RecurrenceID' />" +
-            "<FieldRef Name='fRecurrence' />" +
-            "<FieldRef Name='RecurrenceData' />" +
-            "</ViewFields>",
-        CAMLQuery: "<Query>" +
-            "<Where>" +
-            "<DateRangesOverlap>" +
-            "<FieldRef Name='EventDate' />" +
-            "<FieldRef Name='EndDate' />" +
-            "<FieldRef Name='RecurrenceID' />" +
-            "<Value Type='DateTime'>" +
-            "<Month />" +
-            "</Value>" +
-            "</DateRangesOverlap>" +
-            "</Where>" +
-            "<OrderBy>" +
-            "<FieldRef Name='EventDate' />" +
-            "</OrderBy>" +
-            "</Query>",
-        CAMLQueryOptions: "<QueryOptions>" +
-            "<CalendarDate>" + startDate + "</CalendarDate>" +
-            "<RecurrencePatternXMLVersion>v3</RecurrencePatternXMLVersion>" +
-            "<ExpandRecurrence>TRUE</ExpandRecurrence>" +
-            "</QueryOptions>",
-        completefunc: function (xData, Status) {
-            var pushed = false;
-            var startSpl = [];
-            var endSpl = [];
-            var startSplTime = [];
-            var endSplTime = [];
-            var i;
-            //$(xData.responseXML).SPFilterNode("z:row").each(function() {
-            $($.parseXML(xData.responseText)).find("*[ows_ID]").each(function (ri, r) {
-                var $node = r,// $(this),
-                    fADE = $(r).attr("ows_fAllDayEvent") || 0,
-                    thisADE = (fADE == 0),
-                    thisID = $(r).attr("ows_ID"),
-                    sepID = thisID.indexOf(';#'),
-                    thisTitle = $(r).attr("ows_CalTitle").split(';#')[1],
-                    thisTitle = thisTitle;//.replace('&amp;','and').replace('&','and').replace('/','\\');
-                thisRecurrence = $(r).attr("ows_fRecurrence"),
-                    thisDesc = $(r).attr("ows_EventDescription");
-                if (sepID != -1) thisID = thisID.substring(0, sepID);
-                var thisUrl = "DispForm.aspx?ID=" + thisID,
-                    thisClass = thisTitle.replace(" ", "").substr(0, 10).replace(",", "").replace(" ", "") + thisID,
-                    thisRD = $(r).attr("ows_RecurrenceData");
-                startSpl = $(r).attr("ows_EventDate").split(" ")[0].split("-");
-                startSplTime = $(r).attr("ows_EventDate").split(" ")[1].split(":");
-                endSpl = $(r).attr("ows_EndDate").split(" ")[0].split("-");
-                endSplTime = $(r).attr("ows_EndDate").split(" ")[1].split(":");
-                sDt = $(r).attr("ows_EventDate");
-                eDt = $(r).attr("ows_EndDate");           // if working with FullCalendar or building an events object for another purpose...
-                i = {};
-                i.id = thisID;
-                i.title = thisTitle;
-                i.startDt = sDt;
-                i.endDt = eDt;
-                i.dtStart = new Date(startSpl[0], startSpl[1] - 1, startSpl[2], startSplTime[0], startSplTime[1], startSplTime[2]);
-                i.dtEnd = new Date(endSpl[0], endSpl[1] - 1, endSpl[2], endSplTime[0], endSplTime[1], endSplTime[2]);
-                if ($(r).attr("ows_Duration0") != null && $(r).attr("ows_Duration0") != "" && parseInt($(r).attr("ows_Duration0")) > 1) {
-                    i.dtEnd = i.dtEnd.addDays(parseInt($(r).attr("ows_Duration0")) - 1);
-                }
-                i.multiDay = (parseInt(sDt.split(" ")[0].split("-")[2]) != parseInt(eDt.split(" ")[0].split("-")[2]) ? true : false);
-
-                i.allDay = thisADE;
-                i.description = thisDesc;
-
-
-                var start = new Date(i.dtStart);
-
-
-
-                start.setHours(0, 0, 0, 0);
-                while (start <= i.dtEnd) {
-                    if (start.getMonth() == objDate.getMonth()) {
-                        if (pushed == false) {
-                            events.push(i);
-                            pushed = true;
-                        }
-                        if (!(includeddays.map(Number).indexOf(+start) >= 0))
-                            includeddays.push(start);
-                    }
-                    start = start.addDays(1);
-                }//end while
-                pushed = false;
-            });//end each event
-            if (output === "print")
-                renderEventsInAgendaFormat(calName, objDate, events, includeddays);
-            else if (output === "mobile")
-                renderMobileCalendar(calName, objDate, events, includeddays);
-
-        }
-    })
-}
-
-function renderMobileCalendar(name, objDate, events, includeddays) {
-    var selYear = objDate.getFullYear();
-    var selMonth = objDate.getMonth();
-    var years = [];
-    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
-    var monthsInt = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-    var dx = new Date().getFullYear() - 3;
-    while (dx <= new Date().getFullYear() + 4) {
-        years.push(dx);
-        dx++;
-    }
-    //console.log('mobile time');
-    var locale = "en-us";
-    var month = objDate.toLocaleString(locale, { month: "long" });
-    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    var period = month + " " + objDate.getFullYear();
-    var prevDate = "";
-    var dt = new Date();
-    var check = new Date();
-
-    var dtspl = [];
-    var fEvents = [];
-    var tbl;
-
-    if ($(".mobileCal").length === 0) {
-        $(".pageHeader").parent().css({ 'padding-left': '0px', 'margin-bottom': '10px' });
-        $(".pageHeader").parent().find("*:not('.pageHeader')").wrapAll("<div class='card-wrapper card-2'/>");
-
-        tbl = $("<div class='card-wrapper card-2'><table cellpadding='0' cellspacing='0' class='mobileCal'> \
-		<thead><tr><th colspan='2' class='mCalHeader'><select id='mCalMonthSel'></select>  <select id='mCalYearSel'></select></th></tr></thead> \
-		<tbody></tbody> \
-	</table></div>").appendTo($("div.ms-acal-rootdiv").closest("div[webpartid]"));
-        setTimeout(function () {
-            $("div.ms-acal-rootdiv").closest("div[webpartid]")
-                .css('left', '0px')
-                .css('overflow', 'visible');
-        }, 100);
-        //$("div.ms-acal-header").appendTo(tbl.find("th.mCalHeader"));
-        $(months).each(function (mi, m) {
-            tbl.find("#mCalMonthSel").append("<option " + (selMonth === mi ? "selected='SELECTED'" : "") + " value='" + (mi + 1) + "'>" + m + "</option>");
-        });
-
-        $(years).each(function (yi, y) {
-            tbl.find("#mCalYearSel").append("<option " + (selYear === y ? "selected='SELECTED'" : "") + " value='" + y + "'>" + y + "</option>");
-        });
-        $("#mCalMonthSel,#mCalYearSel")
-            .selectmenu({
-                change: function (evt) {
-                    printCalendarAgendaView("mobile", [parseInt($("#mCalMonthSel").val()), 1, parseInt($("#mCalYearSel").val())]);
-                }
-            });
-    } else {//calendar already exists, just remove rows
-        tbl = $("table.mobileCal");
-    }
-    if (events.length == 0) {
-        tbl.find("tbody").find("tr").remove();
-        tbl.find("tbody").append("<tr><td colspan='2' style='text-align:center;'>There are no events for the month.</td></tr>");
-    } else {
-        tbl.find("tbody").find("tr").remove();
-        $(includeddays).each(function (id, iditem) {
-            check = iditem;
-            check.setHours(0, 0, 0, 0);
-            var d1;
-            var d2;
-            fEvents = $(events).filter(function (fi, fitem) {
-                d1 = new Date(fitem.dtStart);
-                d1.setHours(0, 0, 0, 0);
-                d2 = new Date(fitem.dtEnd);
-                d2.setHours(0, 0, 0, 0);
-                return (check.getTime() <= d2.getTime() && check.getTime() >= d1.getTime());
-            });
-            fEvents.sort(function (a, b) {
-                return (new Date(a.dtStart).getHours() + new Date(a.dtStart).getMinutes()) - (new Date(b.dtStart).getHours() + new Date(b.dtStart).getMinutes());
-            });
-            var dayRow = $("<tr><td class='mDayCol'><div>" + (check.getDate()) + "</div><div>" + days[check.getDay()].substring(0, 3) + "</div></td><td class='mEventCol'></td></tr>").appendTo(tbl.find("tbody"));
-            fEvents.each(function (i, item) {
-                dtspl = item.startDt.split(" ")[0].split('-');
-                dt = new Date(dtspl[0], dtspl[1] - 1, dtspl[2]);
-                if (item.title.indexOf(",") > -1)
-                    dayRow.find("td:last").append("<div data-title='" + item.title + "' data-desc='" + item.description + "' class='mobileEvent'>" + item.title.substr(0, item.title.lastIndexOf(",")) + (item.multiDay ? "*" : "") + item.title.substr(item.title.lastIndexOf(",")) + "</div>");
-                else
-                    dayRow.find("td:last").append("<div data-title='" + item.title + "' data-desc='" + item.description + "'  class='mobileEvent'>" + item.title + (item.multiDay ? "*" : "") + "</div>");
-
-                prevDate = item.startDt.split(" ")[0];
-            });
-        });//end included date
-    }
-    spin
-        .hide('slow')
-        .remove();
-    applyMobileTooltips();
-
-}
-
-function renderEventsInAgendaFormat(name, objDate, events, includeddays) {
-    var locale = "en-us";
-    var month = objDate.toLocaleString(locale, { month: "long" });
-    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    var period = month + " " + objDate.getFullYear();
-    var win = window.open('', window.document.title, 'toolbar=no,location=no');
-    $.get('/style%20library/gnma%20css/gm.css', function (data) {
-        win.document.write("<html><head><style>" + data + "</style></head><body></body></html>");
-    });
-    var prevDate = "";
-    var dt = new Date();
-    var check = new Date();
-
-    var dtspl = [];
-    var fEvents = [];
-    var i = setInterval(function () {
-        if (typeof win.document != 'undefined') {
-            clearInterval(i);
-            $(win.document.body).append("<div class='calendarAgendaViewCont'><table cellspacing='0' cellpadding='0' class='calendarAgendaView'><thead><tr><th colspan='2' style='text-align:left;'><img src='/publishingimages/gmbw.png'/></th></tr><tr><th colspan='2' style='text-align:center;'><span style='font-size:16px;'>" + name + "</span><br/>" + period + "</th></tr><tr><th colspan='2' style='text-align:right;padding:3px;'>*Recurring event</th></thead><tfoot></tfoot><tbody></tbody></table></div>");
-            var tbl = $(win.document.body).find("table.calendarAgendaView tbody");
-            if (events.length == 0) {
-                tbl.append("<tr><td colspan='2' style='text-align:center;'>There are no events for the month.</td></tr>");
-            }
-            $(includeddays).each(function (id, iditem) {
-                check = iditem;
-                check.setHours(0, 0, 0, 0);
-                var d1;
-                var d2;
-                fEvents = $(events).filter(function (fi, fitem) {
-                    d1 = new Date(fitem.dtStart);
-                    d1.setHours(0, 0, 0, 0);
-                    d2 = new Date(fitem.dtEnd);
-                    d2.setHours(0, 0, 0, 0);
-                    return (check.getTime() <= d2.getTime() && check.getTime() >= d1.getTime());
-                });
-                fEvents.sort(function (a, b) {
-                    return (new Date(a.dtStart).getHours() + new Date(a.dtStart).getMinutes()) - (new Date(b.dtStart).getHours() + new Date(b.dtStart).getMinutes());
-                });
-                tbl.append("<tr><td colspan='2'><div style='page-break-inside:avoid;'><div class='grpCont'><div class='evDt'>" + (check.getDate()) + "-" + days[check.getDay()] + "</div><div class='imgCont'><img src='/style library/images/black.png' /></div></div><ul></ul></div></td></tr>");
-                fEvents.each(function (i, item) {
-                    dtspl = item.startDt.split(" ")[0].split('-');
-                    dt = new Date(dtspl[0], dtspl[1] - 1, dtspl[2]);
-                    if (item.title.indexOf(",") > -1)
-                        tbl.find("ul:last").append("<li>" + item.title.substr(0, item.title.lastIndexOf(",")) + (item.multiDay ? "*" : "") + item.title.substr(item.title.lastIndexOf(",")) + "</li>");
-                    else
-                        tbl.find("ul:last").append("<li>" + item.title + (item.multiDay ? "*" : "") + "</li>");
-
-                    prevDate = item.startDt.split(" ")[0];
-                });
-            });//end included date
-            setTimeout(function () {
-                win.document.close();
-                win.focus();
-                win.print();
-                win.close();
-
-            }, 1000);
-        }
-    }, 1000);
-}
-
-function printSPCalendar() {
-    $(".s4-wpTopTable").each(function (i, tbl) { $(tbl).attr('width', $(tbl).outerWidth()); });
-    var printLogo = "<img id='printLogo' style='border: currentColor; border-image: none;' alt='GinnieMae.gov' src='/publishingimages/gnma_logo_small.png'>";
-    $("div.expandedContent:nth-child(2),.gmHeaderBar,.gmFooter,#SlideShowZone,div.centeredContent:first,.shareContentDiv,div.content_last_updated, a[title='Previous Month'],a[title='Next Month']").hide();
-    $("div.boxedContent:first").prepend(printLogo);
-    setTimeout(function () {
-        window.print();
-
-    }, 500);
-    setTimeout(function () {
-        $("#printLogo").remove();
-        $("div.expandedContent:nth-child(2),.gmHeaderBar,.gmFooter,#SlideShowZone,div.centeredContent:first,.shareContentDiv,div.content_last_updated, a[title='Previous Month'],a[title='Next Month']").show();
-    }, 1000);
-
-}
-
-Date.prototype.addDays = function (days) {
-    var dat = new Date(this.valueOf());
-    dat.setDate(dat.getDate() + days);
-    return dat;
-}
-
-function applyMobileTooltips() {
-    $(document).tooltip({
-        items: ".mobileEvent",
-        track: true,
-        content: function () {
-            var element = $(this);
-            var desc = $(this).data('desc');
-            return element.data('title') + (desc != "" && $("<span>" + desc.replace('/', '').replace('&amp;', '') + "</span>").text().trim() != "" ? "<br />" + desc : "");
-        }
-    });
-}”ò¿ŸÂ  ±      ±œT≥      stripScriptTags    !qóL      htmlContent    ú≥ÊŸ      div    ∏OÄ      document   DC      createElement      Q√:	      innerHTML      XFZ      getElementsByTagName   •_œ”
-      parentNode     ˘˙K      removeChild	    ®jöj      divs
-   6CY>	      className      ø≠œq      accessibility      yo      setUserInputTagValues      KDÿ      jqueryContentID    A¢Ωê      attr   ¨‚s◊      toUpperCase    ¥ÿ;é      TEXT   &⁄õ      val    ó{⁄D      setAttribute   ü,r\      select option:selected     ≈.»œ      selected   Zo$Ù      printContent   ©ÎU      stripScriptTag     ò◊/<[     <div id='dialog-message' title=''><div><img src='https://ginniemae.gov/publishingimages/gnma_logo_small.png' alt='Data Search' style='margin-top: 5px;' /></div><div><p><b>Printing Tip</b> <br><br>We recommend printing this page in Microsoft Edge, Google Chrome, or Firefox. Internet Explorer is currently not supported for printing.</p><div></div>    †Á„V      appendTo   <Ÿ∂      #WebPartWPQ5   >ü      css    e}ü      display    ,Ω      none   ìãà	      userAgent      ¯2áâ      window     π„+	      navigator       L.2Ñ
-      checkForIE!     ⁄Eú¡      indexOf"    ƒÇù°      MSIE #      ˛¿1@      #dialog-message$    ‘πm      dialog%      ∫˚      modal&      HL
-	      draggable'      Ü^°”[      ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-dialog-buttons ui-draggable(    ÎƒJ˚      width)      HáíK      show*   ¨Eü	      modalHtml+      rNq‰      <div id="dialogPrintOptions" title="Pick Your Format"><p>Print Options:<ul><li>Listing: List of all events grouped by the days on which they occur.</li><li>Calendar: Events displayed on a month calendar view.</li></ul></p></div>,   ï>^      calPrintFormat-     Ï>Së      div.ms-acal-rootdiv.    örg.      modalObj/   sMjá      #s4-bodyContainer0      ∑ƒKE	      resizable1      ∑…≈      height2     z¡≤S      auto3   \éã      buttons4    x√Ω€	       Listing 5      „Ç»≈      list6   øõ&{      printContentExecute7    &Ùê⁄      Cancel8     :	∂#      create9     /ﬂ‰ï      closest:    ®≥J"
-      .ui-dialog;     Bå|      addClass<   6∏’      dialogPrintOptions=     ∫Â|      MRScreen>   ÍNG      #ZoomInScreen?      ¶¢Ç      concat@     6F„@/      ,div.expandedContent:has(div[id*='WebPartWPQ'])A    ó€      div.ui-accordion-contentB   ·Ò¬      printCalendarAgendaViewC    á.      printD      y˚R‘      printSPCalendarE    ÕÅ±Ì      printPreviewWindowSettingF      ÈØµÙB      toolbar=yes,location=no,directories=yes,menubar=yes,scrollbars=yesG     ”…ZP
-      printTitleH     “E      titleI      æ«†	      printLogoJ      î æ~w      <img style='border: currentColor; border-image: none;' alt='GinnieMae.gov' src='/publishingimages/gnma_logo_small.png'>K    4W»      contentL    …·¥≥      contM   ‘„X      htmlN   Ø}_      ,width=O    &}÷(      , height=600, left=100, top=25P     2ùƒv      previewStyleQ   &ˇ6&¥      <script type="text/javascript" src="/Style Library/GNMA Scripts/jquery-1.4.4.js"></script><script type="text/javascript" src="/Style Library/GNMA Scripts/printpreview.js"></script>R   b√;¿Z      <link rel="stylesheet" type="text/css" href="/_layouts/1033/styles/Themable/search.css" />S     ¯"¶R      <link rel="stylesheet" type="text/css" href="/Style%20Library/GNMA%20CSS/gm.css"/>T     ‚ ^      <link rel="stylesheet" type="text/css" href="/Style%20Library/GNMA%20CSS/gm_contentarea.css"/>U     i—qv]      <link rel="stylesheet" type="text/css" href="/Style%20Library/GNMA%20CSS/ginniemae_rte.css"/>V      ˇ¡ãj      <link rel="stylesheet" type="text/css" href="/Style%20Library/en-US/Themable/Core%20Styles/controls.css"/>W     ãÿZ_      <link rel="stylesheet" type="text/css" href="/Style%20Library/GNMA%20CSS/ginniemae_print.css"/>X    Â˘èà      <link rel="stylesheet" type="text/css" href="/investors/investor_search_tools/siteassets/newdisclosuresearch/css/disclosuresearch.css"/>Y   É®¥      #disclosureSearchMainZ      ºx≤˙      #searchPanel[   îïˆí`      <link rel="stylesheet" type="text/css" href="/Style%20Library/GNMA%20CSS/ginniemae_search.css"/>\   ≤¿π;"     <style type="text/css">@page{size:auto !important;}.printmd {margin-top:40%;padding: 10px;border: 2px solid black;text-align: center;border-radius: 5px;font-family: helvetica;}					@page {size: 25cm 35.7cm;	margin: 5mm 5mm 5mm 5mm;} @media print {.noprint {  visibility: hidden;	} }</style>_     ù¢õ±      <title>`    :q{      </title>d   •‘√r.      <div style="display:none;" class="print_logo">e     t…Æjæ      </div><div id='reportTitle' style='float: left;margin-left: 50%;font-size: 14px;font-weight: 600;padding-bottom: 20px;position: relative;left: -300px;width: 600px;text-align: center;'></div>f     …s#      <div style='display:none;' id='cc'>g    ©è^      </div>h     1"6ù      </div></left></body></html>i    9±⁄:      div.ui-accordion-content:not(.ui-accordion-content-active)j     üvÙ}      hidek   ëvÉ      printPreviewWindowl     óx5      openm   ;ÌÌ:      $jqDocn     3AtŸ
-      setTimeouto     ·5h˛      #cc, .print_logop   KÃÌ      focusq      ª$‹      disclIr     Ïà       setIntervals    ]¬≥1      #MRScreenContent divt   ¬Q:/      #ChartScreenContent divu    BˆAÇ      #messageDialogue.printmdv   òh;      bodyw   ı£$      prependx    ≤ ÷Là      <div id="messageDialogue" class="printmd  noprint">We recommend printing this report in Microsoft Edge, Google Chrome, or Firefox.</div>y   bPk      clearIntervalz      ƒ6n      div.print_logo:first{   ˛Ë˘2      parent|     ü≤h      .scrollable}    ª?y      100%~   }Ov
-      overflow-x     ?Iqõ      visibleÄ    øˆÜ
-      overflow-yÅ     C‰≥«'      #disclosureSearchMain, #MRScreenContentÇ    Í/Ûy
-      #main-bodyÉ     ë‡/Ú      .disclosureHeaderÑ      ±4çÆ      cloneÖ      √ÆZÛ      csrcurlÜ    ∏3Ç      #ZoomInScreen canvasá   V_      canvasà     ˘”V«      citemâ      ∑n]õ	      toDataURLä      ¶Sæ∏      replaceWithã    ¨í∏
-      <img src='å     à@»      ' style='height: ç      ÿ5Ù	      px;width:é      ‰©é      px;'></img>è    3K<      #ccê    )ßÔ      #reportTitleë   > K      #ChartScreení   ^ü+      citemidì    “PD      cobjî   $√Á      topï    t«£      getElementByIdñ     ÖÙã#      div.disclosureHeader, #chartOptionsó    2J       .disclosureMainò    £çH©      .sectionô   ûÄ      secö    A°Ãˇ      .sectioncolõ    ∏t+      32%ú    á'#      .headsectioncol table th, th.headerù    Ï
-ó      colorû      ≈P≠m      blackü      AÒË/      setProperty†    ~ a	      font-size°      h◊ü      11px¢   ÿﬁNÑ	      important£       á°ï&      .disclosureMain table th, .sectionHead§     b Y      background-color•   §Ω      white¶      0shó      .disclosureMain table tdß   –£¥      10px®   Qßı¥
-      td.subhead©     “P…ù      prop™   —(éW      color: black !important;background-color:white !important';font-size: '11px !important'´    ‰á¢!      .disclosureMain .tablesorter-icon¨      *N∑∆      remove≠     ⁄Â◊I      .printmdÆ   A=
-      margin-topØ     l∆T´      0px∞    ŒÇÑ\      tabtitle±   W»ÚÕ       div.disclosureLeftNav a.selected≤   à3¿µ      text≥   ~tN∫4      div[aria-describedby='ChartScreen'] .ui-dialog-title¥   S©t∫      .print_logoµ    Ö¬=Õ      printSPCalendarAsImage∂     ú≈{Ø	      holdReady∑      ˝∑ÈI	      getScript∏      Ä‚Ê7      /Style%20Library/GNMA%20Scripts/calendar/html2canvas.jsπ    Ka      Deferred∫   {·˛é      #s4-workspaceª      ìGÎ	      scrollTopº      UrÊ¡      winΩ    9 ?¿      html2canvasæ    Øvb¡      #CenteredContent1ø      -ßµ‚      logging¿    ^_%N
-      allowTaint¡     ÓG–?
-      onrendered¬     ”Ñ\é	      theCanvas√      8cG      toolbar=no,location=noƒ     ‹B-      append≈     ”Ùw      <img style="width:100%;" src="∆     ÌºÚ^      "/>«    ]N
-      #printLogo»     }1ª      div.expandedContent:nth-child(2),.gmHeaderBar,.gmFooter,#SlideShowZone,div.centeredContent:first,.shareContentDiv,div.content_last_updated, a[title='Previous Month'],a[title='Next Month']…    V(`E      div.ms-acal-item    ˜E
-      max-heightÀ     ˙˙º      34pxÃ   Ñ€ËW      hiddenÕ     e}Q      fixUpCalendarŒ      8#≈      .s4-wpTopTableœ     ’ELÕ      tbl–    QÒ=i
-      outerWidth—     ËZÔfÜ      <img id='printLogo' style='border: currentColor; border-image: none;' alt='GinnieMae.gov' src='/publishingimages/gnma_logo_small.png'>“     òCêJ      div.boxedContent:first”     ìçKá      printCalendar‘      Ô2Ì      calendarObject’     ˜6{ø	      #calendar÷      `~ﬂ      first◊      Ê∑}      fullCalendarÿ   ∂≠      getDateŸ    Ïp…–      selectedMonth⁄      "ü      getMonth€   ±¬!l      selectedYear‹   %k‚5      getFullYearﬁ    ´“)7W      <link rel="stylesheet" type="text/css" href="/Style Library/GNMA CSS/fullcalendar.css">ﬂ    ‰¸ãÎ]      <link rel="stylesheet" type="text/css" href="/Style Library/GNMA CSS/fullcalendar.print.css">‡      vÔZ      <script type="text/javascript" src="/Style Library/GNMA Scripts/jquery-1.4.4.js"></script>·     ¬p*b      <script type="text/javascript" src="/Style Library/GNMA Scripts/jquery-ui-1.8.23.min.js"></script>‚     Ñâ03^      <script type="text/javascript" src="/Style Library/GNMA Scripts/fullcalendar.min.js"></script>„     tìÙ%e      <script type="text/javascript" src="/Style Library/GNMA Scripts/jquery.SPServices-0.7.2.js"></script>‰      s—c      <script type="text/javascript" src="/Style Library/GNMA Scripts/CalendarPrint_Preview.js"></script>Â    #ˆ 6O      </head><body class="ms-WPBody" onLoad="self.print()"><left><div id="main-body">Ê    sàÎ¬      <div class="print_logo">È   /?—@      siteURLÍ    æa0H      " listName="Î   2=¿      listNameÏ   )€Æª      " currentMonth="Ì   . r      " currentYear="Ó    .ìú      "></div>Ô   ¯kÄ      spin   [>√ˇ      outputÒ     £2>e      cWebPartÚ   uâ      div.ms-acal-header:firstÛ   Â…£      div[webpartid]Ù     ≤é[F      <div id='loadingicon'><img src='/publishingimages/loading.gif'/></div>ı     ÂL…2      insertBeforeˆ   QÚ(ì      events˜     ÕeYÅ      includeddays¯   ÑchK(      tr.ms-acal-summary-dayrow:eq(1) th:first˘   àXÆ      calName˙    Ä".      .pageHeader:first˚      óñôb      trim¸   Z]_ê	      startDate˝      ÓßÊ
-      T12:00:00Z˛     âú;≥      objDateˇ    kR`      ctx    üıU(      WebPart   Nw@´      listNm    ¸ú}
-      .ListTitle    ˜_k
-      SPServices    ô™Gë	      operation     qï\™      GetListItems  ,üŸ      CAMLViewFields    ù 4‘	      CAMLQuery%     àsM      CAMLQueryOptions,  dO»e      completefunc-  të>      xData.     ˚Èª      Status/    ÛÉøù      pushed0    ¿7¨Q      startSpl1  ¢äö      endSpl2    ãfÌ      startSplTime3  ´XO&
-      endSplTime4    Û¿bŸ      parseXML5  H}ı#      responseText6  æHTp	      *[ows_ID]7     ≠E      $node8     –Bev      fADE9  Ëú5Ô      ows_fAllDayEvent:  JîiD      thisADE;   HjÊÎ      thisID<    Y±?      ows_ID=    q≈ÓÑ      sepID>     •∞      ;#?    'ÒKF	      thisTitle@     Ù—êª      ows_CalTitleA  Ú˜À3      thisRecurrenceB    ¸¿’       ows_fRecurrenceC   Ö7ã      thisDescD  ≥øˇ      ows_EventDescriptionE  ﬂY„	      substringF     C±«u      thisUrlG   rè°Q      DispForm.aspx?ID=H     ∆"<ü	      thisClassI     6ôfÿ      substrJ    é3÷      thisRDK    K Y—      ows_RecurrenceDataL    ≤30      ows_EventDateM      ;      ows_EndDateN   ˆã‰*      sDtO   @ú      eDtP   ã9¬π      startDtQ   ÄA˛Á      endDtR     êvç¨      dtStartS   g1u      dtEndT     Ús∑ƒ      ows_Duration0U     ≤››q      addDaysV   ~zSW      multiDayW  ⁄‹√      allDayX    Ñàö      descriptionY   ÏFôu      setHoursZ  Ñu2      push[  9Ã      map\   Û„      renderEventsInAgendaFormat]    
-Le      mobile^    Æƒ&Í      renderMobileCalendar_  ÁÈ¬      selYear`   øjEs      selMontha  È®cÑ      Janb   Ì∆ló      Febc   ¨keÆ      Mard   ¶EkS      Apre   Pó      Mayf   #˙Ç      Jung   áiø      Julh   ∂I—‚      Augi   ^3»«      Septj  ò˘ÕÈ      Octk   ≤}      Novl   2’¢L      Decm   ˘!X	      monthsIntn     H-¨      en-uso     >ú!      longp  H¥‡      Sundayq    £Bﬂ      Mondayr    ËâH1      Tuesdays   ö´	      Wednesdayt     ”5ª      Thursdayu  ‰±¥      Fridayv    ò∂k•      Saturdayw  Æ$.K      periodx    DÚ⁄      prevDatey  è¢ü1      checkz     â‡g°      dtspl{     Lﬁô      fEvents|   2[S]
-      .mobileCal}    g,
-      .pageHeader~   ‘Ê      padding-left  ’î,9      margin-bottomÄ     ¬QRã      *:not('.pageHeader')Å  o§à€      wrapAllÇ   	ô(ÿ"      <div class='card-wrapper card-2'/>É    Ä∞‘§     <div class='card-wrapper card-2'><table cellpadding='0' cellspacing='0' class='mobileCal'> 		<thead><tr><th colspan='2' class='mCalHeader'><select id='mCalMonthSel'></select>  <select id='mCalYearSel'></select></th></tr></thead> 		<tbody></tbody> 	</table></div>Ñ    ı]á      leftÖ  ÛÛ%∂      #mCalMonthSelÜ     †~y»      <option á   iåq      selected='SELECTED'à   òÊd8       value='â  µìë      '>ä    ò…	      </option>ã     ;ï"      #mCalYearSelå  ùÌøm      #mCalMonthSel,#mCalYearSelç    ÷T#ﬂ
-      selectmenué    Á˛¡      changeè    Ûçg      evtê   –1˜      table.mobileCalë   ßèâv      tbodyí      ‹ÚC[      <tr><td colspan='2' style='text-align:center;'>There are no events for the month.</td></tr>ì   ûE=≥      iditemî    >	≈      filterï    èªçn      fitemñ     uÙ.      getTimeó   Ü}ÿ„      sortò  }:CÂ      getHoursô  *™∏?
-      getMinutesö    Ñó}      dayRowõ    ÈwOF      <tr><td class='mDayCol'><div>ú     {•Z      </div><div>ù   =<jD      getDayû     n•4+      </div></td><td class='mEventCol'></td></tr>ü   ˝ÑÃ∫      item†  µÈê      td:last°   d±=%      <div data-title='¢     ﬁ≠ÊA      ' data-desc='£     ˘3 ”      ' class='mobileEvent'>§    ò»      lastIndexOf•   $ÓH[      '  class='mobileEvent'>¶   b{su      slowß  7Ù0      applyMobileTooltips®   ¯≈+Z"      /style%20library/gnma%20css/gm.css©    6ó(Å      data™  Löπ      <html><head><style>´   ú	î˝#      </style></head><body></body></html>¨   ∆i)     <div class='calendarAgendaViewCont'><table cellspacing='0' cellpadding='0' class='calendarAgendaView'><thead><tr><th colspan='2' style='text-align:left;'><img src='/publishingimages/gmbw.png'/></th></tr><tr><th colspan='2' style='text-align:center;'><span style='font-size:16px;'>≠  —≠ÔÙ      </span><br/>Æ  Gﬂ[ç      </th></tr><tr><th colspan='2' style='text-align:right;padding:3px;'>*Recurring event</th></thead><tfoot></tfoot><tbody></tbody></table></div>Ø     ï…Â¸      table.calendarAgendaView tbody∞    1 ﬁZa      <tr><td colspan='2'><div style='page-break-inside:avoid;'><div class='grpCont'><div class='evDt'>±     ˙—,m      </div><div class='imgCont'><img src='/style library/images/black.png' /></div></div><ul></ul></div></td></tr>≤     HlŒ      ul:last≥   "'      <li>¥  ˜Ó’∂      </li>µ     údN8      dat∂   ∏á˘2      setDate∑   /}ø8      tooltip∏   §#`      itemsπ     ‹ƒ!      .mobileEvent∫  ú≠e≤      trackª     ô≥Zx      descº  º’$L      <span>Ω    ˛À¿Ç      &amp;æ     ŸÂ°      </span>ø   |N‰7      <br />¿    MÅ      <html><head>¡  ˚)·&:      </head><body  class="ms-WPBody"><left><div id="main-body">√    ÓV)      ,width=1000, height=700, left=100, top=25ƒ     ºÓt∂M      <div style="width: 950px;	margin: 0 auto;" id="calendar" class="fc" siteURL="≈     ƒÄkú‡     <ViewFields><FieldRef Name='Title'/><FieldRef Name='CalTitle'/><FieldRef Name='ID' /><FieldRef Name='Description' /><FieldRef Name='EventDescription' /><FieldRef Name='Body' /><FieldRef Name='Expires' /><FieldRef Name='URL' /><FieldRef Name='Created' /><FieldRef Name='Duration0' /><FieldRef Name='EventDate' /><FieldRef Name='EndDate' /><FieldRef Name='fAllDayEvent' /><FieldRef Name='RecurrenceID' /><FieldRef Name='fRecurrence' /><FieldRef Name='RecurrenceData' /></ViewFields>∆  ¯gA2ı      <Query><Where><DateRangesOverlap><FieldRef Name='EventDate' /><FieldRef Name='EndDate' /><FieldRef Name='RecurrenceID' /><Value Type='DateTime'><Month /></Value></DateRangesOverlap></Where><OrderBy><FieldRef Name='EventDate' /></OrderBy></Query>«     =G¡,      <QueryOptions><CalendarDate>»  ®Ñ      </CalendarDate><RecurrencePatternXMLVersion>v3</RecurrencePatternXMLVersion><ExpandRecurrence>TRUE</ExpandRecurrence></QueryOptions>…  ÁÂò@      setUserInputTagValues/<Œ   yπ/      printContentExecute/<œ     klÇ      printContentExecute/disclI<–   ld      printContentExecute/disclI</<—     ™ ì÷      printSPCalendarAsImage/<“  º5ßn      printSPCalendarAsImage/</<”    FMº      printSPCalendarAsImage/</</<’  ´>ù*      printSPCalendarAsImage/</</</onrendered/i<÷    ËsﬁØ      printSPCalendarAsImage/</</</<ÿ    ÔºCª&      printCalendarAgendaView/completefunc/<Ÿ    öBS      renderMobileCalendar/<€    För      renderMobileCalendar/</fEvents<‹   ﬂ1u      renderMobileCalendar/</<›  z{€      renderEventsInAgendaFormat/<ﬁ  ÌrMQ      renderEventsInAgendaFormat/i<ﬂ     ∫·G      renderEventsInAgendaFormat/i</<‡   K@x(      renderEventsInAgendaFormat/i</</fEvents<·  ¬>´\!      renderEventsInAgendaFormat/i</</<‚     9S∞#      printSPCalendar/<„     5¨QÛ      Date.prototype.addDays     :   z  :   :              Ô%,â                                                                                                                                                                        	                 
-      
-                 
-                 
-                                                                                                                                                                                                                                                                                                                                                               !                 "      "           #      "           $      "           %      "           &      "          '      '           (      '           )      '           *                 +      +           ,      +          -      -          .      .           /      .           0      .           1      -           2                  3      3           4      3           5      3           6                  8      7           9                  7      ≥Oåc            –  –  –6  –µ  –”  –Ô  PB  –^ –\ –D  –ß –                ¡  i  	                               %  É                 É                 P  P     *  .                É                 É                 É                 É                   E  G  I  K  P  P  k  Pm  Pq  P             i  L                                ã Ö  P∞                à               à  í  ì               i  ô                É                 É                 É                 É                                                 d  I               r  º  P                             á   `i `                                             i  œ     
-           E  G  I  ‘  V   Ÿ  €  P    k                 P]`Ò  Pˆ  P˜  P˘  P¸  P˛  Pˇ  P P  `É  `  `             - . / P0 P1 P2 P3 Pi `   
-         “ r  7 8 : ; = ? F H J Ÿ              a  ˛  ˆ  P˜  _ P` PC  ]  m a 6  Z  _  `w x P]`y Pz P{ Pœ  P                             í m               í y               è              ç ì A`B`ö P             “ ï              a  b               i  ü             a `˛  ˆ  P˜  P6  Z  _  `w Pº  Px P]`y Pz P{ Pi `             ©                œ  P             ç ì A`B`             “ ï              a  b               i  ü                               I               i  œ                                                                Ö   ª É               _   µ É   Ø¬0∞IÙ$KEÆ˙ö         %  &  =   (           0  1  (  %  3  8         4  ù  7        1  (  ~  Ä           (          ù          ù  §  †        ù  §  †        §  ù  †        Æ          1  ø  ¿  ¡     
-         ê     
-       ê     #        Î    % ,                  Z     
-     ~         é         Z          ∏ ∫ K  á&’™ç!´!:   P    ag^ P                            ’   ∂   I   l   K   ⁄£5Ä Õ0Ä ˙`ï@Ä 
-PÄ¿  â„+†  0                      ∂   ‹I   ﬂ   r »   ⁄π   ∑  K   ⁄π   ‹I   ﬂ   r »  ⁄π  I   »  ⁄ñ   π  /‹(»  ⁄ò1   ï
-   π  π  JI   ‹I	   ﬂπ  π  Jv ⁄ó¬ˇˇˇï   π   ‹I   ﬂ   r »  ⁄π  I   »  ⁄ñ   π  /‹(»  ⁄òT   ï   π  π  JI
-      ò,   ï   π  π  JI   ‹I	   ﬂπ  π  Jv ⁄ï   óüˇˇˇï   π   I   †£ `ë 	P(`-`ê P(`.fñ 	`ï "	ˇˇˇÙPN	`ê P(`.fñ `û `ï 	ˇˇˇÙPì@`QÄ¿         L   C          ∫   f   ®   Êß¯?®   W                         ∂    ∑  r ‹I   ﬂ   r ‹I   ﬂl   v ⁄∂    ∑  r ‹I   ﬂ   r ‹I   ﬂl   v ⁄£@`ˇˇˇˇPP*	E&PD`ˇˇˇˇPP
-$ˇˇˇ˚P4PÄ@  à∑Ö@  À                        Ÿ»  ⁄∂    π  r ‹I   ﬂ   r  õ7   ï   ⁄∂    π  r ‹I   ﬂ   r ‹I   ﬂr     ï   òe   ï   ∂    π  r ‹I   ﬂr  »   ⁄∂    π  r ‹I   ﬂr ‹I   ﬂ	   ∂    π  r ‹I   ﬂr  v ⁄ï   £&`ˇˇˇˇPPì ˇˇˇ˛PP
-Pò `ˇˇˇˇP
-P(`ˇˇˇˇPPˇˇˇ˛P
-Pˇˇˇ‚PI	PÄl   ∞+¬l   4                        Ÿ»   ⁄∂    π   r ‹I   ﬂr ‹I   ﬂ      v ⁄£&	`ˇˇˇˇPPî P$PÄÄ∞  =Ó¯A∞  Ï        	       ;       ∏  …   ⁄∏ …   ⁄∂       r ‹I   ﬂ   r ‹I   ﬂ      v ⁄∂   I	   I
-   »   ⁄π   ‹I   ﬂ   r »  ⁄π  òf   ï   ∂       r ‹I   ﬂ8   ;   ;      ;   ê;   v ⁄∂       r ‹I   ﬂv  ⁄†ó   ï      »  ⁄∂   I      ò   ï   ∂      K   ⁄ï!   ∂       r I   òù   ï&   ∂    π  r ‹I   ﬂ   r »  ⁄∂    π  r ‹I   ﬂ8   ;      ;    ê;   ;   8!   l"   ;#   l$   ;%   l&   ;'   ;(   l)   ;*   v ⁄ó   ï9   ∂+    º   º   v ⁄ï;   £í@`PÄ `Pî P$`î `ê 
-P(	`ê@	`P
-%&&*HPD	`P
-P$	`15;@`*	`õ 	`ï 	`Pî@`ˇˇˇˇPP(	`ˇˇˇˇP
-%&*(&%J$J)O-JP>1 	`ˇˇˇÓP95PÄÄå   O¢[Aå   H                        Ÿ»   ⁄∂      K   ⁄∂    π   r ‹I   ﬂ   v ⁄∂    º   º   v ⁄£&`ê `ˇˇˇˇPP$`ˇˇˇÓP$PÄå   O¢[Aå   H                        Ÿ»   ⁄∂      K   ⁄∂    π   r ‹I   ﬂ   v ⁄∂    º   º   v ⁄£&`ê `ˇˇˇˇPP$`ˇˇˇÓP$PÄX   kPàX   $                        Ÿ»   ⁄∂    π   r ‹I   ﬂ   v ⁄£&`ˇˇˇˇPP$PÄÄh   rÎ!Yh   3                        Ÿ»   ⁄∂    π   r ‹I   ﬂ   r ‹I   ﬂ   v ⁄£`ˇˇˇˇPPP Pê  ≈¬jßê  "         
-       s       ∑  ‹I   ﬂ   r ˇö    ï   ⁄∑  ‹I   ﬂ   r ˇï   ò    ï   ∑  ‹I   ﬂ   r «  ⁄ï
-   ∂       r ‹I   ﬂv  ⁄∂	   I
-      ò/   ï   ∂	   I
-      ⁄∂       v ⁄ój  ï   ∂	   I
-      ò*   ï   ∂	   I
-      ⁄∂    v  ⁄ó+  ï       »   ⁄∂   I   »  ⁄   »  ⁄   …   ⁄∂    ∑  r I   òá   ï'   ∂    ∑  v ⁄∂    ∑  r ‹I   ﬂl   v ⁄∑ ò   ï/   ∂    º   r …   ⁄ï1   π      %∂    ∑  r ‹I   ﬂr  %   %»   ⁄ï8   º   òM  ï:      »  ⁄   »  ⁄π     %»  ⁄π     %»  ⁄π      %»  ⁄π  !   %»  ⁄π  "   %»  ⁄π  #   %»  ⁄π  $   %»  ⁄∂    %   r I   ö    ïF   ⁄∂    &   r I   ïJ   ò(   ïK   π  '   %»  ⁄π  (   %»  ⁄ïM   π  )   %»  ⁄π  *   %π  %+   %»  ⁄π  π  %»  ⁄π  ,   %»  ⁄π  -   %π  %.   %»  ⁄π  /   %º   %0   %»  ⁄π  1   %»  ⁄∂    2   r ‹I3   ﬂv  ⁄∂	   ‹I4   ﬂ      π   r …   ⁄º   I   ‹I4   ﬂv  ⁄º   I   ‹I5   ﬂπ  v ⁄∂    º   I   r …   ⁄∂    %   r I   ò!   ïo   ∂6    l7   Ëv ⁄ó!   ïq   ∂8    l9   ∏r …   ⁄ïs   £ 	`P† -Pï 	`"PL`P
-PD	`ö 	`ë 	`PN`ö 	`ë 	`î0 )`*`/`J`K`ˇˇˇˇPî@`ˇˇˇˇPD`ˇˇˇˇP
-ˇˇˇ˚PD `/`ˇˇˇPN$`
-Dˇˇˇ˛P
-Pî@(`ë@* `J, `J4`O6`/`/`/`/`/`O>`P† (Pô `OB`î@H`/`
-*ê `*`ON`
-Qê@P`
-Fë `OS`P
-?P$&`ñ ˇˇˇÛP)`ë P$`ë "ˇˇˇ˙PDY`
-ˇˇˇˇP)`Pî `5`C[P>c@f`^˛°5Ä  ÊCf)P>Ä  ÏPX   qöÏ÷X   #                         º   ∂    ∑ r ‹I   ﬂr  %…   ⁄£ `ˇˇˇ˛P
-P*PÄò   Ò[6äò   U                          º   ‹I   ﬂ   r ‹I   ﬂv  ⁄º   I   ‹I   ﬂv  ⁄º   ‹I   ﬂv  ⁄º   ‹I   ﬂv  ⁄£ `ë P
-P$`ë P$`P$`P$PÄÄ»  `U£°»  V                ”        ∂       r I   ö    ï   ⁄∂       r I   ï	   õF   ï
-   ⁄º  ‹I   ﬂ   r I   õ    ï   ⁄∂       r I   ï   òè  ï   º  ‹I   ﬂ   r I   ò.   ï   º  ‹I   ﬂ	   r ‹I
-   ﬂ   v ⁄ï   ∂    º  v ⁄º  ‹I   ﬂ   r ‹I   ﬂr  ‹I   ﬂv  ⁄º  ‹I   ﬂ   r ‹I   ﬂr  ‹I   ﬂ8      ;      ;      ;      ;   v ⁄º  ‹I   ﬂ   r ‹I   ﬂv  ⁄º  ‹I   ﬂ   r »   ⁄º  ‹I   ﬂ   r ‹I   ﬂr  ‹I   ﬂπ   v ⁄   …   ⁄∂        r I   òy   ïA   ∂    π   r ‹I   ﬂ!   r ‹I"   ﬂl#   v ⁄º  ‹I   ﬂ$   r ‹I%   ﬂv  ⁄º  ‹I   ﬂ&   r ‹I   ﬂv  ⁄ó“   ïO   ∂    '   r I   òÅ   ïT   ∂    π   r ‹I   ﬂ!   r ‹I"   ﬂl(   v ⁄∂    π   r ‹I   ﬂ)   r ‹I   ﬂv  ⁄º  ‹I   ﬂ$   r ‹I%   ﬂv  ⁄ó7   ïd   º  ‹I   ﬂ*   r ‹I   ﬂr  ‹I   ﬂπ   v ⁄ïj   ∂    π   r ‹I   ﬂ+   r ‹I"   ﬂl,   v ⁄∂    π   r ‹I   ﬂ-   r ‹I   ﬂ8.   /   ;0   r ‹I"   ﬂl1   v ⁄∂    π   r ‹I   ﬂ2   r ‹I   ﬂ83   /   ;0   4   ;5   6   ;7   r ‹I"   ﬂl8   v ⁄∂    π   r ‹I   ﬂ9   r ‹I   ﬂ8:   /   ;0   4   ;5   ;   ;7   r ‹I"   ﬂl<   v ⁄∂    π   r ‹I   ﬂ=   r ‹I>   ﬂ?   @   r ‹I"   ﬂlA   v ⁄∂    π   r ‹I   ﬂ   r ‹I   ﬂ8B   4   ;5   /   ;0   6   ;7   v ⁄∂    π   r ‹I   ﬂC   r ‹ID   ﬂv  ⁄ó)   ï™   º  ‹I   ﬂ$   r ‹I%   ﬂv  ⁄ïÆ   º  ‹I   ﬂE   r ‹I   ﬂ8F   G   ;H   v ⁄∂    I   r ‹IJ   ﬂr  »  ⁄∂    '   r I   ò'   ïΩ   ∂    K   r ‹IJ   ﬂr  »  ⁄ï¡   º  ‹I   ﬂ&   r ‹IL   ﬂπ  v ⁄º  ‹I   ﬂM   r ‹I%   ﬂv  ⁄º  ‹I   ﬂ   r ‹I   ﬂr  ‹I%   ﬂv  ⁄∂    º  v ⁄∂N    lO   –v ⁄£@`P† (P´ )P† ,Pô `ë Pî `ë PPI`ˇˇˇˇPD`ë P
-P
-	PD`ë P
-P
-
-
-
-
-ˇˇˇæP$`ë P
-0P$"`ë PH`ë P
-P
-ˇˇˇ˜P$(`+
-`Pî `ˇˇˇˇPP
-ˇˇˇ˚PD `ë P
-P$`ë P
-PN$#`Pî@'`ˇˇˇˇPP
-ˇˇˇ˚PD0`ˇˇˇˇPP
-,PD2`ë P
-P>5 `ë P
-P
-ˇˇˇ˜PI;`ˇˇˇˇPP
-ˇˇˇ˚PD@`ˇˇˇˇPP*"
-ˇˇˇ˙P*#ˇˇˇ˚PDG`ˇˇˇˇPP*"
-
-
-ˇˇˇÀP*#ˇˇˇ˚PDM`ˇˇˇˇPP*"
-
-
-ˇˇˇÀP*#ˇˇˇ˚PDS`ˇˇˇˇPP*Z*#ˇˇˇ˚PDY`ˇˇˇˇPP
-
-
-
-ˇˇˇÀP$`ˇˇˇˇPP
-*P>b@d`ë P
-PIj`ë P
-
-ˇˇˇ˙PDl$`P
-%P(`Pî `P
-:PMq`ë P
-ˇˇˇ˚PDs`ë P
-PDu`ë P
-P
-	PDw`ˇˇˇˇP$`5~CxPDÄ  ÄPÄÄ‰   –πË≈‰   Ö                         ∂       r ∑  J‹I   ﬂr  …   ⁄∂    ∑ r ‹I   ﬂ   º   %   %∂    ∑ r ‹I   ﬂr  %   %∂    ∑ r ‹I	   ﬂr  %
-   %v ⁄£ !`
-PP)!`ˇˇˇˇP
- ˇˇˇ˛P
-	P
-ˇˇˇ˛P
-	P
-ˇˇˇöP$PÄÄÄ0  —≠2ã0  ª                        ∂    ∑ r ‹I   ﬂ   r »   ⁄∂   I   I   ‹I   ﬂπ   r »  ⁄π  ‹I   ﬂr  …   ⁄∂    ∑ r ‹I	   ﬂ
-   º   %   %∂    π  r ‹I   ﬂr  %   %∂    π  r ‹I   ﬂr  %   %v ⁄£ .`ˇˇˇˇPP(+`ñ #ˇˇˇÒP( `P)!`ˇˇˇˇP
- ˇˇˇ˛P
-P
-ˇˇˇ˛P
-P
-ˇˇˇúP$PÄÄ¥   7tiB¥   h                         ∂    ∑ r ‹I   ﬂ   r I   ò?   ï   ∂    ∑ r ‹I   ﬂ   r ‹I   ﬂ8      ;   v ⁄ï   £ !`ˇˇˇˇPPï !`ˇˇˇˇPP
-
-ˇˇˇ˙P)PÄX   Uæ'ÁX   *                        Ÿ»   ⁄π   I   ‹I   ﬂ         v ⁄£&!`ü P$PÄÄÄX   Uæ'ÁX   *                        Ÿ»   ⁄π   I   ‹I   ﬂ         v ⁄£&!`ü P$PÄÄÄX   Uæ'ÁX   *                        Ÿ»   ⁄π   I   ‹I   ﬂ         v ⁄£&!`ü P$PÄÄÄX   Uæ'ÁX   *                        Ÿ»   ⁄π   I   ‹I   ﬂ         v ⁄£&!`ü P$PÄÄÄà   LÕ‡®à   E                  	        º  I   ‹I   ﬂv  ⁄º  ‹I   ﬂv  ⁄º  ‹I   ﬂv  ⁄∂    º  v ⁄£@`ë P$`P$`P$`ˇˇˇˇP$Pd   ÆÖ¬d   ,                          ∂   ‹I   ﬂv ⁄∂   ‹I   ﬂ   l   v ⁄£@`PD`ë GˇˇˇªP4APî  L·æüî                  #        ∂   ‹I   ﬂv ⁄∂   ‹I   ﬂr  »   ⁄∂       r ‹I   ﬂv ⁄π   ‹I   ﬂl   v ⁄∂       r ‹I	   ﬂl
-   v ⁄   »  ⁄∂       r ‹I   ﬂv  ⁄∂       r ‹I   ﬂπ  v ⁄∂       r ‹I   ﬂ8      ;      ;   v ⁄∂    v  ⁄π   ‹I   ﬂ   v ⁄£ 	`PD`P(	`PP$	`ˇˇˇ˚PD0	`P
-ˇˇˇ˚P$`J3	`P
-Ä  ¿P$	`P
-#ˇˇˇ¯P$	`P
-
-
-ˇˇˇ‰P$	`J8	`ê PD:PÄÄL   }‘§L                            ∂   ‹I   ﬂl   –v ⁄£ `5'CPD)	PÄÄº   ß˛QLº   m                          ∂    ∂       r 8   ∂       r ‹I   ﬂr  
-ÆG·zÚ?);   ;   ;   l   ;	   v ⁄∂
-    l   Ëv ⁄£@`[%P
-Pí &&JPD`5$CPD%PÄÄ¥   ≈È(ü¥   i                         ≥   ∑  ≈   ⁄∂   ‹I   ﬂr  …   ⁄∂   ‹I   ﬂ   ∂   I   I      r …  ⁄∂	    l
-   Ër …   ⁄£ `N#`
-PI`ë î ˇˇˇ˜PI!`5C,PIPÄÄƒ   ’§C3ƒ   t                          º  I      ò]   ï   ∂    º   v ⁄∂    º  I   I   r ‹I   ﬂ   º   %   %v ⁄º  ‹I	   ﬂv  ⁄ï   £ !`õ !`ˇˇˇˇP$!`ˇˇˇˇP
-&ˇˇˇ”P$!`PIPÄ¿   ¯}Od¿   o                          ∂       r ‹I   ﬂv  ⁄∂       r ‹I   ﬂv  ⁄∂       r ‹I   ﬂ8   	   ;
-      ;   v ⁄∂    v  ⁄£@`P
-P$`P
-Ä  ¿P$`P
-
-
-ˇˇˇ‰P$`JPÄx   Ú√/Kx   3                         ∂    ∑ r ‹I   ﬂ   ∂    ∑ r ‹I   ﬂr  v ⁄£ `ˇˇˇˇPˇˇˇ˛P
-PˇˇˇÎP$PÄÄÄ§  ΩYû§  ±      
-          J          »   ⁄∂   I   »  ⁄   »  ⁄∂    ∑  r I   òu  ï   ∂    ∑  r ‹I   ﬂ   r ‹I	   ﬂr  »  ⁄π  I   ò6  ï   π  ‹I
-   ﬂ   r »  ⁄π  ‹I   ﬂr  »  ⁄π  ‹I   ﬂr  »  ⁄π      %»   ⁄   »  ⁄π     %»  ⁄π     %»  ⁄π     %»  ⁄π     %»  ⁄π     %»  ⁄π     %»  ⁄π     %»  ⁄π     %»  ⁄   »  ⁄π     %π  %   %»  ⁄π  π  %»  ⁄π     %»  ⁄π     %π  %   %»  ⁄π     %π  ‹I   ﬂ    r %!   %π  ‹I   ﬂ"   r %#   %π  %$   %π  %%   %»  ⁄π  &   %»  ⁄∂    '   r ‹I(   ﬂv  ⁄∂)   ‹I*   ﬂ      π   r »	  ⁄π	  I   ‹I*   ﬂv  ⁄π	  I   ‹I+   ﬂπ  v ⁄π	  I   ‹I,   ﬂv  ⁄∂)   ‹I-   ﬂv  ⁄π	  ‹I.   ﬂv  ⁄ïJ   £ %`J`O	`J	`ˇˇˇˇPî `ˇˇˇˇPP
-P(`ï `ê P(!`P( `PH`O `J`/`/`/`/`/`/`/`O" `*`
-*ê `*`O(`
-;ê@,`
-uê P
-#ê P
-($ê `O/`P
-?P$&`ñ ˇˇˇÛP(`ê P$`ê "ˇˇˇ˙P$`ê P$`PD6`P9:Pp  ä†≈îp  ù  '              U       ∏  …   ⁄∏ …   ⁄◊…   ⁄Ÿ…   ⁄4…   ⁄µ       r ‹I   ﬂ   r …   ⁄¥   µ       r ‹I   ﬂº   r √   ⁄µ   ‹I   ﬂr  ‹I	   ﬂv  ⁄g    …   ⁄g    …   ⁄º   ò   ï   º   ó6   ï   µ    
-   r ‹I   ﬂ   r ‹I   ﬂ   r ï   …   ⁄µ       r ‹I   ﬂr  ‹I   ﬂr  …   ⁄º   J   %º   J%   %º   J%   %…   ⁄µ   º   ‹I   ﬂ   r J‹I   ﬂ   r Jµ    º   ‹I   ﬂ   r J‹I   ﬂ   r Jr &º   ‹I   ﬂ   r J‹I   ﬂ   r Jﬁ  Ä … 	  ⁄   º   ‹I   ﬂ   r ‹I   ﬂ   r J%… 
-  ⁄µ    º 
-     %y „ﬁ  …   ⁄µ    r  ‹I   ﬂ8      ;   ;    º   ;!   "   ;#   $   ;%   &   º   %'   %;(   l)   ;*   v ⁄£ß `PP)`ê P
-YˇˇˇÛP)`P
-P$`+`+`´ P.PP.`P
-P
-P)`î@
-`	ë 
-Pë P	ë 
-Pë PˇˇˇﬂP5ë 
-Pë P
-ˇˇˇÉI`ë 	PP,`ˇˇˇ˚.`ê %	*	&	*	J%	J4	% ë@9	J	P4~PÄÄh  åãh  Ë                         …   ⁄g    …   ⁄g    …   ⁄g    …   ⁄g    …   ⁄µ    µ   ‹I   ﬂ∑  I   r r ‹I   ﬂ   r ‹I   ﬂl   v ⁄º     ò-   ï   µ	    º  º	  º  º  v ⁄ó=   ï   º  
-   ò(   ï   µ    º  º	  º  º  v ⁄ï   £ `'`+`+ `+`@`ˇˇˇ˜Pˇˇˇ˝P!P
-ˇˇˇ˚PD>`ï `		ˇˇˇÂP.`ï `		ˇˇˇÂPIC	PÄº  CV»¨  l      
-          —      ∑ »   ⁄µ    ∑ r ‹I   ﬂ   r õ   ï   ⁄ï   »  ⁄π  »  ⁄µ    ∑ r ‹I   ﬂ   r »  ⁄π  ‹I   ﬂ   r »  ⁄µ    ∑ r ‹I   ﬂ   r ‹I   ﬂ   r J»  ⁄π  »  ⁄¥	   µ    ∑ r ‹I   ﬂ
-   r √	   ⁄¥   µ    ∑ r ‹I   ﬂ   r √   ⁄π  ˇò"   ï!   π  ‹I   ﬂπ  r »  ⁄ï#      π  %»  ⁄π  ‹I   ﬂ      r ‹I   ﬂ
-r ‹I   ﬂ      r ‹I   ﬂ      r π  %»  ⁄µ    ∑ r ‹I   ﬂ   r »  ⁄µ    ∑ r ‹I   ﬂ   r ‹I   ﬂ   r J‹I   ﬂ   r …   ⁄µ    ∑ r ‹I   ﬂ   r ‹I   ﬂ   r J‹I   ﬂ   r …   ⁄µ    ∑ r ‹I   ﬂ   r ‹I   ﬂ   r J‹I   ﬂ   r …   ⁄µ    ∑ r ‹I   ﬂ   r ‹I   ﬂ   r J‹I   ﬂ   r …   ⁄¥   µ    ∑ r ‹I   ﬂ   r √   ⁄¥   µ    ∑ r ‹I   ﬂ   r √   ⁄8   …   ⁄º   π  K   ⁄º   π  K   ⁄º   µ   K   ⁄º   µ   K   ⁄º   µ    º   Jº   J&º   Jº   Jº   Jº   Jﬁ  Ä K!   ⁄º   µ    º   Jº   J&º   Jº   Jº   Jº   Jﬁ  Ä K"   ⁄µ    ∑ r ‹I   ﬂ#   r ö]   ïÇ   ⁄µ    ∑ r ‹I   ﬂ#   r    ö1   ïà   ⁄µ$    µ    ∑ r ‹I   ﬂ#   r r ïè   òO   ïê   º   º   I"   ‹I%   ﬂµ$    µ    ∑ r ‹I   ﬂ#   r r &r K"   ⁄ïõ   º   µ$    µ   ‹I   ﬂ   r J‹I   ﬂ   r Jr µ$    µ   ‹I   ﬂ   r J‹I   ﬂ   r Jr ò   ïØ   ó   ïØ   ïØ   K&   ⁄º   π  K'   ⁄º   µ   K(   ⁄µ    º   I!   ﬁ  Ä »	  ⁄π	  ‹I)   ﬂv ⁄ñ∏   π	  º   I"   ò≈   ïª   π	  ‹I*   ﬂr  º	  ‹I*   ﬂr  ò   ï¡   º   ò&   ï√   º  ‹I+   ﬂº   v ⁄…   ⁄ï≈   º  ‹I,   ﬂµ-   r ‹I   ﬂπ	  r ô   ïÕ   º  ‹I+   ﬂπ	  v ⁄ïœ   π	  ‹I%   ﬂr »	  ⁄ó+ˇˇˇï—   …   ⁄£ `(`ˇˇˇˇPPô  `+`ˇˇˇˇPP(`ê P(!`ˇˇˇˇPPP*!`)`ˇˇˇ˛PP)ˇˇˇ˛PP)`ë `ˇˇˇÛP-`*!`ï 
-PPî Pî P*`ˇˇˇˇPP(`ˇˇˇ˛PPPë P)`ˇˇˇ˛PPPë P)`ˇˇˇ˛PPPë P)`ˇˇˇ˛PPPë P)`ˇˇˇ˛PP)`ˇˇˇ˛PP)`+`/`/`ê `ê `	ˇˇˇ™P)`	ˇˇˇ¥P)`ˇˇˇˇPPñ #ˇˇˇ˛PPö (ˇˇˇ˛PPˇˇˇÚPî `ñ 	ˇˇˇ˛PPˇˇˇÚPˇˇˇ¯PN`ë Pë PˇˇˇÂP-	ë Pë PˇˇˇÂP•@ `/`ê@$`	ˇˇˇ˜H(`P$f	ï `PP.`ë `ˇˇˇ˚P$`L/`ˇˇˇ¸P
-ˇˇˇ¯P/`ˇˇˇ˚PI2`Pí@4`'PÄº         Ö  ⁄   8  YÆ†›(  ¿  	             t      ∏ …   ⁄∑ ‹I   ﬂr  …   ⁄∑ ‹I   ﬂr  …   ⁄g    »   ⁄g      h       h      h      h      h      h   	   h   
-   h      h      h	      h
-      h   »  ⁄g   h    h   h   h   h   h   h   h   	h   
-h	   h
-   h   »  ⁄∂   ﬁ  Ä  ‹I   ﬂr  &»  ⁄ñ   π  ∂   ﬁ  Ä  ‹I   ﬂr  %ò-   ï   π   ‹I   ﬂπ  v ⁄π  /'»  ⁄ó≥ˇˇˇï      »  ⁄∑ ‹I   ﬂπ  8      ;   r »  ⁄g      h       h      h      h      h      h      h   …   ⁄π     %∑ ‹I   ﬂr  %»  ⁄   …   ⁄∂   ﬁ  Ä  …   ⁄∂   ﬁ  Ä  …   ⁄g    … 	  ⁄g    … 
-  ⁄∂        r I!   ò0  ï+   ∂    "   r ‹I#   ﬂr  ‹I$   ﬂ8%   &   ;'   (   ;)   v ⁄∂    "   r ‹I#   ﬂr  ‹I*   ﬂ+   r ‹I,   ﬂ-   v ⁄∂    .   r ‹I/   ﬂ∂    0   r ‹I1   ﬂ2   r r …   ⁄∂3    l4   dv ⁄∂    π  r ‹I5   ﬂl6   v ⁄∂    π   r ‹I5   ﬂl7   v ⁄∂    8   r ‹I9   ﬂ8:   l;   ;<   v ⁄ó   ïT   ∂    =   r …   ⁄ïV   º   I!   òa   ïY   º   ‹I*   ﬂ>   r ‹I*   ﬂ?   r ‹I@   ﬂv  ⁄º   ‹I*   ﬂ>   r ‹IA   ﬂB   v ⁄óT   ïc   º   ‹I*   ﬂ>   r ‹I*   ﬂ?   r ‹I@   ﬂv  ⁄∂    ∑ r ‹I5   ﬂlC   v ⁄ïm   ∂D   ‹IE   ﬂF   r ‹I@   ﬂv  ⁄∂G    v  ⁄£)`
-P)`
-P)`*`ˇ#`› `î P+fZ
-Pë 	`ˇˇˇ˚P$	`ï@`*`
-
-ˇˇˇÁP(`— `
-
-P)`+`ì `ì@`+`@	`Pî 	`P
-P
-
-
-ˇˇˇ„P$	`P
-P	PPD	`PJ[PˇˇˇﬁP)	`5$B PD&	`ˇˇˇˇP
-ˇˇˇ˚PD*	`ˇˇˇˇP
-ˇˇˇ˚PD-	`P*%J.P>3 	`PN6	`ñ 	`ë PP
-P$	`ë PP 	`ë PP
-P$	`ˇˇˇˇP
-ˇˇˇ˚PIW`,
-U*
-P$`:\PÄÄÄ8         7  R   |   „èk»|   G                          ∂       r ‹I   ﬂ   r ‹I   ﬂ      r ‹I   ﬂ   	   v ⁄£ `PP*Z*Z$	PÄÄ¨   »&Õ
-¨   n                         º   ‹I   ﬂ   r ‹I   ﬂ   º   ∑  ò   ï      ó   ï      ï   %   %∑  %%   %∑ %	   %v ⁄£ `ë P
-Æ 1
-ˇˇˇúP$	PÄÄ®   ≤!C®   l                         º   ‹I   ﬂ   r ‹I   ﬂ   º   ∑ ò   ï      ó   ï      ï   %   %∑ %   %∑ %	   %v ⁄£ `ë P
-Æ /
-
-ˇˇˇ•P$	P¥   1·Ùu¥   g           	              ∂       g   ∂    ∂       r ‹I   ﬂr  r h    h   ∂    ∂       r ‹I   ﬂr  r h   v ⁄£ `"	[
-Pˇˇˇ‰P'	[
-PˇˇˇÂPˇˇˇÕP$PÄÄ`  Xû+Ú`  ‹                         ∑ …  ⁄º  ‹I   ﬂv ⁄∂    º  r ‹I   ﬂl   r …
-  ⁄º
-  ‹I   ﬂl   v ⁄∂       º  ‹I   ﬂr  %	   %º  º  ‹I
-   ﬂr  J‹I   ﬂr %   %r ‹I   ﬂº  ‹I   ﬂ   r r …   ⁄º
-  ‹I   ﬂl   v ⁄£ `)`ê P `ˇˇˇ˛P
-ˇˇˇ˘PI`ˇˇˇ˚PD`#P
-ë P
-P
-ˇˇˇ§P
-Ä  ¶ë PˇˇˇÛP)`ˇˇˇ˚PD	P  =9–Ã  Æ                         ∂   ∑ I   ﬁ  Ä …   ⁄º   ‹I   ﬂv ⁄∂   ∑ I   ﬁ  Ä …   ⁄º   ‹I   ﬂv ⁄º  ‹I   ﬂr  º   ‹I   ﬂr  ö*   ï   ⁄º  ‹I   ﬂr  º   ‹I   ﬂr  ï   †£ `ˇˇˇ˜P)`ê P$`ˇˇˇ˜P)`ê P$`PPõ PP)QÄÄ‹   >*&‹   Å                         ∂   ∑  I   ﬁ  Ä ‹I   ﬂr  ∂   ∑  I   ﬁ  Ä ‹I   ﬂr  %∂   ∑ I   ﬁ  Ä ‹I   ﬂr  ∂   ∑ I   ﬁ  Ä ‹I   ﬂr  %&†£ `ˇˇˇ˜P
-P	ˇˇˇ˜P
-P	ˇˇˇ˜P
-P	ˇˇˇ˜P
-P%QÄÄå  Xî_Éå  Ú          	       A       ∑ I   ‹I   ﬂ   r J‹I   ﬂ   r …	  ⁄∂   º	  Jº	  J&º	  Jﬁ  Ä …  ⁄∑ I   ‹I   ﬂ   r ˇòÿ   ï   º   ‹I	   ﬂ
-   r ‹I   ﬂ   ∑ I   %   %∑ I   %   %∑ I   ‹I   ﬂ∑ I   ‹I   ﬂ   r r %∑ I   ò   ï#      ó   ï#      ï#   %∑ I   ‹I   ﬂ∑ I   ‹I   ﬂ   r r %   %v ⁄óá   ï-   º   ‹I	   ﬂ
-   r ‹I   ﬂ   ∑ I   %   %∑ I   %   %∑ I   %∑ I   ò   ï:      ó   ï:      ï:   %   %v ⁄ï=   ∑ I   ‹I   ﬂ   r J…  ⁄£ `î Pë P)`
-	ˇˇˇﬂP)`î Pê `ë P
-.ê î PˇˇˇÎP*¨ î PˇˇˇÓP
-ˇˇˇ:PN`ë P
-/	≤ ˇˇˇáPI`î P+P‹  v6:‹  `                      ∏  …   ⁄∏ …   ⁄∏ …   ⁄   »   ⁄∑ ‹I   ﬂπ   8      ;   r »  ⁄g      h       h      h   	   h   
-   h      h      h   …   ⁄π     %∑ ‹I   ﬂr  %…   ⁄∂   ‹I   ﬂ   ∂   I   I      r …   ⁄∂   ‹I   ﬂ   l   v ⁄   …   ⁄∂   ﬁ  Ä  … 	  ⁄∂   ﬁ  Ä  … 
-  ⁄g    …   ⁄g    …   ⁄∂    l   Ër …   ⁄£õ `*`
-
-ˇˇˇÁP(`— `
-
-P*`ë î ˇˇˇ˜P)`ë ,ˇˇˇ÷PD	`+`ì `ì@`+`+`5:CP9;PÄÄX   ˜ª(X   %                         º   I   ‹I   ﬂ   ∑  %   %v ⁄£ 	`ë 
-ˇˇˇ‚P$PÄÑ  }PBÑ  ˝                  !        º  I      òÊ   ï   ∂    º  v ⁄∂    º  I   I   r ‹I   ﬂ   º  %   %º  %	   %v ⁄∂    º  I   I   r ‹I
-   ﬂ   r …   ⁄º  I   ò   ï   º   ‹I   ﬂ   v ⁄ï   ∂    º  r ‹I   ﬂl   v ⁄∂    l   Ëv ⁄ï!   £ `õ `ˇˇˇˇP$`ˇˇˇˇP
-Ä ˇˇ˛ƒP$`ˇˇˇˇPP)`ñ `ë PI`ˇˇˇˇP
-ˇˇˇ˚PD#`5)C#PI+P$  C8ö≥$  ≤                         ∑ …
-  ⁄º
-  ‹I   ﬂv ⁄∂    º  r ‹I   ﬂl   r …  ⁄º  ‹I   ﬂl   v ⁄º  ‹I   ﬂ   º
-  ‹I	   ﬂr  %
-   %º  º
-  ‹I   ﬂr  J%   %v ⁄º  ‹I   ﬂl   v ⁄£ `)`ê P `ˇˇˇ˛P
-ˇˇˇ˘PI`ˇˇˇ˚PD`gP
-ë PˇˇˇnP$`ˇˇˇ˚PDP  ∫FcÃ  Æ                         ∂   ∑ I   ﬁ  Ä …   ⁄º   ‹I   ﬂv ⁄∂   ∑ I   ﬁ  Ä …   ⁄º   ‹I   ﬂv ⁄º
-  ‹I   ﬂr  º   ‹I   ﬂr  ö*   ï   ⁄º
-  ‹I   ﬂr  º   ‹I   ﬂr  ï   †£ `ˇˇˇ˜P)`ê P$`ˇˇˇ˜P)`ê P$`PPõ PP)QÄÄ‹   e$x√‹   Å                         ∂   ∑  I   ﬁ  Ä ‹I   ﬂr  ∂   ∑  I   ﬁ  Ä ‹I   ﬂr  %∂   ∑ I   ﬁ  Ä ‹I   ﬂr  ∂   ∑ I   ﬁ  Ä ‹I   ﬂr  %&†£ `ˇˇˇ˜P
-P	ˇˇˇ˜P
-P	ˇˇˇ˜P
-P	ˇˇˇ˜P
-P%QÄÄH  hKÈhH  ∂          	       5       ∑ I   ‹I   ﬂ   r J‹I   ﬂ   r …  ⁄∂   º  Jº  J&º  Jﬁ  Ä …	  ⁄∑ I   ‹I   ﬂ   r ˇò∫   ï   º  ‹I	   ﬂ
-   r ‹I   ﬂ   ∑ I   ‹I   ﬂ∑ I   ‹I   ﬂ   r r %∑ I   ò   ï      ó   ï      ï   %∑ I   ‹I   ﬂ∑ I   ‹I   ﬂ   r r %   %v ⁄ói   ï'   º  ‹I	   ﬂ
-   r ‹I   ﬂ   ∑ I   %∑ I   ò   ï.      ó   ï.      ï.   %   %v ⁄ï1   ∑ I   ‹I   ﬂ   r J…  ⁄£ `î Pë P)`
-	ˇˇˇﬂP)`î Pê `ë P
-	ê î PˇˇˇÎP*¨ î PˇˇˇÓP
-ˇˇˇîPN`ë P
-		≤ ˇˇˇ‚PI`î P+PÑ   ÙJÄùÑ   F                  	        º  I   ‹I   ﬂv  ⁄º  ‹I   ﬂv  ⁄º  ‹I   ﬂv  ⁄º  ‹I   ﬂv  ⁄£ `ë P$`P$`P$`PDPÏ   ˚ÀÏ   É                         ∂       r ‹I   ﬂl   v ⁄   »   ⁄∂       r ‹I   ﬂv  ⁄∂       r ‹I	   ﬂπ   v ⁄∂
-    l   Ùv ⁄∂
-    l   Ëv ⁄£ `P
-ˇˇˇ˚P$`*`P
-Ä  ¿P$`P
-#ˇˇˇ¯P$`5CPD	`5C	P4PÄÄÄx   Ú√/Kx   3                         ∂    ∑ r ‹I   ﬂ   ∂    ∑ r ‹I   ﬂr  v ⁄£ `ˇˇˇˇPˇˇˇ˛P
-PˇˇˇÎP$PÄÄÄ<   ¶›<                             ∂   ‹I   ﬂv  ⁄£ 	`PDPl   \â¿∏l   3                          ∂       r ‹I   ﬂv  ⁄∂       r ‹I   ﬂv  ⁄£ 	`P
-P$	`P
-Ä  ¿P$Pê   »	ê   M                	       Ÿ»  ⁄∂   π  ‹I   ﬂr  ﬁ  Ä »   ⁄π   ‹I   ﬂπ   ‹I   ﬂr  ∑  %v ⁄π   †£&`	PˇˇˇÚ(`PˇˇˇËP$`Qt   lúœêt   9                  	        ∂    ∂   r ‹I   ﬂ8      ;   ;   l   ;	   v ⁄£ `ˇˇˇˇP
-%	*	&	JP4
-PP  •¿©P  Ï                        Ÿ»  ⁄∂    π  r »   ⁄∂    π  r ‹I   ﬂ   r »  ⁄π   ‹I   ﬂ   r π     öf   ï
-   ⁄∂       π  ‹I   ﬂ      r ‹I   ﬂ	      r %
-   %r ‹I   ﬂr  ‹I   ﬂr     ï   ò   ï      π  %ó   ï      ï   %†£&`ˇˇˇˇP(`ˇˇˇˇPP(`ê Põ ï Pî P
-ˇˇˇ›P
-EP
-Pù ö 	QÄ3ıÿ  `          ¿  0      
-      `$            ¬     %    `$  ¬         `$  ¶     Ñ     p    p  `  5  ,  $  $  ?   6    `  1   ,  $  $  ?   6    `$  $  ?   	  `$  9  :  ;  <    `$                    !  "  #  $     @%  &  '  =   (  )  +  ,  F  à   -  0  /    @0  2  1    @  p4    pù    p7  3  	  p8  6    `$  M    `¶   o  )    ?   p  C    `$  Ü  â  ä  ã  å  1  ç  (  é    `$    ç   î    ï  â  ä  ã  å  1  ç  (  é    `$  ¶   ö  0      @õ  (    `‰  ü  †  °  ¢    `‰  ü  †  °  ¢    `‰  ü  †  ß  ¢    `‰  ü  §  •  ¢    `  ?   p  C  y    `$  Y  0  Z  ¶   s  t  u  v  w  x  y  z  {  j  |      @2  1  }  (    ~  Ä  Å  Ç  É  Ñ    à   Ü  á  Ñ     pè  )  ê  ë    pñ  ó  ò    pú    @û  ù    p£    @•  §  °  †    p¶    @ß    p®  ©  ‰  ™    p  @´  ¨  ≠  	  @Ø  Æ  ±  ≤  ≥  M  ¥  n    p
-  `!  =  >  ?  @  $  A  )    ,  5  à   B  C  1   D  F    H  J  0    Ñ     p   N  (  O  Q  R  S  T  U  V  W  X  Y  Z  [  \  ¿ _  `  ¡ d  e  f  g  h  i  j  l  >  n    pr    p  `  F  y  $  v  ƒ  ≈  ∆  C    `¬  â    l  à     H  √  r    p  `$  «  ¨  »  )  …      @À     Ã  ê  Õ    `Ω  $  æ  
-  @1  ø  ¿    p¡  n    p  `  n    p  `$    (  –    `$  ∂  π  ∫  ª  y     pŒ  Ñ     p—  »  j  “  w  …      @       ê  Õ  ∑    `$  ∂  ∑  ∏    p  `F    H  J  $  0  ¶   ’  ÷  ◊  ÿ  ⁄  ‹  √ à   W  ﬁ  ﬂ  ‡  ·  ‚  „  ‰  ¿ _  `  Â  Ê  g  ƒ   È  Í  Î  Ï  Ì  Ó  h  i  j    l  >  ?   C  p  !  `$    9 < !  > @ Ø  A B C D E G ´     à   I ,  K L -  :  M N O   @ç H  P Q U  R S T ï  U V W X Y ⁄  Z [ W     `$  4 5 ¶   6 Ñ   !  pC  \ ] ^   `$  Ú  9  Û  Ô  Ù  ı  j  )  ¯    V   Ø  /  ˙  ≤  ˚  -  ˝  U  T  ï  ˇ  ç   ó       @     Î  ≈  ∆  « » %    p, #  `$  -  9  Û    Ñ Ø  ê    $  `¶   Ö ƒ  Ü á à   à â ä %  `¶   ã ƒ  Ü á à   à â ä &  `B  ] ï  $  Ö   ã (  `U  R Y S ñ )  `U  R ò ô *  `P Ø     -  U  H  !  ,  ¶   † ƒ  ° ¢ X £ I § V *  à   g  • '  `Y $  î (  pó )  põ ÿ  ú ù E û   ¶   ë Ñ   *  p"  `‹  ⁄  a b c d e f g h i j k l U  Z n ı    @o Z  p q r s t u v    à   $  | 0  } {      @Ø  ~ ß   ¶   Ä Å Ç É   -  9  Û  n  #  pÑ   $  p%  på ç   @&  pé ê ë [ ¨  ƒ  í '  pÔ  j  ¶ ß ,  `  >  ™ ´ /  `U  R Y S ñ 0  `U  R ò ô 1  `P Ø     -  U  H  !  ,  ¶   ≤ ƒ  ≥ I § V *  à   ¥ .  `Y $  î /  pó 0  pƒ  ∞ ÿ  -  ù ± Ñ   1  p2  `  ?   p  C  -  `  F  y  $  v  ƒ  ¨ ≠ Æ ¶   Ø 0  í Ñ   .  pn  2  p+  `n ı    @o Z  p q r s t u v    ‹    l  à     H  √  $  ¬   ® ,  pU  r  -  p4  `$    (  –  5  `  C  6  `$  «  ¨  »  )  3  `$  Œ  Ñ   4  p—  »  j  “  w  n  5  p6  p8  `$  © ª H  à   º ´  /  Ω æ ≤  ˚  ø 7  `$    ∑   @π ∏ ∫ 9  pK  9  `U  &  ∂ ÿ     `  p  p  p
-  p  p  p  p"  p+  p3  p8  pU  ¶  7  pU ˇXÑj                              †              †     
-   …     †       …     † =   ,         †  #      4      †
- +      ù      †
- 3      7      †
- 7      8      †
-   :   6      †  i      Œ     † l      Œ     † ∂   P   œ     † t      –     †       –     † è   	   –     † ò      –     † û      –     † §      –     † ™      –     † ∞      –     † ë     µ      †  x     —     † o     “     † c     ”     † J     ¡      †
- @  
-   ’     † U     ÷     † s     “     † ó  /   ”      †     +   B      †  Ù     ,     †
- ∆  .   ÿ     † Ö  H   ^     †  +  
-   Ÿ     † 5  
-   Ÿ     † ?  
-   Ÿ     † I     é     †
- s     Ÿ     † Q     €     † W     ‹     † \     ‹     †      \     †  Õ     ›     †      ﬁ     †      ﬂ     † “     ‡     † ÿ     ·     † ›     ·     † ˇ     ﬂ     † @     D      †  2     ‚     † 7     ‚     † :     ‚     † e     „     † [  
-   ß     †  M     K      †
- ùH©¿      ¥ù      ¥ù                     !      !                C  ˛  %  ˛                ±  ?  ®  ?                 Æ  ˜  •  ˜  !   E           Ä  ™    ™  '              ´  p  ¢  p  F   '            ò  a  è  a  K   &            Ö     |     P   "            ˘  =    =  T              Ä   [C  Æ  [C  ^                 a  	  a  z   .            t&  d'  k&  d'  π   %           Ä'  +C  Á'  +C  ƒ   3             ;/  d0  3/  d0  ﬂ   /            ﬂ1  á3  ◊1  á3  Î   >            ¬6  ô7  π6  ô7  ˇ   >           M8  À8  D8  À8    ,            ∂9  4:  ≠9  4:    ,            ;  ç;  ;  ç;    ,            w<  ˝<  n<  ˝<    ,             B  C  B  C  <  )            ÄC  ∂N  aC  ∂N  M               ¯C  èN  ÔC  èN  R  U           Ä~D  ‡K  uD  ‡K  W             ¬D  ÀK  πD  ÀK  Y  (           ÄªE  zI  ≤E  zI  _  *            H  YI  ¯G  YI  j  6             ŸI  ¥K  –I  ¥K  u  %             L  GL  L  GL  Ç  +            “N  ‹^  ºN  ‹^  ë            É._  Fw  Ô^  Fw  –  !          Ä@i  ;w  7i  ;w  	               ¶j  (v  ùj  (v    O          Ägw  Àâ  Jw  Àâ  P              E}  Á}  <}  Á}  p               X~  	  O~  	  v  !            .  ’  %  ’  z               >Ä  ‹Ä  5Ä  ‹Ä    "          ÄâÇ  Yâ  ÄÇ  Yâ  ã  '            9É  cÑ  0É  cÑ  ê  1            âÑ  CÖ  ÄÑ  CÖ  ó  #            >Ü  Lâ  5Ü  Lâ  õ  #          ÄÚâ  Âó  œâ  Âó  Æ  $            õã  å  íã  å  ¥  :          ÄØå  ⁄ó  ¶å  ⁄ó  Ω  "           Ä0ê  Ûñ  'ê  Ûñ  ≈  +            Ùê  6í  Îê  6í     5            `í  "ì  Wí  "ì  —  '            qî  ‚ñ  hî  ‚ñ  ’  '            *ó  ¿ó  !ó  ¿ó  ‡  !            ò  võ  Èó  võ  Î               -ò  dò  $ò  dò  Ï  '            "ö  Hö  ö  Hö                 iö  iõ  `ö  iõ  Ù              úõ  	ú  ìõ  	ú  ˚  #           )ú  ¥ù  ú  ¥ù                öú  ®ù  ëú  ®ù               5°›gPã†òk      f≠≤f≠≥F¡“∞       m    O^partitionKey=%28https%2Cginniemae.gov%29,:https://www.ginniemae.gov/Style%20Library/GNMA%20Scripts/print.js strongly-framed 1 security-info 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 request-method GET response-head HTTP/2 200 
-content-type: application/javascript
-content-length: 40372
-last-modified: Fri, 17 Jun 2022 22:41:21 GMT
-etag: "{45DA400F-1628-46CE-9E2D-52FE7C23B1DD},187"
-resourcetag: rt:45DA400F-1628-46CE-9E2D-52FE7C23B1DD@00000000187
-content-disposition: attachment; filename*=utf-8''print%2ejs; filename="print.js"
-x-download-options: noopen
-strict-transport-security: max-age=31536000; includeSubDomains; preload
-x-frame-options: SAMEORIGIN, SAMEORIGIN
-content-security-policy: frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com *.teams.microsoft.us local.teams.office.com *.powerapps.com *.yammer.com *.officeapps.live.com *.office.com *.stream.azure-test.net *.microsoftstream.com *.dynamics.com *.microsoft.com onedrive.live.com *.onedrive.live.com;, frame-ancestors 'self'
-date: Sat, 06 Apr 2024 20:16:54 GMT
-expires: Fri, 22 Mar 2024 20:16:54 GMT,0
-sprequestguid: b6731ca1-d630-2062-3bd5-938b38807bce
-request-id: b6731ca1-d630-2062-3bd5-938b38807bce
-sprequestduration: 1224
-spiislatency: 0
-cache-control: private,max-age=0,no-cache
-pragma: no-cache
-accept-ranges: bytes
-x-sharepointhealthscore: 0
-public-extension: http://schemas.microsoft.com/repl-2
-microsoftsharepointteamservices: 16.0.0.10407
-x-content-type-options: nosniff
-x-ms-invokeapp: 1; RequireReadOnly
-x-from: WEB01
-access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept
-access-control-allow-methods: POST,GET,OPTIONS,PUT,DELETE
-x-xss-protection: 1; mode=block
-X-Firefox-Spdy: h2
- original-response-headers date: Sat, 06 Apr 2024 19:40:08 GMT
-content-type: application/javascript
-content-length: 40372
-set-cookie: AWSALB=G2mEeCS2NMeoIZGJfmC/FIbRJHFsJ5X7CfSxx88T1vNy6RFMKDiVfu0a9tP+OcBkKb1HS1xQkMofDuYKOM+FMMJeU7tTs5gYp8lM6OaIItt/qVjCI1eYbt5KIp0c; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/
-set-cookie: AWSALBCORS=G2mEeCS2NMeoIZGJfmC/FIbRJHFsJ5X7CfSxx88T1vNy6RFMKDiVfu0a9tP+OcBkKb1HS1xQkMofDuYKOM+FMMJeU7tTs5gYp8lM6OaIItt/qVjCI1eYbt5KIp0c; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/; SameSite=None; Secure
-set-cookie: AWSALB=An58DZSJpNrccMDRZbhILwEHDvo6IXFoemw36Icu5G1VPWorXfdW0PYg58RSU5JqRu0pgHDZviQfbiWnWsCjhj6UufU2wbk6kv4olTumrKFQTg9B60w+9jyS7k9J; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/
-set-cookie: AWSALBCORS=An58DZSJpNrccMDRZbhILwEHDvo6IXFoemw36Icu5G1VPWorXfdW0PYg58RSU5JqRu0pgHDZviQfbiWnWsCjhj6UufU2wbk6kv4olTumrKFQTg9B60w+9jyS7k9J; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/; SameSite=None; Secure
-cache-control: private,max-age=0,no-cache
-pragma: no-cache
-expires: Fri, 22 Mar 2024 19:40:08 GMT,0
-last-modified: Fri, 17 Jun 2022 22:41:21 GMT
-accept-ranges: bytes
-etag: "{45DA400F-1628-46CE-9E2D-52FE7C23B1DD},187"
-x-sharepointhealthscore: 0
-resourcetag: rt:45DA400F-1628-46CE-9E2D-52FE7C23B1DD@00000000187
-content-disposition: attachment; filename*=utf-8''print%2ejs; filename="print.js"
-x-download-options: noopen
-public-extension: http://schemas.microsoft.com/repl-2
-sprequestguid: 9b711ca1-b6b0-2062-aa45-14b0e05c5da9
-request-id: 9b711ca1-b6b0-2062-aa45-14b0e05c5da9
-x-frame-options: SAMEORIGIN
-content-security-policy: frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com *.teams.microsoft.us local.teams.office.com *.powerapps.com *.yammer.com *.officeapps.live.com *.office.com *.stream.azure-test.net *.microsoftstream.com *.dynamics.com *.microsoft.com onedrive.live.com *.onedrive.live.com;
-sprequestduration: 1091
-spiislatency: 1
-microsoftsharepointteamservices: 16.0.0.10407
-x-content-type-options: nosniff
-x-ms-invokeapp: 1; RequireReadOnly
-x-from: WEB02
-x-frame-options: SAMEORIGIN
-content-security-policy: frame-ancestors 'self'
-access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept
-access-control-allow-methods: POST,GET,OPTIONS,PUT,DELETE
-strict-transport-security: max-age=31536000; includeSubDomains; preload
-x-xss-protection: 1; mode=block
-X-Firefox-Spdy: h2
- ctid 2 uncompressed-len 0 net-response-time-onstart 1570 net-response-time-onstop 1619 alt-data 1;40372,javascript/moz-script-bytecode-20240222211730-8l alt-data-from-child 1  ˚–

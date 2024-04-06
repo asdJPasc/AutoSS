@@ -1,2228 +1,0 @@
-ï»¿//Optional parameter includeMargin is used when calculating outer dimensions  
-(function ($) { 
-    $.fn.getHiddenDimensions = function (includeMargin) {
-        var $item = this,
-        props = { position: 'absolute', visibility: 'hidden', display: 'block' },
-        dim = { width: 0, height: 0, innerWidth: 0, innerHeight: 0, outerWidth: 0, outerHeight: 0 },
-        $hiddenParents = $item.parents().addBack().not(':visible'),
-        includeMargin = (includeMargin == null) ? false : includeMargin;
-
-        var oldProps = [];
-        $hiddenParents.each(function () {
-            var old = {};
-
-            for (var name in props) {
-                old[name] = this.style[name];
-                this.style[name] = props[name];
-            }
-
-            oldProps.push(old);
-        });
-
-        dim.width = $item.width();
-        dim.outerWidth = $item.outerWidth(includeMargin);
-        dim.innerWidth = $item.innerWidth();
-        dim.height = $item.height();
-        dim.innerHeight = $item.innerHeight();
-        dim.outerHeight = $item.outerHeight(includeMargin);
-
-        $hiddenParents.each(function (i) {
-            var old = oldProps[i];
-            for (var name in props) {
-                this.style[name] = old[name];
-            }
-        });
-
-        return dim;
-    }
-}(jQuery));	 
-
-
-var inDesignMode = 0;
-function GenerateAccordions(){
-//alert(inDesignMode);
-inDesignMode = typeof document.forms[MSOWebPartPageFormName] != 'undefined' ?  document.forms[MSOWebPartPageFormName].MSOLayout_InDesignMode.value : SP.Ribbon.PageState.Handlers.isInEditMode();
-
-if (inDesignMode === "1"){
-return false;
-}
-
-//$("head").append("<link rel=\"stylesheet\" type=\"text/css\" href=\"/Style%20Library/GNMA%20CSS/content.css\" />");
-
- 
-$("div.startAccordion").each(function(i,acc){
- 
-//var webparts = $(item).closest("tr td[id*=MSOZoneCell_WebPartWPQ]").closest("tbody>tr").nextAll();//.closest("tbody").find(">tr");
-var startIndex = $(acc).closest("div[id*=MSOZoneCell_WebPartWPQ]").closest("div").index()-1;
-var webparts = startIndex == -1 ? $(acc).closest("div.ms-webpart-zone").find(">div") : $(acc).closest("div.ms-webpart-zone").find(">div:gt("+startIndex+")");
-webparts.each(function(wi,webpart){
-var title = $(webpart).find(".ms-webpart-titleText span:first").text();
-title = title.replace('(Hidden)','');
-
-//console.log(title);
-if(title.indexOf("Start Accordion")>-1){
-//console.log("creating accordion");
-$(webpart).replaceWith("<div class='contentAccordion' style='display:none;' id=\"accordionContainer_" + i.toString() + "\"></div>"); //find("div:first")
-}
-else if(title.indexOf("End Accordion")>-1){
-$(webpart).remove();
-return false;//break out of this one, accordion finished
-}
-else{
- 
-//console.log("appending section");
-if(title.indexOf("{") > -1){
-
-const regex = /{([^}]*)}/;
-const match = regex.exec(title);
-const textBetweenBrackets = match ? match[1] : null;
-title = title.replace("{"+textBetweenBrackets+"}",'');
-title = "<span style='display: block;font-weight: bold !important;color: black;font-size: 14px !important;'>" + textBetweenBrackets + "</span>" + title;
-}
-$("div[id='accordionContainer_" + i.toString() + "']").append("<h3><span>" + title + "</span></h3>").append($(webpart).find("div[webpartid]:first"));
-$(webpart).remove();
-}
-});
- 
-});
-
-$("div[id*='accordionContainer_']").accordion({heightStyle: "content", autoHeight: false, collapsible:true, active:false,  clearStyle: true, icons: {"header": "ui-icon-circle-plus","headerSelected": "ui-icon-circle-minus"}}).show();
-
-var hash = decodeURIComponent(window.location.hash.replace(/</g, "&lt;").replace(/>/g, "&gt;"));
-hash = hash.replace('#','');
-var scrollToEl = $(".shareContentDiv").nextAll("div.centeredContent, div.expandedContent").find("*[id='"+hash+"'],*[name='"+hash+"'],span:contains('"+hash+"')");
-if(hash!='' && hash != null && $("h3.ui-accordion-header").length > 0){
-linkToAccordion(hash);
-}
-else if(hash!='' && hash != null && scrollToEl.length > 0){
-$("html").animate({scrollTop: scrollToEl.first().offset().top - 35}, 1000);
-}
-
- 
-}
-
-function linkToAccordion(hash){
-var firstMatchFound = 0;
-var hashList = hash.split(';');
-var firstItem = null;
-$(hashList).each(function(hi,hashitem){
-var item = $(".shareContentDiv").nextAll("div.centeredContent, div.expandedContent").find("h3.ui-accordion-header span:contains('"+hashitem+"')").first().parent(); //REMOVED FROM FIND *[id='"+hashitem+"'],*[name='"+hashitem+"'],
-	
-var a = item.closest("div[id*='accordionContainer_']");
-if(a.length > 0){
-	var i = $("h3.ui-accordion-header").index(item);		
-	if(i > -1 && firstMatchFound == 0){	
-		firstItem = item;
-		firstMatchFound = 1;
-		a.accordion({'active' : i});
-		//$("html").animate({scrollTop: a.parent().offset().top + 200}, 1000);
-		
-		 a.accordion({
-	  beforeActivate: function( event, ui ) {
-	  $(".accoddball").next('div').hide();
-	  $(".accoddball").removeClass('ui-accordion-header-active');
-	  $(".accoddball").removeClass('ui-state-active');
-	  $(".accoddball").removeClass('accoddball');
-
-	  },
-	  activate: function(event, ui) {
-        $("html").animate({scrollTop: (firstItem.offset().top - 80)}, 1000);
-      }
-	  
-	  });
-		
-
-	}
-	else if(i > -1){
-	
-	var el = a.find(".ui-accordion-content").eq(i);
-	  el.show();
-	  item.addClass('ui-accordion-header-active ui-state-active accoddball');
-	 
-	 }
-	}
-	
-});
-
-return false;
-}
-function formatMobileTables(target){
-if(target != null && target.trim()==='')
-return true;
-
-var cPage = window.location.href.toLowerCase();
-
- 
-if ($("#bm-nav-icon:visible").length > 0) {
-//excluded pages
-if(cPage.indexOf("/investors/investor_search_tools/pages/remicsearch.aspx") > -1){
-$("div.gmFilterBlock").closest("div").parent().css({"max-width" : $(".gmFilterBlock").closest(".boxedContent").innerWidth()-30+"px","overflow-y":"scroll"});
-$("div.gmFilterBlock").append("<div class='slideIcon'></div>");
-$("div.gmFilterBlock .buttonSearch").css({"width":"150px"});
-return true;
-}
-else if(cPage.indexOf("ginnieinbrief/pages/default.aspx")>-1){
-$("table.posttable").closest("div").attr('style','margin-top:20px;margin-bottom:20px;').addClass('card-wrapper card-2');
-}
-else if(cPage.indexOf("ginnieinbrief/pages/post.aspx")>-1){
-var contrSect = $("table.contributorstbl").closest("td").hide().contents().detach();;
-var crd  = $("<div style='margin-top:20px;' class='card-wrapper card-2'></div>").insertAfter("div[webpartid]:last");
-crd.append(contrSect);
-$("#tweet").closest("div[webpartid]").wrap("<div style='margin-top:40px;' class='card-wrapper card-2'></div>");
-}
-else if(cPage.indexOf("executive_leadership.aspx")>-1){
-$(".presidentbiocontainer").siblings("div").eq(1).css({'margin-left':'0px'})
-$(".presidentbiocontainer,.biocontainer").addClass("card-wrapper card-2");
-
-}else if(cPage.indexOf("contact_information.aspx")>-1){
-$("th:contains('Telephone Inquiries')").closest("table")
-	.find("td:first").css({'width':'50%'})
-	.closest("div[webpartid]").find("span").css({'white-space':'normal'});
-
-}
-
-$("#yearnav").closest("div[webpartid]").css({'overflow-x':'hidden'});
-
-
-
-
-//Press Release Tables
-$("div.filter-table").each(function(fti,ft){
-$(ft).hide();
-
-var ftc = $("<div class='filter-table-cont' id='filter-table-cont-"+fti+"'></div>").insertAfter(ft);
-var pos = 2;
-$(ft).find("div.filter-tableRow:first div.filter-tableCell").each(function(i,r){
-
-
-var block;
-
-
-var ctrl = $(ft).find("div.filter-tableRow:eq(1) div.filter-tableCell:eq("+i+")").find(".gmFilterBlock:first, input:first").detach();
-if(ctrl!=null){
-block = $("<div class='filterBlock'><div class='filterBlockLabel'>"+$(r).text()+"</div><div class='filterBlockControl filter-tableCell'></div></div>").appendTo(ftc);
-
-if(!(pos % 2 === 0))
-	block.css({'float':'right'});
-
-block.find("div.filterBlockControl").append(ctrl);
- 
-if(block.find("div.filterBlockControl input[type=text]").length > 0 ){block.css({'width':'90%'});block.prev().css({'float':'right'});pos=pos+2;}else{pos=pos+1;}//search box
-if(block.find("div.filterBlockControl input[value='Search'], div.filterBlockControl input[value='Clear']").length > 0 && block.prev().css('float')==='left' && block.prev().css('width') !='100%'){block.css({'float':'left', 'width':'100%'});block.prev().css({'width':'100%'});pos=pos+1;}
-}
-});//end each cell
-//$(ftc).find("input[type='button']:last").closest(".filterBlock").css({'float':'right'});
-//$(ftc).closest('.boxedContent').find("table:first").contents().not("h1").wrap("<div class='card-wrapper card-2'></div>");
-});//end each filter table
- 
-
-//disclosure table
-$(".disclosureFilterTable, #catfilter, #keywordsearchtbl, div.gmFilterBlock table").each(function(dti,dt){
-//handle page size
-var pgsz = $("th.pagesize").contents();
-if(pgsz.length > 0){
-$("th.pagesize").remove();
-}
-$(dt).hide();
-var ftc = $("<div class='filter-table-cont' id='filter-table-cont-"+dti+"'></div>").insertBefore(dt);
-var block;
-var ctrl;
-$(dt).find("tr td:has('input,select')").each(function(i,r){
-ctrl = $(r).contents().not('.inputSearchIcon');
-if(ctrl!=null){
-var isSB = (ctrl.length > 0 && ctrl[0].id ==="disclosureSearchBox");
-block = $("<div class='filterBlock' style=''><div class='filterBlockLabel'>"+(ctrl.length > 0 && ctrl[0].id ==="disclosureSearchBox" ? "Search:" : $(r).closest("tr").prev().find("th").eq(i).text())+"</div><div class='filterBlockControl'></div></div>").appendTo(ftc);
-if(!(i % 2 === 0) && !(isSB) && block.prev().width() < 250)
-	block.css({'float':'right'});
-else if(isSB){
-	block.css({'clear':'left','width':'100%'});
-	if(block.prev().css('float')==='left'){block.prev().css('width','100%');}
-}else if(block.prev().width() > 250)
-{
-block.css({'width':'100%'});
-}
-else
-	block.css({'clear':'left'});
-	
-block.find("div.filterBlockControl").append(ctrl);
-}
-
-});
-if(pgsz.length > 0)
-{
-$("<div class='filterBlock' style='float:left;width:100%;'><div class='filterBlockLabel'></div><div class='filterBlockControl'></div></div>").appendTo(ftc);
-ftc.find(".filterBlock:last .filterBlockControl").append(pgsz);
-}
-
-});
-
-
-
-//disclosure tabs
-if($(".disclosureTab").hide().length > 0){
-//var ftc = $("<div class='filter-table-cont' id='filter-table-cont'></div>").insertBefore(".filterBlock:first");//.disclosureTab:first"
-var newTS = $("<div class='filterBlock' style='float:left;width:100%;'><div class='filterBlockLabel'>File Type:</div><div class='filterBlockControl filter-tableCell'><select style='width:100%;' class='mNavSelect gmSearchDD'></select></div></div>").insertBefore(".filterBlock:first");
-$(".disclosureTab").each(function(ti,t){
-newTS.find("select:last").append("<option "+ ($(t).hasClass('selected') ? "selected='selected'" : "" ) +" value='"+$(t).find("a:first").attr('href')+"'>" + $(t).text()+"</option>");
-});
-
-$(".filter-table-cont .filterBlock:last")
-	.css({'float':'left','width':'100%'})
-	.prev()
-	.css({'float':'left','width':'100%'});
-
-}//end if disclosuretab check
-$(".mNavSelect").selectmenu({
-	change: function( event, ui ) {window.location.href = $(this).val();}
-	});
-
-//handle letter filter
-var letter = GetUrlKeyValue('letter');
-$("table.letterpicker").each(function(lfi,lf){
-var lfb = $(".filterBlock:last");
-if(lfb.length ===0){//no filters yet
-$("<div class='filter-table-cont' id='filter-table-cont-"+lfi+"'><div class='filterBlock'></div></div>").insertBefore(lf);
-lfb = $(".filterBlock:last");
-}
-
-var newLF = $("<div class='filterBlock'><div class='filterBlockLabel'>Starts With</div><div class='filterBlockControl filter-tableCell'><div class='gmFilterBlock'><select class='mLetterPicker'></select></div></div></div>").insertAfter(lfb);
-	var lval = "";
-	$(lf).find("tbody tr td .letterpickerlink").each(function(li,l){
-	lval = $(l).attr('href').split('letter=')[1].split('&')[0];
-		newLF.find("select").append("<option "+(letter.substring(0,1)===lval.substring(0,1) ? "selected='SELECTED'":"") +" value='"+lval+"'>"+$(l).text()+"</option>");
-	});//end each letter
-	//get last filterblock
-
-if(lfb.find("select:last").closest(".filterBlock").css('float')==='left'){
-newLF.css({'float':'right'});
-}
-
-var sel = ($(".mLetterPicker:last").closest("div[webpartid]").find("table td:contains('There are no')").length > 0 ? "selected = 'selected' " : "");
-newLF.find(".mLetterPicker:last").prepend("<option "+ sel +" value=' '>Select...</option>");
-	newLF.find(".mLetterPicker:last").selectmenu({
-	change: function( event, ui ) { runLetterFilter($(this).val());}
-	});
-
-
-var pl = $(lf).closest("div[webpartid]").find("#printLink").detach();
-var plfb = $("<div class='filterBlock' style='clear: left;float:left;'></div>").appendTo(lfb.closest(".filter-table-cont"));
-plfb.append(pl);
-lf.remove();
-});//end each lf
-//end handle letter filter
-
-//remove empty blocks
-//$(".filterBlock:empty").remove();
-
-
-var divW = $("div.boxedContent:first").getHiddenDimensions(true).width;//get div w before table added
-
-//get tables
-var tables = (target === null ? $("div[id*='CenteredContent'],div[id*='ExpandedContent'],.boxedContent").find(".disclosureDataTable, #GLOSSARYTABLE, .disclosureTabBody .resultsTable,table.ms-rteTable-staticTable, table.staticTable, table[id*='filterTable']").filter(function(i,t){if($(t).hasClass('resultsTable')===true || (!($(t).hasClass('fileDetail')) && $(t).find("div[webpartid], td.ms-paging").length===0 && !($(t).text().trim()==="") && $(t).find("table").length===0 && $(t).find(".filterTableInner_s1, td.sortCell").length===0 && $(t).find(".ms-acal-month-top").length===0 && !($(t).hasClass('letterpicker')) && $(t).find(".ms-acal-display").length===0 && !($(t).hasClass('filterTableInner_s1')))){return true;}})  : $("div[id*='CenteredContent'],div[id*='ExpandedContent']").find("#"+target));
-tables.hide();
-$(tables).not(".s4-wpTopTable").each(function(i,t){
-
-var filedetails = $(t).find("table.fileDetail").detach();
-
-//check for accordion hidden elements
-var hidden = 0;
-if($(t).closest('.ui-accordion-content').is(':hidden')){
-hidden=1;
-	$(t).closest('.ui-accordion-content').show();
-}
-var newSTbl = $("<div class='scrolltable' id='scrolltable_"+i+"'><div class='scrolltable-fixed'><table cellspacing='0'><thead></thead><tbody></tbody><tfoot></tfoot></table></div><div class='scrolltable-scroll'><div class='scrolltable-scroll-inner'><table  cellspacing='0'><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div></div>").insertAfter(t);//" + $(t).attr('class')+"
-//newTbl.wrap("<div class='zui-wrapper'><div class='zui-scroller'></div></div>");
-
-$(t).find("#hiddenresults").closest("tr").remove();
-var rS = 0;
-$(t).find("tr").each(function(tri,tr){
-
-if($(tr).find("td:first,th:first").attr('colspan')>1){
-var place = "div.scrolltable:last";
-if($(t).closest('div[webpartid]').find('.filter-table-cont').length>0){
-	place = "div.filter-table-cont";
-
-}
-
-if($(tr).text().indexOf("There are no")>-1)
-{
-newSTbl.find(".scrolltable-scroll-inner table >tbody:first").append("<tr><td colspan='"+(newSTbl.find(".scrolltable-scroll-inner table:first tr:first th").length-1)+"'>" + $(tr).text() + "</td></tr>");
-return true;
-}else{
-if($(place).prev().hasClass("mobileTableHeader"))
-	$(place).prev().append(" > " + $(tr).find("th:first,td:first").not(":contains('There are no')").text());
-else
-	$("<span class='mobileTableHeader'>"+$(tr).find("th:first,td:first").not(":contains('There are no')").text()+"</span>").insertBefore(place);
-	
-return true;
-}
-
-}
-
-
-
-
-if($(tr).find("th").length > 0 || $(tr).hasClass('tableSubHeader')){ //header row
-	//insert first row / cell into left col
-	$(tr).prop('class','').prop('style','');//clear styles
-	$(tr).find("tr,th,td").prop('class','').prop('style','');//clear styles
-
-	var newLftTr = $("<tr class='scrolltable-header'></tr>").appendTo(newSTbl.find(".scrolltable-fixed > table > thead"));
-	$(tr).find("td:eq(0),th:eq(0)").append("&nbsp;").appendTo(newLftTr);
-	 
-	
-	var newRtTr = $("<tr class='scrolltable-header'></tr>").appendTo(newSTbl.find(".scrolltable-scroll-inner > table > thead"));
-	$(tr).find("td,th").appendTo(newRtTr);
- 
-}
-else //regular rows
-{
-	$(tr).prop('class','').prop('style','');//clear styles
-	$(tr).find("tr,th,td").prop('class','').prop('style','');//clear styles
-
-var newLftTr = $("<tr></tr>").appendTo(newSTbl.find(".scrolltable-fixed > table > tbody"));
-	if(rS===0){
-		var oldTD = $(tr).find("td:eq(0)").clone();
-		var rowSpan = oldTD.attr('rowspan');
-		if(typeof rowSpan != 'undefined'){
-		rS = parseInt(rowSpan);
-		
-		
-		oldTD.removeAttr('rowspan');
-		}
-		oldTD.appendTo(newLftTr);
-			if(rS > 0){
-			for(rsi=1;rsi<rS;rsi++){
-			var bg = newSTbl.find(".scrolltable-fixed > table > tbody > tr:last > td:first").css('background-color');
-			$("<tr><td style='background-color:"+bg+"'>&nbsp;</td></tr>").appendTo(newSTbl.find(".scrolltable-fixed > table > tbody"));	
-			}
-			
-			rS= rS -1;
-			}
-		}else{
-		rS = rS - 1;
-	}
-	var newRtTr = $("<tr></tr>").appendTo(newSTbl.find(".scrolltable-scroll-inner > table > tbody"));
-	if(rS ===0)
-		$(tr).find("td:not(:first)").appendTo(newRtTr);
-	else
-		$(tr).find("td:not([rowspan])").appendTo(newRtTr);
-
-}
-});//end each row
-//newSTbl.find("tr,th,td").prop('class','').prop('style','');//clear styles
-//get max width for frozen col
-var max = 0;  
-
- 
-filedetails.each(function(fdi,fd){
-newSTbl.find(">tbody:first > tr").eq(fdi).append(fd).closest("td").css({'min-width':'300px'});
-});
-
-
-
-newSTbl.find(".fileDetail").css({'width':'inherit'}).prop('width','');		
- 
-	
-var w = max+20;// newTbl.find("td:first > div").outerWidth()+20;
- 
-var iw = 0;
-if(hidden===0)
- iw = newSTbl.closest("div.boxedContent").getHiddenDimensions(true).innerWidth;
-else
- iw = newSTbl.closest("div.boxedContent").getHiddenDimensions(true).width-0; //in accordion so want that width
-
-//$("#"+newSTbl.attr('id')).ready(function(){
-//$(document).ready(function(){
-//$("div.scrolltable").each(function(i,tb){
-//var tbl = $(tb); //newSTbl;
-var tbl = newSTbl;
-/*
-if($(tbl).parents('.ui-accordion-content').length > 0  && $(tbl).closest('.ui-accordion-content').is(':hidden')){
-$(t).closest('.ui-accordion-content').show();
-w = divW - tbl.find(".scrolltable-fixed table:first").getHiddenDimensions(true).width - 50;
-}else{
-w = divW - tbl.find(".scrolltable-fixed table:first").getHiddenDimensions(true).width - 25;
-}
-
-*/
-
-
-
-var w = 0;
-var dataTbl = 0;
-//get datatable width
-dataTbl = tbl.find(".scrolltable-scroll-inner table").getHiddenDimensions(true).width;// + tbl.find(".scrolltable-fixed table").width();
-//set to inner scroll area to accomodate width
-tbl.find(".scrolltable-scroll-inner").css({'width': dataTbl+'px'});
-
-//get scrolltable scroll width from remainder of space left after fixed table within div container
-var sfTbl = tbl.find(".scrolltable-fixed table:first").getHiddenDimensions(true).width;
-if(divW < 1)
-	divW = tbl.closest("div.boxedContent").getHiddenDimensions(true).width;
-	
-w = divW - sfTbl - 25;
-tbl.find(".scrolltable-scroll").css({'width':w+'px'});
-//console.log('scrolltable-scroll w:' + w + ' from ' + divW + " - " + sfTbl);
-
-//console.log(divW);
-//console.log($(tbl).prop('id') + ":" + w);
-
-if(dataTbl <= w  ){
-//console.log('greater');
-	tbl.find(".scrolltable-scroll-inner, .scrolltable-scroll-inner table").css({'width':'100%'});
-    }
-    
-//hand fixed / scroll tables out of alignment
-while(tbl.find(".scrolltable-scroll").position().top > tbl.find(".scrolltable-fixed").position().top ){
-	tbl.find(".scrolltable-scroll").css({'width': (tbl.find(".scrolltable-scroll").width()-20)+'px'});
-}
-	
-
-
-//heights 
-//handle one column tables
-if(tbl.find(".scrolltable-scroll td, .scrolltable-scroll th").length == 0)
-{
-	tbl.find(".scrolltable-scroll").remove();
-	tbl.css({'width':'100%'});
-	tbl.find(".scrolltable-fixed:first").css({'width':'100%'});
-	
-}
-
-
-syncRowHeights(tbl);
-
-if(hidden===1)
-$(t).closest('.ui-accordion-content').hide();
-
-$(t).remove();
-});//end each table
-
-
- //fix up disclosure history
- $(".disclosureTabBody").removeClass("disclosureTabBody").addClass("card-wrapper card-2").css({'float':'left'});
- 
- //fix disclosure search
- if(window.location.href.toLowerCase().indexOf("investors/investor_search_tools/pages/default.aspx")>-1)
- {
- $(".gmFilterBlock").addClass("card-wrapper card-2").css({"float":"left"});
- $(".gmFilterBlock").parent().attr('style', ' ');
- 	$(".gmFilterBlock").find("p").css({"float":"left"});
- 	
- 	$(".filterBlock:last").css({"clear":"left","display":"block","width":"100%"}).find("input[name='buttonSubmit']").css('width','100%');
- 	
- 
- }
-
-
-if(cPage.indexOf("multiclasssecadvsrch.aspx")>-1){
-$("div.gmFilterBlock")
-	.closest("div").css({'display':'inline-block', 'padding-left' : '2px !important', 'padding-right':'2px !important'})
-	.find(".buttonClear").css({"margin-left":"0px"});;
-
-}
-
-}//end if burger
- 
-
-}
-
-function syncRowHeights(tbl){
-//console.log('setting row height');
-var max = 0;
-tbl.find("table:not('.detailsTable') th").each(function(i,th){
-	// console.log($(th).text());
-		    max = Math.max($(th).height(), max); //getHiddenDimensions(true).height
-	//$(tr).find("th,td").css({'height':max+"px"});
-});//end each th
-//console.log(max);
-max = max + 2;
-tbl.find("table:not('.detailsTable') th").css({'height': max+'px','min-height':max+'px'});
-max = 0;
-tbl.find(".scrolltable-scroll-inner table:not('.detailsTable') tr").each(function(tri,tr){
-max=0;
-$(tr).find('td').each(function(tdi,td){
-max = Math.max($(td).height(), max);
-});//end each td
-//get left side height
-var lH =  tbl.find(".scrolltable-fixed table  tr:eq("+tri+") td:first").height();
-max = max > lH ? max : lH;
-max = max + 2;
-tbl.find(".scrolltable-fixed table tr:eq("+tri+") td:first").css({'height': max+'px','min-height':max+'px'});
-$(tr).find("td").css({'height': max+'px','min-height':max+'px'});
-
-
-});//end each table
-
-}
-
-function runLetterFilter(letter){
-var str = updateQueryStringParam("letter",letter);
-window.location.href=str;
-}	 
-	 
-
-$(document).on('DOMNodeInserted', function (e) {
-var t = $(e.target).prop('id'); 
-if(t!=null && typeof t != 'undefined'){
-if(t.indexOf('filterTable')>-1){
-//console.log('fired' + t);
-formatMobileTables(t);
-}
-}
-});
-
-if(window.location.href.toLowerCase().indexOf("profile.aspx")>-1 || window.location.href.toLowerCase().indexOf("subscribe.aspx")>-1){
-//console.log('profile page');
-$("#formcontainer").ready(function(){
-if ($("#bm-nav-icon:visible").length > 0) {
-var lpl;
-var loginPanel = $("<div class='loginPanel'></div>").insertAfter("#formcontainer");
-loginPanel.closest("td[id*='MSOZoneCell']").closest("table").wrap("<div class='logincard card-2'></div>");
-var clone = $("#formcontainer");//.clone();
-loginPanel.prop('id','formcontainer');
-//$("#formcontainer").remove();
-$("#formcontainer").hide();
-clone.find(" > table > tbody > tr").find(">td").each(function(fei,fe){
-if($(fe).hasClass('sub-label') && ($(fe).parent().prop('id')!=null && $(fe).parent().prop('id').indexOf('trOrg')===-1)){                 //, td.sub-entry, td:has(input.sub-button,input.btnCancel)
-	lpl = $("<div class='loginPanelLabel'></div>").appendTo(loginPanel);
-	$(fe).contents().appendTo(lpl);
-}else if($(fe).find('table').length>0){
-	lpl = $("<div class='loginPanelField'></div>").appendTo(loginPanel);
-	if($(fe).find("table.subCbList").length>0 || $(fe).find("table[id*='rbMedia']").length>0){
-		$(fe).find("table:first").appendTo(lpl);//.clone().
-	}else{
-		$(fe).find("table:first td:not(:has('.buttonSearch'))").contents().clone().appendTo(lpl);//.contents().clone().
-		$(fe).find("table:first td:has('.buttonSearch')").contents().wrap("<div class='loginPanelField'></div>").appendTo(loginPanel);//.contents().clone()
-	}
-}else if($(fe).hasClass('sub-entry') || $(fe).find("input.sub-button,input.btnCancel").length>0){ 
-	lpl = $("<div class='loginPanelField'></div>").appendTo(loginPanel);
-	var ctrls = $(fe).contents().wrap("<div/>");//.contents().clone()
-
-	if($(fe).parent().attr('id') != null && $(fe).parent().attr('id').indexOf('trOrg')>-1){
-		var tb = $("<table class='orgbox'><tbody><tr id='" + $(fe).parent().attr('id') +"'><td><table><tbody><tr></tr><tr></tr></tbody></table></td></tr></tbody></table>").appendTo(lpl);
-		var l = $(fe).closest("tr").find("td:eq(0)");//.clone();
-		var f = $(fe).closest("tr").find("td:eq(1)");//.clone();
-		
-		l.appendTo(tb.find("table tbody tr:eq(0)"));
-		f.appendTo(tb.find("table tbody tr:eq(1)"));
-		//$(fe).closest("tr").remove();
-	}
-	else{
-		ctrls.appendTo(lpl);
-	}
-}else if(($(fe).parent().prop('id')!=null && $(fe).parent().prop('id').indexOf('trOrg')===-1)){
-lpl = $("<div class='loginPanelLabel'><div class='sub-instruct'></div></div>").appendTo(loginPanel);
-$(fe).contents().appendTo(lpl.find(".sub-instruct"));
-}
-
-});
-
-//$("#formcontainer").prop('id','oldformcontainer').remove();
-//$("input[type='radio'][id*='_0']").each(function(i,e){$(e).attr('id',$(e).attr('id').replace('_0',''));})
-var orgVal = $(".orgbox").closest("div").prev().find("input[id*='rbMediaUpdate']:checked").val();
-if(orgVal==="1")
-	$(".orgbox tr[id*='trOrg']").show();
-
-
-loginPanel.show();
-
-}
-});
-}
-
-var updateQueryStringParam = function (key, value) {
-
-    var baseUrl = [location.protocol, '//', location.host, location.pathname].join(''),
-        urlQueryString = document.location.search,
-        newParam = key + '=' + value,
-        params = '?' + newParam;
-
-    // If the "search" string exists, then build params from it
-    if (urlQueryString) {
-        var updateRegex = new RegExp('([\?&])' + key + '[^&]*');
-        var removeRegex = new RegExp('([\?&])' + key + '=[^&;]+[&;]?');
-
-        if( typeof value == 'undefined' || value == null || value == '' ) { // Remove param if value is empty
-            params = urlQueryString.replace(removeRegex, "$1");
-            params = params.replace( /[&;]$/, "" );
-
-        } else if (urlQueryString.match(updateRegex) !== null) { // If param exists already, update it
-            params = urlQueryString.replace(updateRegex, "$1" + newParam);
-
-        } else { // Otherwise, add it to end of query string
-            params = urlQueryString + '&' + newParam;
-        }
-    }
-
-    // no parameter was set so we don't need the question mark
-    params = params == '?' ? '' : params;
-	return baseUrl + params;
-    //window.history.replaceState({}, "", baseUrl + params);
-};
-
-//handle images that are content areas on mobile pages, allowing them to be viewed in full in a new window when clicked, and fixing sizing issues
-
-$("div.boxedContent").ready(function(){
-if ($("#bm-nav-icon:visible").length > 0) {
-var bcW = $(window).width();
-var matches = $(".boxedContent a[target='_blank'] img:not([src*='blank.gif']):not([class*='leadership-img']):not([src*='GinnieInBrief']):not([src*='ginnieinbrief']):not([src*='youtube.com'])").filter(function(i,im){return $(this).width() > bcW; });
-matches.prop('width','100%')
-	.prop('height','')
-	.css({'width':'100%','height':'auto','margin':'auto', 'padding':'inherit'})
-	.parent().append("<div style='cursor:pointer;'>Click to view full size image</div>");
-
- 
-
-$(".boxedContent img[alt]:not([src*='blank.gif']):not([class*='leadership-img']):not([src*='GinnieInBrief']):not([src*='ginnieinbrief']):not([src*='youtube.com'])").filter(function(i,im){
-if($(this).width() > bcW || $(this).parents("a").length===0){return true;} }).each(function(i,im){
-	$(im).prop('width','100%')
-	.prop('height','')
-	.css({'width':'100%','height':'auto','margin':'auto','padding':'inherit'});
-	if(!$(im).parent().is("a")){
-		$(im).wrap("<a title='Click to view full image' href='"+$(this).attr('src')+"' target='_blank'></a>");
-		$(im).parent().append("<div style='cursor:pointer;'>Click to view full size image</div>");
-		}
-	});
-	}
-});
-var scrollHeight = 0;
-$("#s4-workspace").ready(function(){
-setInterval(function(){
-var cScrollHeight = $("#s4-workspace").height();
-if(cScrollHeight != scrollHeight){
-scrollHeight = cScrollHeight;
-$("#s4-workspace").attr('style',$("#s4-workspace").attr('style')+'-webkit-overflow-scrolling: touch;-webkit-perspective: 0;');
-}
-},800);
-});
-
-
-$("div.boxedContent").ready(function () {
-    //--RH 8/17/2018  below code check if device is mobile phone or tablet
-    if ($("#bm-nav-icon:visible").length > 0) {
-        var windWidth = $(window).width();
-        var mobileWidth = 450;
-
-        //--RH 8/17/2018  below code check if .imgPlusName class exist in the page
-        if ($('.imgPlusName')[0]) {
-            var boxWidth = $('.imgPlusName').width() / $('.imgPlusName').parent().width() * 100;
-            //--RH 8/17/2018  below code check if device is mobile phone
-            if (windWidth <= mobileWidth) {
-                //--RH 8/17/2018  check if the page is Modernization
-                if (boxWidth > 25 && boxWidth < 45) {
-                    $(".imgPlusName").attr('style', 'width: 30.5% !important; height: 140px');
-                }
-                //--RH 8/17/2018  affect pages that have 4 boxes like in MBS Guide
-                else {
-                    $(".imgPlusName").attr('style', 'width: 45.5% !important');
-                }
-            }
-            //--RH 8/23/2018  when device is tablet
-            else {
-                $(".imgPlusName").attr('style', 'margin-top: 10px; margin-bottom: 10px');
-            }
-        }
-
-        //--RH 8/17/2018  below code check if .headerDiv class exist in the page
-        if ($('.headerDiv')[0]) {
-            var headerDivHeight = $('.headerDiv').height();
-            //--RH 8/17/2018 .headerDev class has height of 215 in MBÃ¢â‚¬â€¹SProspectuses and Budget & Performance pages
-            if (headerDivHeight == 215) {
-                $(".headerDiv").attr('style', 'height: 230px !important');
-            }
-            //--RH 8/17/2018 .headerDev class has height of 275 in Systems & Applications page
-            else if (headerDivHeight == 275) {
-                $(".headerDiv").attr('style', 'height: 340px !important');
-            }
-        }
-
-
-        //--RH 8/23/2018  below code check if .filter-tableCell1 class exist in the page
-        if ($('.filter-tableCell1')[0]) {
-            //--RH 8/23/2018  if the device is mobile phone
-            if (windWidth <= mobileWidth) {
-                $(".filter-tableCell1").attr('style', 'width: 45.5% !important');
-                $(".wrapperDiv ").attr('style', 'max-width: 80% !important');
-            }
-            //--RH 8/23/2018  affect pages that have 4 boxes like in MBS Guide.  This will happen in Tablet device
-            else {
-                $(".filter-tableCell1").attr('style', 'width: 24.5% !important');
-                $(".wrapperDiv ").attr('style', 'width: 75% !important');
-            }
-        }
-    }
-   
-});
-
-var disclTitleOrigLoc;
-
-$(window).resize(function() {
- if($("#bm-nav-icon:visible").length == 0 && $('#bm-nav-icon').hasClass('open')) {
-	 	
-     		$("#burgermenu").hide();
-     		$('#bm-nav-icon').removeClass('open');
-     		}
-     		
-  if ($("#bm-nav-icon:visible").length > 0)
-  {
-        
-     		
-  		if($('#burgermenu').length===0){
-	  		
-	  		renderBurgerMenu();
-	  		buildBurgerMenu();
-  		}
-  }
-
-//disclosure search pages
-if(window.location.href.toLowerCase().indexOf("/investors/investor_search_tools/pages/default.aspx")>-1)
-{
-    if(window.innerWidth < 1300 && $("#disclSrchPageTitle").length===0){
-                disclTitleOrigLoc = $("#pageTitle").prev();
-                $("#pageTitle")
-                .insertBefore("#disclosureSearchMain")
-                .attr('id','disclSrchPageTitle');
-    }else if(window.innerWidth >= 1300 && $("#pageTitle").length===0){
-            $("#disclSrchPageTitle")
-                .insertAfter(disclTitleOrigLoc)
-                .attr('id','pageTitle');
-    }
-}
-  
-  });
-
-//window.addEventListener("orientationchange", function() {
-window.onresize = function(){
-setTimeout(function(){
-//alert('resize');
- 
- //alert($(".boxedContent:visible:first").width() + ":" + $(".boxedContent:visible:first").height());
-var modifier = 0;
-//console.log(screen.orientation);
- if ($("#bm-nav-icon:visible").length > 0) {
- //alert(window.orientation +":" + window.innerWidth + ":" + window.innerHeight);
-	if(window.orientation===90 || window.orientation===-90 || window.innerWidth > window.innerHeight)//landscape
-	{
-		modifier = 90;
-	}
-	else// if(screen.orientation.angle===0)//portrait
-	{
-		modifier = 40;
-	}
-	
-     //anytime orienation changes run below
-    //alert("the orientation of the device is now " + screen.orientation.angle);
-
-	//resize scrolltables
-	$(".scrolltable").each(function(si,s){
-	var acc = 0;
-	var tbl = $(s);
-	var divW = $(s).closest("div.boxedContent").getHiddenDimensions(true).innerWidth;
-	if(tbl.parents("div.ui-accordion-content").length > 0){
-		divW = tbl.closest("div[webpartid]").getHiddenDimensions(true).innerWidth;
-		if(tbl.parents("div.ui-accordion-content:hidden").length>0){
-		acc = 1;
-		tbl.closest("div[webpartid]").show();
-		}
-		} 
-	//console.log(divW);
-	//console.log(modifier);
-	var maxW = (divW-modifier)/2;
-	//alert(maxW);
-	//console.log(maxW);
-	//$(".scrolltable-fixed table").find("td,th").css({'max-width':maxW+'px'});
-	$(".scrolltable-fixed,.scrolltable-scroll").css({'width':maxW+'px'});
-	$(".scrolltable-fixed table").find("td,th").css({'max-width':maxW+'px'});
-		//get width of data table
-	    var w =  tbl.find(".scrolltable-scroll-inner table").getHiddenDimensions(true).innerWidth;// + tbl.find(".scrolltable-fixed table").width();
-	    //set the width of the inner div which contains the data table
-		tbl.find(".scrolltable-scroll-inner").css({'width' : w+'px'});
-		//console.log(divW);
-		w = tbl.find(".scrolltable-fixed table:first").getHiddenDimensions(true).innerWidth;
-		//console.log('fixed table width: ' + w);
-		//console.log('containing div width:' + divW);
-		w = divW - w - 20;// - 42;
-		
-		//console.log($(tbl).prop('id') + ":" + w);
-		//tbl.find(".scrolltable-scroll").css({'width':w+'px'});
-		
-		if(w > tbl.find(".scrolltable-scroll-inner").getHiddenDimensions(true).innerWidth ){
-		//console.log('greater');
-			tbl.find(".scrolltable-scroll-inner, .scrolltable-scroll-inner table").css({'width':'100%'});
-		}//end width check
-	syncRowHeights(tbl);
-	if(acc===1)
-		tbl.closest("div[webpartid]").hide();
-		
-	});//end each scrolltable
-	
-	
- 
-}//end mobile nav check
-    },500);
-//}); //end orientation change event
-}
-
-
- 
-         èW x ÿÿ     20240222211730-8lËW –h…¥C   https://www.ginniemae.gov/Style%20Library/GNMA%20Scripts/content.js      ü‡  //Optional parameter includeMargin is used when calculating outer dimensions  
-(function ($) { 
-    $.fn.getHiddenDimensions = function (includeMargin) {
-        var $item = this,
-        props = { position: 'absolute', visibility: 'hidden', display: 'block' },
-        dim = { width: 0, height: 0, innerWidth: 0, innerHeight: 0, outerWidth: 0, outerHeight: 0 },
-        $hiddenParents = $item.parents().addBack().not(':visible'),
-        includeMargin = (includeMargin == null) ? false : includeMargin;
-
-        var oldProps = [];
-        $hiddenParents.each(function () {
-            var old = {};
-
-            for (var name in props) {
-                old[name] = this.style[name];
-                this.style[name] = props[name];
-            }
-
-            oldProps.push(old);
-        });
-
-        dim.width = $item.width();
-        dim.outerWidth = $item.outerWidth(includeMargin);
-        dim.innerWidth = $item.innerWidth();
-        dim.height = $item.height();
-        dim.innerHeight = $item.innerHeight();
-        dim.outerHeight = $item.outerHeight(includeMargin);
-
-        $hiddenParents.each(function (i) {
-            var old = oldProps[i];
-            for (var name in props) {
-                this.style[name] = old[name];
-            }
-        });
-
-        return dim;
-    }
-}(jQuery));	 
-
-
-var inDesignMode = 0;
-function GenerateAccordions(){
-//alert(inDesignMode);
-inDesignMode = typeof document.forms[MSOWebPartPageFormName] != 'undefined' ?  document.forms[MSOWebPartPageFormName].MSOLayout_InDesignMode.value : SP.Ribbon.PageState.Handlers.isInEditMode();
-
-if (inDesignMode === "1"){
-return false;
-}
-
-//$("head").append("<link rel=\"stylesheet\" type=\"text/css\" href=\"/Style%20Library/GNMA%20CSS/content.css\" />");
-
- 
-$("div.startAccordion").each(function(i,acc){
- 
-//var webparts = $(item).closest("tr td[id*=MSOZoneCell_WebPartWPQ]").closest("tbody>tr").nextAll();//.closest("tbody").find(">tr");
-var startIndex = $(acc).closest("div[id*=MSOZoneCell_WebPartWPQ]").closest("div").index()-1;
-var webparts = startIndex == -1 ? $(acc).closest("div.ms-webpart-zone").find(">div") : $(acc).closest("div.ms-webpart-zone").find(">div:gt("+startIndex+")");
-webparts.each(function(wi,webpart){
-var title = $(webpart).find(".ms-webpart-titleText span:first").text();
-title = title.replace('(Hidden)','');
-
-//console.log(title);
-if(title.indexOf("Start Accordion")>-1){
-//console.log("creating accordion");
-$(webpart).replaceWith("<div class='contentAccordion' style='display:none;' id=\"accordionContainer_" + i.toString() + "\"></div>"); //find("div:first")
-}
-else if(title.indexOf("End Accordion")>-1){
-$(webpart).remove();
-return false;//break out of this one, accordion finished
-}
-else{
- 
-//console.log("appending section");
-if(title.indexOf("{") > -1){
-
-const regex = /{([^}]*)}/;
-const match = regex.exec(title);
-const textBetweenBrackets = match ? match[1] : null;
-title = title.replace("{"+textBetweenBrackets+"}",'');
-title = "<span style='display: block;font-weight: bold !important;color: black;font-size: 14px !important;'>" + textBetweenBrackets + "</span>" + title;
-}
-$("div[id='accordionContainer_" + i.toString() + "']").append("<h3><span>" + title + "</span></h3>").append($(webpart).find("div[webpartid]:first"));
-$(webpart).remove();
-}
-});
- 
-});
-
-$("div[id*='accordionContainer_']").accordion({heightStyle: "content", autoHeight: false, collapsible:true, active:false,  clearStyle: true, icons: {"header": "ui-icon-circle-plus","headerSelected": "ui-icon-circle-minus"}}).show();
-
-var hash = decodeURIComponent(window.location.hash.replace(/</g, "&lt;").replace(/>/g, "&gt;"));
-hash = hash.replace('#','');
-var scrollToEl = $(".shareContentDiv").nextAll("div.centeredContent, div.expandedContent").find("*[id='"+hash+"'],*[name='"+hash+"'],span:contains('"+hash+"')");
-if(hash!='' && hash != null && $("h3.ui-accordion-header").length > 0){
-linkToAccordion(hash);
-}
-else if(hash!='' && hash != null && scrollToEl.length > 0){
-$("html").animate({scrollTop: scrollToEl.first().offset().top - 35}, 1000);
-}
-
- 
-}
-
-function linkToAccordion(hash){
-var firstMatchFound = 0;
-var hashList = hash.split(';');
-var firstItem = null;
-$(hashList).each(function(hi,hashitem){
-var item = $(".shareContentDiv").nextAll("div.centeredContent, div.expandedContent").find("h3.ui-accordion-header span:contains('"+hashitem+"')").first().parent(); //REMOVED FROM FIND *[id='"+hashitem+"'],*[name='"+hashitem+"'],
-	
-var a = item.closest("div[id*='accordionContainer_']");
-if(a.length > 0){
-	var i = $("h3.ui-accordion-header").index(item);		
-	if(i > -1 && firstMatchFound == 0){	
-		firstItem = item;
-		firstMatchFound = 1;
-		a.accordion({'active' : i});
-		//$("html").animate({scrollTop: a.parent().offset().top + 200}, 1000);
-		
-		 a.accordion({
-	  beforeActivate: function( event, ui ) {
-	  $(".accoddball").next('div').hide();
-	  $(".accoddball").removeClass('ui-accordion-header-active');
-	  $(".accoddball").removeClass('ui-state-active');
-	  $(".accoddball").removeClass('accoddball');
-
-	  },
-	  activate: function(event, ui) {
-        $("html").animate({scrollTop: (firstItem.offset().top - 80)}, 1000);
-      }
-	  
-	  });
-		
-
-	}
-	else if(i > -1){
-	
-	var el = a.find(".ui-accordion-content").eq(i);
-	  el.show();
-	  item.addClass('ui-accordion-header-active ui-state-active accoddball');
-	 
-	 }
-	}
-	
-});
-
-return false;
-}
-function formatMobileTables(target){
-if(target != null && target.trim()==='')
-return true;
-
-var cPage = window.location.href.toLowerCase();
-
- 
-if ($("#bm-nav-icon:visible").length > 0) {
-//excluded pages
-if(cPage.indexOf("/investors/investor_search_tools/pages/remicsearch.aspx") > -1){
-$("div.gmFilterBlock").closest("div").parent().css({"max-width" : $(".gmFilterBlock").closest(".boxedContent").innerWidth()-30+"px","overflow-y":"scroll"});
-$("div.gmFilterBlock").append("<div class='slideIcon'></div>");
-$("div.gmFilterBlock .buttonSearch").css({"width":"150px"});
-return true;
-}
-else if(cPage.indexOf("ginnieinbrief/pages/default.aspx")>-1){
-$("table.posttable").closest("div").attr('style','margin-top:20px;margin-bottom:20px;').addClass('card-wrapper card-2');
-}
-else if(cPage.indexOf("ginnieinbrief/pages/post.aspx")>-1){
-var contrSect = $("table.contributorstbl").closest("td").hide().contents().detach();;
-var crd  = $("<div style='margin-top:20px;' class='card-wrapper card-2'></div>").insertAfter("div[webpartid]:last");
-crd.append(contrSect);
-$("#tweet").closest("div[webpartid]").wrap("<div style='margin-top:40px;' class='card-wrapper card-2'></div>");
-}
-else if(cPage.indexOf("executive_leadership.aspx")>-1){
-$(".presidentbiocontainer").siblings("div").eq(1).css({'margin-left':'0px'})
-$(".presidentbiocontainer,.biocontainer").addClass("card-wrapper card-2");
-
-}else if(cPage.indexOf("contact_information.aspx")>-1){
-$("th:contains('Telephone Inquiries')").closest("table")
-	.find("td:first").css({'width':'50%'})
-	.closest("div[webpartid]").find("span").css({'white-space':'normal'});
-
-}
-
-$("#yearnav").closest("div[webpartid]").css({'overflow-x':'hidden'});
-
-
-
-
-//Press Release Tables
-$("div.filter-table").each(function(fti,ft){
-$(ft).hide();
-
-var ftc = $("<div class='filter-table-cont' id='filter-table-cont-"+fti+"'></div>").insertAfter(ft);
-var pos = 2;
-$(ft).find("div.filter-tableRow:first div.filter-tableCell").each(function(i,r){
-
-
-var block;
-
-
-var ctrl = $(ft).find("div.filter-tableRow:eq(1) div.filter-tableCell:eq("+i+")").find(".gmFilterBlock:first, input:first").detach();
-if(ctrl!=null){
-block = $("<div class='filterBlock'><div class='filterBlockLabel'>"+$(r).text()+"</div><div class='filterBlockControl filter-tableCell'></div></div>").appendTo(ftc);
-
-if(!(pos % 2 === 0))
-	block.css({'float':'right'});
-
-block.find("div.filterBlockControl").append(ctrl);
- 
-if(block.find("div.filterBlockControl input[type=text]").length > 0 ){block.css({'width':'90%'});block.prev().css({'float':'right'});pos=pos+2;}else{pos=pos+1;}//search box
-if(block.find("div.filterBlockControl input[value='Search'], div.filterBlockControl input[value='Clear']").length > 0 && block.prev().css('float')==='left' && block.prev().css('width') !='100%'){block.css({'float':'left', 'width':'100%'});block.prev().css({'width':'100%'});pos=pos+1;}
-}
-});//end each cell
-//$(ftc).find("input[type='button']:last").closest(".filterBlock").css({'float':'right'});
-//$(ftc).closest('.boxedContent').find("table:first").contents().not("h1").wrap("<div class='card-wrapper card-2'></div>");
-});//end each filter table
- 
-
-//disclosure table
-$(".disclosureFilterTable, #catfilter, #keywordsearchtbl, div.gmFilterBlock table").each(function(dti,dt){
-//handle page size
-var pgsz = $("th.pagesize").contents();
-if(pgsz.length > 0){
-$("th.pagesize").remove();
-}
-$(dt).hide();
-var ftc = $("<div class='filter-table-cont' id='filter-table-cont-"+dti+"'></div>").insertBefore(dt);
-var block;
-var ctrl;
-$(dt).find("tr td:has('input,select')").each(function(i,r){
-ctrl = $(r).contents().not('.inputSearchIcon');
-if(ctrl!=null){
-var isSB = (ctrl.length > 0 && ctrl[0].id ==="disclosureSearchBox");
-block = $("<div class='filterBlock' style=''><div class='filterBlockLabel'>"+(ctrl.length > 0 && ctrl[0].id ==="disclosureSearchBox" ? "Search:" : $(r).closest("tr").prev().find("th").eq(i).text())+"</div><div class='filterBlockControl'></div></div>").appendTo(ftc);
-if(!(i % 2 === 0) && !(isSB) && block.prev().width() < 250)
-	block.css({'float':'right'});
-else if(isSB){
-	block.css({'clear':'left','width':'100%'});
-	if(block.prev().css('float')==='left'){block.prev().css('width','100%');}
-}else if(block.prev().width() > 250)
-{
-block.css({'width':'100%'});
-}
-else
-	block.css({'clear':'left'});
-	
-block.find("div.filterBlockControl").append(ctrl);
-}
-
-});
-if(pgsz.length > 0)
-{
-$("<div class='filterBlock' style='float:left;width:100%;'><div class='filterBlockLabel'></div><div class='filterBlockControl'></div></div>").appendTo(ftc);
-ftc.find(".filterBlock:last .filterBlockControl").append(pgsz);
-}
-
-});
-
-
-
-//disclosure tabs
-if($(".disclosureTab").hide().length > 0){
-//var ftc = $("<div class='filter-table-cont' id='filter-table-cont'></div>").insertBefore(".filterBlock:first");//.disclosureTab:first"
-var newTS = $("<div class='filterBlock' style='float:left;width:100%;'><div class='filterBlockLabel'>File Type:</div><div class='filterBlockControl filter-tableCell'><select style='width:100%;' class='mNavSelect gmSearchDD'></select></div></div>").insertBefore(".filterBlock:first");
-$(".disclosureTab").each(function(ti,t){
-newTS.find("select:last").append("<option "+ ($(t).hasClass('selected') ? "selected='selected'" : "" ) +" value='"+$(t).find("a:first").attr('href')+"'>" + $(t).text()+"</option>");
-});
-
-$(".filter-table-cont .filterBlock:last")
-	.css({'float':'left','width':'100%'})
-	.prev()
-	.css({'float':'left','width':'100%'});
-
-}//end if disclosuretab check
-$(".mNavSelect").selectmenu({
-	change: function( event, ui ) {window.location.href = $(this).val();}
-	});
-
-//handle letter filter
-var letter = GetUrlKeyValue('letter');
-$("table.letterpicker").each(function(lfi,lf){
-var lfb = $(".filterBlock:last");
-if(lfb.length ===0){//no filters yet
-$("<div class='filter-table-cont' id='filter-table-cont-"+lfi+"'><div class='filterBlock'></div></div>").insertBefore(lf);
-lfb = $(".filterBlock:last");
-}
-
-var newLF = $("<div class='filterBlock'><div class='filterBlockLabel'>Starts With</div><div class='filterBlockControl filter-tableCell'><div class='gmFilterBlock'><select class='mLetterPicker'></select></div></div></div>").insertAfter(lfb);
-	var lval = "";
-	$(lf).find("tbody tr td .letterpickerlink").each(function(li,l){
-	lval = $(l).attr('href').split('letter=')[1].split('&')[0];
-		newLF.find("select").append("<option "+(letter.substring(0,1)===lval.substring(0,1) ? "selected='SELECTED'":"") +" value='"+lval+"'>"+$(l).text()+"</option>");
-	});//end each letter
-	//get last filterblock
-
-if(lfb.find("select:last").closest(".filterBlock").css('float')==='left'){
-newLF.css({'float':'right'});
-}
-
-var sel = ($(".mLetterPicker:last").closest("div[webpartid]").find("table td:contains('There are no')").length > 0 ? "selected = 'selected' " : "");
-newLF.find(".mLetterPicker:last").prepend("<option "+ sel +" value=' '>Select...</option>");
-	newLF.find(".mLetterPicker:last").selectmenu({
-	change: function( event, ui ) { runLetterFilter($(this).val());}
-	});
-
-
-var pl = $(lf).closest("div[webpartid]").find("#printLink").detach();
-var plfb = $("<div class='filterBlock' style='clear: left;float:left;'></div>").appendTo(lfb.closest(".filter-table-cont"));
-plfb.append(pl);
-lf.remove();
-});//end each lf
-//end handle letter filter
-
-//remove empty blocks
-//$(".filterBlock:empty").remove();
-
-
-var divW = $("div.boxedContent:first").getHiddenDimensions(true).width;//get div w before table added
-
-//get tables
-var tables = (target === null ? $("div[id*='CenteredContent'],div[id*='ExpandedContent'],.boxedContent").find(".disclosureDataTable, #GLOSSARYTABLE, .disclosureTabBody .resultsTable,table.ms-rteTable-staticTable, table.staticTable, table[id*='filterTable']").filter(function(i,t){if($(t).hasClass('resultsTable')===true || (!($(t).hasClass('fileDetail')) && $(t).find("div[webpartid], td.ms-paging").length===0 && !($(t).text().trim()==="") && $(t).find("table").length===0 && $(t).find(".filterTableInner_s1, td.sortCell").length===0 && $(t).find(".ms-acal-month-top").length===0 && !($(t).hasClass('letterpicker')) && $(t).find(".ms-acal-display").length===0 && !($(t).hasClass('filterTableInner_s1')))){return true;}})  : $("div[id*='CenteredContent'],div[id*='ExpandedContent']").find("#"+target));
-tables.hide();
-$(tables).not(".s4-wpTopTable").each(function(i,t){
-
-var filedetails = $(t).find("table.fileDetail").detach();
-
-//check for accordion hidden elements
-var hidden = 0;
-if($(t).closest('.ui-accordion-content').is(':hidden')){
-hidden=1;
-	$(t).closest('.ui-accordion-content').show();
-}
-var newSTbl = $("<div class='scrolltable' id='scrolltable_"+i+"'><div class='scrolltable-fixed'><table cellspacing='0'><thead></thead><tbody></tbody><tfoot></tfoot></table></div><div class='scrolltable-scroll'><div class='scrolltable-scroll-inner'><table  cellspacing='0'><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div></div>").insertAfter(t);//" + $(t).attr('class')+"
-//newTbl.wrap("<div class='zui-wrapper'><div class='zui-scroller'></div></div>");
-
-$(t).find("#hiddenresults").closest("tr").remove();
-var rS = 0;
-$(t).find("tr").each(function(tri,tr){
-
-if($(tr).find("td:first,th:first").attr('colspan')>1){
-var place = "div.scrolltable:last";
-if($(t).closest('div[webpartid]').find('.filter-table-cont').length>0){
-	place = "div.filter-table-cont";
-
-}
-
-if($(tr).text().indexOf("There are no")>-1)
-{
-newSTbl.find(".scrolltable-scroll-inner table >tbody:first").append("<tr><td colspan='"+(newSTbl.find(".scrolltable-scroll-inner table:first tr:first th").length-1)+"'>" + $(tr).text() + "</td></tr>");
-return true;
-}else{
-if($(place).prev().hasClass("mobileTableHeader"))
-	$(place).prev().append(" > " + $(tr).find("th:first,td:first").not(":contains('There are no')").text());
-else
-	$("<span class='mobileTableHeader'>"+$(tr).find("th:first,td:first").not(":contains('There are no')").text()+"</span>").insertBefore(place);
-	
-return true;
-}
-
-}
-
-
-
-
-if($(tr).find("th").length > 0 || $(tr).hasClass('tableSubHeader')){ //header row
-	//insert first row / cell into left col
-	$(tr).prop('class','').prop('style','');//clear styles
-	$(tr).find("tr,th,td").prop('class','').prop('style','');//clear styles
-
-	var newLftTr = $("<tr class='scrolltable-header'></tr>").appendTo(newSTbl.find(".scrolltable-fixed > table > thead"));
-	$(tr).find("td:eq(0),th:eq(0)").append("&nbsp;").appendTo(newLftTr);
-	 
-	
-	var newRtTr = $("<tr class='scrolltable-header'></tr>").appendTo(newSTbl.find(".scrolltable-scroll-inner > table > thead"));
-	$(tr).find("td,th").appendTo(newRtTr);
- 
-}
-else //regular rows
-{
-	$(tr).prop('class','').prop('style','');//clear styles
-	$(tr).find("tr,th,td").prop('class','').prop('style','');//clear styles
-
-var newLftTr = $("<tr></tr>").appendTo(newSTbl.find(".scrolltable-fixed > table > tbody"));
-	if(rS===0){
-		var oldTD = $(tr).find("td:eq(0)").clone();
-		var rowSpan = oldTD.attr('rowspan');
-		if(typeof rowSpan != 'undefined'){
-		rS = parseInt(rowSpan);
-		
-		
-		oldTD.removeAttr('rowspan');
-		}
-		oldTD.appendTo(newLftTr);
-			if(rS > 0){
-			for(rsi=1;rsi<rS;rsi++){
-			var bg = newSTbl.find(".scrolltable-fixed > table > tbody > tr:last > td:first").css('background-color');
-			$("<tr><td style='background-color:"+bg+"'>&nbsp;</td></tr>").appendTo(newSTbl.find(".scrolltable-fixed > table > tbody"));	
-			}
-			
-			rS= rS -1;
-			}
-		}else{
-		rS = rS - 1;
-	}
-	var newRtTr = $("<tr></tr>").appendTo(newSTbl.find(".scrolltable-scroll-inner > table > tbody"));
-	if(rS ===0)
-		$(tr).find("td:not(:first)").appendTo(newRtTr);
-	else
-		$(tr).find("td:not([rowspan])").appendTo(newRtTr);
-
-}
-});//end each row
-//newSTbl.find("tr,th,td").prop('class','').prop('style','');//clear styles
-//get max width for frozen col
-var max = 0;  
-
- 
-filedetails.each(function(fdi,fd){
-newSTbl.find(">tbody:first > tr").eq(fdi).append(fd).closest("td").css({'min-width':'300px'});
-});
-
-
-
-newSTbl.find(".fileDetail").css({'width':'inherit'}).prop('width','');		
- 
-	
-var w = max+20;// newTbl.find("td:first > div").outerWidth()+20;
- 
-var iw = 0;
-if(hidden===0)
- iw = newSTbl.closest("div.boxedContent").getHiddenDimensions(true).innerWidth;
-else
- iw = newSTbl.closest("div.boxedContent").getHiddenDimensions(true).width-0; //in accordion so want that width
-
-//$("#"+newSTbl.attr('id')).ready(function(){
-//$(document).ready(function(){
-//$("div.scrolltable").each(function(i,tb){
-//var tbl = $(tb); //newSTbl;
-var tbl = newSTbl;
-/*
-if($(tbl).parents('.ui-accordion-content').length > 0  && $(tbl).closest('.ui-accordion-content').is(':hidden')){
-$(t).closest('.ui-accordion-content').show();
-w = divW - tbl.find(".scrolltable-fixed table:first").getHiddenDimensions(true).width - 50;
-}else{
-w = divW - tbl.find(".scrolltable-fixed table:first").getHiddenDimensions(true).width - 25;
-}
-
-*/
-
-
-
-var w = 0;
-var dataTbl = 0;
-//get datatable width
-dataTbl = tbl.find(".scrolltable-scroll-inner table").getHiddenDimensions(true).width;// + tbl.find(".scrolltable-fixed table").width();
-//set to inner scroll area to accomodate width
-tbl.find(".scrolltable-scroll-inner").css({'width': dataTbl+'px'});
-
-//get scrolltable scroll width from remainder of space left after fixed table within div container
-var sfTbl = tbl.find(".scrolltable-fixed table:first").getHiddenDimensions(true).width;
-if(divW < 1)
-	divW = tbl.closest("div.boxedContent").getHiddenDimensions(true).width;
-	
-w = divW - sfTbl - 25;
-tbl.find(".scrolltable-scroll").css({'width':w+'px'});
-//console.log('scrolltable-scroll w:' + w + ' from ' + divW + " - " + sfTbl);
-
-//console.log(divW);
-//console.log($(tbl).prop('id') + ":" + w);
-
-if(dataTbl <= w  ){
-//console.log('greater');
-	tbl.find(".scrolltable-scroll-inner, .scrolltable-scroll-inner table").css({'width':'100%'});
-    }
-    
-//hand fixed / scroll tables out of alignment
-while(tbl.find(".scrolltable-scroll").position().top > tbl.find(".scrolltable-fixed").position().top ){
-	tbl.find(".scrolltable-scroll").css({'width': (tbl.find(".scrolltable-scroll").width()-20)+'px'});
-}
-	
-
-
-//heights 
-//handle one column tables
-if(tbl.find(".scrolltable-scroll td, .scrolltable-scroll th").length == 0)
-{
-	tbl.find(".scrolltable-scroll").remove();
-	tbl.css({'width':'100%'});
-	tbl.find(".scrolltable-fixed:first").css({'width':'100%'});
-	
-}
-
-
-syncRowHeights(tbl);
-
-if(hidden===1)
-$(t).closest('.ui-accordion-content').hide();
-
-$(t).remove();
-});//end each table
-
-
- //fix up disclosure history
- $(".disclosureTabBody").removeClass("disclosureTabBody").addClass("card-wrapper card-2").css({'float':'left'});
- 
- //fix disclosure search
- if(window.location.href.toLowerCase().indexOf("investors/investor_search_tools/pages/default.aspx")>-1)
- {
- $(".gmFilterBlock").addClass("card-wrapper card-2").css({"float":"left"});
- $(".gmFilterBlock").parent().attr('style', ' ');
- 	$(".gmFilterBlock").find("p").css({"float":"left"});
- 	
- 	$(".filterBlock:last").css({"clear":"left","display":"block","width":"100%"}).find("input[name='buttonSubmit']").css('width','100%');
- 	
- 
- }
-
-
-if(cPage.indexOf("multiclasssecadvsrch.aspx")>-1){
-$("div.gmFilterBlock")
-	.closest("div").css({'display':'inline-block', 'padding-left' : '2px !important', 'padding-right':'2px !important'})
-	.find(".buttonClear").css({"margin-left":"0px"});;
-
-}
-
-}//end if burger
- 
-
-}
-
-function syncRowHeights(tbl){
-//console.log('setting row height');
-var max = 0;
-tbl.find("table:not('.detailsTable') th").each(function(i,th){
-	// console.log($(th).text());
-		    max = Math.max($(th).height(), max); //getHiddenDimensions(true).height
-	//$(tr).find("th,td").css({'height':max+"px"});
-});//end each th
-//console.log(max);
-max = max + 2;
-tbl.find("table:not('.detailsTable') th").css({'height': max+'px','min-height':max+'px'});
-max = 0;
-tbl.find(".scrolltable-scroll-inner table:not('.detailsTable') tr").each(function(tri,tr){
-max=0;
-$(tr).find('td').each(function(tdi,td){
-max = Math.max($(td).height(), max);
-});//end each td
-//get left side height
-var lH =  tbl.find(".scrolltable-fixed table  tr:eq("+tri+") td:first").height();
-max = max > lH ? max : lH;
-max = max + 2;
-tbl.find(".scrolltable-fixed table tr:eq("+tri+") td:first").css({'height': max+'px','min-height':max+'px'});
-$(tr).find("td").css({'height': max+'px','min-height':max+'px'});
-
-
-});//end each table
-
-}
-
-function runLetterFilter(letter){
-var str = updateQueryStringParam("letter",letter);
-window.location.href=str;
-}	 
-	 
-
-$(document).on('DOMNodeInserted', function (e) {
-var t = $(e.target).prop('id'); 
-if(t!=null && typeof t != 'undefined'){
-if(t.indexOf('filterTable')>-1){
-//console.log('fired' + t);
-formatMobileTables(t);
-}
-}
-});
-
-if(window.location.href.toLowerCase().indexOf("profile.aspx")>-1 || window.location.href.toLowerCase().indexOf("subscribe.aspx")>-1){
-//console.log('profile page');
-$("#formcontainer").ready(function(){
-if ($("#bm-nav-icon:visible").length > 0) {
-var lpl;
-var loginPanel = $("<div class='loginPanel'></div>").insertAfter("#formcontainer");
-loginPanel.closest("td[id*='MSOZoneCell']").closest("table").wrap("<div class='logincard card-2'></div>");
-var clone = $("#formcontainer");//.clone();
-loginPanel.prop('id','formcontainer');
-//$("#formcontainer").remove();
-$("#formcontainer").hide();
-clone.find(" > table > tbody > tr").find(">td").each(function(fei,fe){
-if($(fe).hasClass('sub-label') && ($(fe).parent().prop('id')!=null && $(fe).parent().prop('id').indexOf('trOrg')===-1)){                 //, td.sub-entry, td:has(input.sub-button,input.btnCancel)
-	lpl = $("<div class='loginPanelLabel'></div>").appendTo(loginPanel);
-	$(fe).contents().appendTo(lpl);
-}else if($(fe).find('table').length>0){
-	lpl = $("<div class='loginPanelField'></div>").appendTo(loginPanel);
-	if($(fe).find("table.subCbList").length>0 || $(fe).find("table[id*='rbMedia']").length>0){
-		$(fe).find("table:first").appendTo(lpl);//.clone().
-	}else{
-		$(fe).find("table:first td:not(:has('.buttonSearch'))").contents().clone().appendTo(lpl);//.contents().clone().
-		$(fe).find("table:first td:has('.buttonSearch')").contents().wrap("<div class='loginPanelField'></div>").appendTo(loginPanel);//.contents().clone()
-	}
-}else if($(fe).hasClass('sub-entry') || $(fe).find("input.sub-button,input.btnCancel").length>0){ 
-	lpl = $("<div class='loginPanelField'></div>").appendTo(loginPanel);
-	var ctrls = $(fe).contents().wrap("<div/>");//.contents().clone()
-
-	if($(fe).parent().attr('id') != null && $(fe).parent().attr('id').indexOf('trOrg')>-1){
-		var tb = $("<table class='orgbox'><tbody><tr id='" + $(fe).parent().attr('id') +"'><td><table><tbody><tr></tr><tr></tr></tbody></table></td></tr></tbody></table>").appendTo(lpl);
-		var l = $(fe).closest("tr").find("td:eq(0)");//.clone();
-		var f = $(fe).closest("tr").find("td:eq(1)");//.clone();
-		
-		l.appendTo(tb.find("table tbody tr:eq(0)"));
-		f.appendTo(tb.find("table tbody tr:eq(1)"));
-		//$(fe).closest("tr").remove();
-	}
-	else{
-		ctrls.appendTo(lpl);
-	}
-}else if(($(fe).parent().prop('id')!=null && $(fe).parent().prop('id').indexOf('trOrg')===-1)){
-lpl = $("<div class='loginPanelLabel'><div class='sub-instruct'></div></div>").appendTo(loginPanel);
-$(fe).contents().appendTo(lpl.find(".sub-instruct"));
-}
-
-});
-
-//$("#formcontainer").prop('id','oldformcontainer').remove();
-//$("input[type='radio'][id*='_0']").each(function(i,e){$(e).attr('id',$(e).attr('id').replace('_0',''));})
-var orgVal = $(".orgbox").closest("div").prev().find("input[id*='rbMediaUpdate']:checked").val();
-if(orgVal==="1")
-	$(".orgbox tr[id*='trOrg']").show();
-
-
-loginPanel.show();
-
-}
-});
-}
-
-var updateQueryStringParam = function (key, value) {
-
-    var baseUrl = [location.protocol, '//', location.host, location.pathname].join(''),
-        urlQueryString = document.location.search,
-        newParam = key + '=' + value,
-        params = '?' + newParam;
-
-    // If the "search" string exists, then build params from it
-    if (urlQueryString) {
-        var updateRegex = new RegExp('([\?&])' + key + '[^&]*');
-        var removeRegex = new RegExp('([\?&])' + key + '=[^&;]+[&;]?');
-
-        if( typeof value == 'undefined' || value == null || value == '' ) { // Remove param if value is empty
-            params = urlQueryString.replace(removeRegex, "$1");
-            params = params.replace( /[&;]$/, "" );
-
-        } else if (urlQueryString.match(updateRegex) !== null) { // If param exists already, update it
-            params = urlQueryString.replace(updateRegex, "$1" + newParam);
-
-        } else { // Otherwise, add it to end of query string
-            params = urlQueryString + '&' + newParam;
-        }
-    }
-
-    // no parameter was set so we don't need the question mark
-    params = params == '?' ? '' : params;
-	return baseUrl + params;
-    //window.history.replaceState({}, "", baseUrl + params);
-};
-
-//handle images that are content areas on mobile pages, allowing them to be viewed in full in a new window when clicked, and fixing sizing issues
-
-$("div.boxedContent").ready(function(){
-if ($("#bm-nav-icon:visible").length > 0) {
-var bcW = $(window).width();
-var matches = $(".boxedContent a[target='_blank'] img:not([src*='blank.gif']):not([class*='leadership-img']):not([src*='GinnieInBrief']):not([src*='ginnieinbrief']):not([src*='youtube.com'])").filter(function(i,im){return $(this).width() > bcW; });
-matches.prop('width','100%')
-	.prop('height','')
-	.css({'width':'100%','height':'auto','margin':'auto', 'padding':'inherit'})
-	.parent().append("<div style='cursor:pointer;'>Click to view full size image</div>");
-
- 
-
-$(".boxedContent img[alt]:not([src*='blank.gif']):not([class*='leadership-img']):not([src*='GinnieInBrief']):not([src*='ginnieinbrief']):not([src*='youtube.com'])").filter(function(i,im){
-if($(this).width() > bcW || $(this).parents("a").length===0){return true;} }).each(function(i,im){
-	$(im).prop('width','100%')
-	.prop('height','')
-	.css({'width':'100%','height':'auto','margin':'auto','padding':'inherit'});
-	if(!$(im).parent().is("a")){
-		$(im).wrap("<a title='Click to view full image' href='"+$(this).attr('src')+"' target='_blank'></a>");
-		$(im).parent().append("<div style='cursor:pointer;'>Click to view full size image</div>");
-		}
-	});
-	}
-});
-var scrollHeight = 0;
-$("#s4-workspace").ready(function(){
-setInterval(function(){
-var cScrollHeight = $("#s4-workspace").height();
-if(cScrollHeight != scrollHeight){
-scrollHeight = cScrollHeight;
-$("#s4-workspace").attr('style',$("#s4-workspace").attr('style')+'-webkit-overflow-scrolling: touch;-webkit-perspective: 0;');
-}
-},800);
-});
-
-
-$("div.boxedContent").ready(function () {
-    //--RH 8/17/2018  below code check if device is mobile phone or tablet
-    if ($("#bm-nav-icon:visible").length > 0) {
-        var windWidth = $(window).width();
-        var mobileWidth = 450;
-
-        //--RH 8/17/2018  below code check if .imgPlusName class exist in the page
-        if ($('.imgPlusName')[0]) {
-            var boxWidth = $('.imgPlusName').width() / $('.imgPlusName').parent().width() * 100;
-            //--RH 8/17/2018  below code check if device is mobile phone
-            if (windWidth <= mobileWidth) {
-                //--RH 8/17/2018  check if the page is Modernization
-                if (boxWidth > 25 && boxWidth < 45) {
-                    $(".imgPlusName").attr('style', 'width: 30.5% !important; height: 140px');
-                }
-                //--RH 8/17/2018  affect pages that have 4 boxes like in MBS Guide
-                else {
-                    $(".imgPlusName").attr('style', 'width: 45.5% !important');
-                }
-            }
-            //--RH 8/23/2018  when device is tablet
-            else {
-                $(".imgPlusName").attr('style', 'margin-top: 10px; margin-bottom: 10px');
-            }
-        }
-
-        //--RH 8/17/2018  below code check if .headerDiv class exist in the page
-        if ($('.headerDiv')[0]) {
-            var headerDivHeight = $('.headerDiv').height();
-            //--RH 8/17/2018 .headerDev class has height of 215 in MBÃ¢â‚¬â€¹SProspectuses and Budget & Performance pages
-            if (headerDivHeight == 215) {
-                $(".headerDiv").attr('style', 'height: 230px !important');
-            }
-            //--RH 8/17/2018 .headerDev class has height of 275 in Systems & Applications page
-            else if (headerDivHeight == 275) {
-                $(".headerDiv").attr('style', 'height: 340px !important');
-            }
-        }
-
-
-        //--RH 8/23/2018  below code check if .filter-tableCell1 class exist in the page
-        if ($('.filter-tableCell1')[0]) {
-            //--RH 8/23/2018  if the device is mobile phone
-            if (windWidth <= mobileWidth) {
-                $(".filter-tableCell1").attr('style', 'width: 45.5% !important');
-                $(".wrapperDiv ").attr('style', 'max-width: 80% !important');
-            }
-            //--RH 8/23/2018  affect pages that have 4 boxes like in MBS Guide.  This will happen in Tablet device
-            else {
-                $(".filter-tableCell1").attr('style', 'width: 24.5% !important');
-                $(".wrapperDiv ").attr('style', 'width: 75% !important');
-            }
-        }
-    }
-   
-});
-
-var disclTitleOrigLoc;
-
-$(window).resize(function() {
- if($("#bm-nav-icon:visible").length == 0 && $('#bm-nav-icon').hasClass('open')) {
-	 	
-     		$("#burgermenu").hide();
-     		$('#bm-nav-icon').removeClass('open');
-     		}
-     		
-  if ($("#bm-nav-icon:visible").length > 0)
-  {
-        
-     		
-  		if($('#burgermenu').length===0){
-	  		
-	  		renderBurgerMenu();
-	  		buildBurgerMenu();
-  		}
-  }
-
-//disclosure search pages
-if(window.location.href.toLowerCase().indexOf("/investors/investor_search_tools/pages/default.aspx")>-1)
-{
-    if(window.innerWidth < 1300 && $("#disclSrchPageTitle").length===0){
-                disclTitleOrigLoc = $("#pageTitle").prev();
-                $("#pageTitle")
-                .insertBefore("#disclosureSearchMain")
-                .attr('id','disclSrchPageTitle');
-    }else if(window.innerWidth >= 1300 && $("#pageTitle").length===0){
-            $("#disclSrchPageTitle")
-                .insertAfter(disclTitleOrigLoc)
-                .attr('id','pageTitle');
-    }
-}
-  
-  });
-
-//window.addEventListener("orientationchange", function() {
-window.onresize = function(){
-setTimeout(function(){
-//alert('resize');
- 
- //alert($(".boxedContent:visible:first").width() + ":" + $(".boxedContent:visible:first").height());
-var modifier = 0;
-//console.log(screen.orientation);
- if ($("#bm-nav-icon:visible").length > 0) {
- //alert(window.orientation +":" + window.innerWidth + ":" + window.innerHeight);
-	if(window.orientation===90 || window.orientation===-90 || window.innerWidth > window.innerHeight)//landscape
-	{
-		modifier = 90;
-	}
-	else// if(screen.orientation.angle===0)//portrait
-	{
-		modifier = 40;
-	}
-	
-     //anytime orienation changes run below
-    //alert("the orientation of the device is now " + screen.orientation.angle);
-
-	//resize scrolltables
-	$(".scrolltable").each(function(si,s){
-	var acc = 0;
-	var tbl = $(s);
-	var divW = $(s).closest("div.boxedContent").getHiddenDimensions(true).innerWidth;
-	if(tbl.parents("div.ui-accordion-content").length > 0){
-		divW = tbl.closest("div[webpartid]").getHiddenDimensions(true).innerWidth;
-		if(tbl.parents("div.ui-accordion-content:hidden").length>0){
-		acc = 1;
-		tbl.closest("div[webpartid]").show();
-		}
-		} 
-	//console.log(divW);
-	//console.log(modifier);
-	var maxW = (divW-modifier)/2;
-	//alert(maxW);
-	//console.log(maxW);
-	//$(".scrolltable-fixed table").find("td,th").css({'max-width':maxW+'px'});
-	$(".scrolltable-fixed,.scrolltable-scroll").css({'width':maxW+'px'});
-	$(".scrolltable-fixed table").find("td,th").css({'max-width':maxW+'px'});
-		//get width of data table
-	    var w =  tbl.find(".scrolltable-scroll-inner table").getHiddenDimensions(true).innerWidth;// + tbl.find(".scrolltable-fixed table").width();
-	    //set the width of the inner div which contains the data table
-		tbl.find(".scrolltable-scroll-inner").css({'width' : w+'px'});
-		//console.log(divW);
-		w = tbl.find(".scrolltable-fixed table:first").getHiddenDimensions(true).innerWidth;
-		//console.log('fixed table width: ' + w);
-		//console.log('containing div width:' + divW);
-		w = divW - w - 20;// - 42;
-		
-		//console.log($(tbl).prop('id') + ":" + w);
-		//tbl.find(".scrolltable-scroll").css({'width':w+'px'});
-		
-		if(w > tbl.find(".scrolltable-scroll-inner").getHiddenDimensions(true).innerWidth ){
-		//console.log('greater');
-			tbl.find(".scrolltable-scroll-inner, .scrolltable-scroll-inner table").css({'width':'100%'});
-		}//end width check
-	syncRowHeights(tbl);
-	if(acc===1)
-		tbl.closest("div[webpartid]").hide();
-		
-	});//end each scrolltable
-	
-	
- 
-}//end mobile nav check
-    },500);
-//}); //end orientation change event
-}
-
-
- 
- Ó˜ÀÙç  ã        ¿"å³      getHiddenDimensions    Ò®C      includeMargin      ß;è0      $item       ¦      props      È’      position   H<*      absolute   1ÒÑ 
-      visibility     „ÛèW      hidden     e}Ÿ      display	    Ÿàû      block
-      o·Yß      dim    ëÄJû      width      ·ÉÅ      height     UŸ
-      innerWidth     0U—      innerHeight    Qñ=i
-      outerWidth     k]2      outerHeight    S÷€      $hiddenParents     Ív=      parents    íŠ      addBack    q€      not    SZK#      :visible   ?ì½³      oldProps   fndd      old    ğ„u2      push   >å/      jQuery     sSZí      inDesignMode   çÏ      GenerateAccordions     ¸O€      document   èy¥      forms      öv      MSOWebPartPageFormName     º™Ø      MSOLayout_InDesignMode      F-L      Ribbon!     äà7Ó	      PageState"      »,Øk      Handlers#   Ãv!      isInEditMode$   –É>Ú      div.startAccordion%     Âé„      acc&    2’Q
-      startIndex'     /ßä•      closest(    ”â¥L      div[id*=MSOZoneCell_WebPartWPQ])    œ³æÙ      div*    {p‚c      webparts+   Ûo”A      div.ms-webpart-zone,    ¾K      >div-   µ¨z.      >div:gt(.   -d_       webpart/    ÒE      title0      Íy7\       .ms-webpart-titleText span:first1   ˆ3Àµ      text2    -S      (Hidden)3   ÚEœÁ      indexOf4    T¬é      Start Accordion5    ¦S¾¸      replaceWith6    &J
-^K      <div class='contentAccordion' style='display:none;' id="accordionContainer_7    .“œ      "></div>8   eı4      End Accordion9      *N·Æ      remove:     ²cT      regex;      Ï$	      {([^}]*)}<      }      textBetweenBrackets=    5Æ¹—c      <span style='display: block;font-weight: bold !important;color: black;font-size: 14px !important;'>>    Ùå¡      </span>?    0ÜŞ      div[id='accordionContainer_@    NTÛh      ']A     ÜB-      appendB     ?WÏ
-      <h3><span>C     (~~­      </span></h3>D   ‰õ2è      div[webpartid]:firstE   CCÈ5      div[id*='accordionContainer_']F     ¸ıY	      accordionG      ÿÄ      heightStyleH    4WÈ      contentI    ís¦
-      autoHeightJ     /ê¥¾      collapsibleK    Œ¨Px      activeL     `‘1
-      clearStyleM     jªâ      iconsN      kˆÿ      headerO     £ïõ      ui-icon-circle-plusP    -˜      headerSelectedQ     H¥      ui-icon-circle-minusR   H‡’K      showS   y‡´n      hashT   ø2‡‰      windowU     0+QA      locationV   aÅ @      &lt;W   »ãÒ      &gt;X   0Œ
-      scrollToElY     3¿µÔ      .shareContentDivZ   İÀ©      nextAll[    …‰S(      div.centeredContent, div.expandedContent\   NÅAÇ      *[id=']     -…ë      '],*[name='^    ·¸)/      '],span:contains('_     úuÓ      ')`     bîZ®      h3.ui-accordion-headera     ¸ì      linkToAccordionb    ÔãX      htmlc   Öq1¼      animated    “Gë	      scrollTope      `~ß      firstf      $Ãç      topg    X©¹7      firstMatchFoundh    >4Ú-      hashListi   F’ñ	      firstItemj      .aˆ      hashitemk   ı„Ìº      iteml   ,1fE&      h3.ui-accordion-header span:contains('m     şèù2      parentn     xqa      beforeActivateo     II·P      eventp      –É1ú      .accoddballq    Ÿvô}      hider   ö+      removeClasss    šçİŞ      ui-accordion-header-activet     å	…8      ui-state-activeu    cÏ’
-      accoddballv     ó4P      activatew   ªâıR      .ui-accordion-contentx      BŒ|      addClassy   ÒÉ¾5      ui-accordion-header-active ui-state-active accoddballz      ,"”      formatMobileTables{     —–™b      trim|   Ì d      cPage}      »©`X      href~   R‰Do      toLowerCase    É(²      #bm-nav-icon:visible€   €:Ç•7      /investors/investor_search_tools/pages/remicsearch.aspx    ùœêq      div.gmFilterBlock‚      >Ÿ      cssƒ    d§Ş	      max-width„      ·w©h      .gmFilterBlock…     ˜Îß      .boxedContent†      ¿ö†
-      overflow-y‡     \zû      scrollˆ     vn‡ë      <div class='slideIcon'></div>‰      i;¨6      div.gmFilterBlock .buttonSearchŠ    5g      150px‹      ! æ       ginnieinbrief/pages/default.aspxŒ   ñ†5      table.posttable    A¢½      attr   ˆ$s#      margin-top:20px;margin-bottom:20px;    Ô¶®       card-wrapper card-2    çÉLI      ginnieinbrief/pages/post.aspx‘      Aa‹^	      contrSect’      ’Îİ‹      table.contributorstbl“      ¹Ñ      contents”   vßYÉ      detach•     f‰      crd–    ¯Š@      <div style='margin-top:20px;' class='card-wrapper card-2'></div>—   ŠŠ³(      insertAfter˜    ¯)È|      div[webpartid]:last™    Ãm‰™      #tweetš     åÉ£      div[webpartid]›     Ñêc      wrapœ   p›9Ñ@      <div style='margin-top:40px;' class='card-wrapper card-2'></div>   ªo—W      executive_leadership.aspx      n+      .presidentbiocontainerŸ     ÌĞ˜s      siblings    ò(:É      margin-left¡    lÆT«      0px¢    ë?·s$      .presidentbiocontainer,.biocontainer£   £€Ùk      contact_information.aspx¤   şu‚@"      th:contains('Telephone Inquiries')¥     ¶d”      table¦      ‹²D      td:first§   ZÙ¯ÿ      50%¨    ±4PB      span©   Ö¸G      white-spaceª    „4.      normal«     C_$»      #yearnav¬   }Ov
-      overflow-x­     ,S&º      div.filter-table®   %*P      fti¯    ÏOÀš      ftc°    &ÒÉª5      <div class='filter-table-cont' id='filter-table-cont-±      Eê¾      '></div>²   U,2–      pos³    [8).      div.filter-tableRow:first div.filter-tableCell´     ^.	í      ctrlµ   Õš³ú2      div.filter-tableRow:eq(1) div.filter-tableCell:eq(¶     2/à!      .gmFilterBlock:first, input:first·      ıÙ²7      <div class='filterBlock'><div class='filterBlockLabel'>¸    `v<,C      </div><div class='filterBlockControl filter-tableCell'></div></div>¹     çãV      appendToº   [Ï      float»       ‘¸.      right¼      £3Ü¿      div.filterBlockControl½     ‹s|'      div.filterBlockControl input[type=text]¾    ³à‰Š      90%¿    >Æ§"      prevÀ   ŞOÅhY      div.filterBlockControl input[value='Search'], div.filterBlockControl input[value='Clear']Á      õ]‡      leftÂ   »?y      100%Ã   ŞxN      .disclosureFilterTable, #catfilter, #keywordsearchtbl, div.gmFilterBlock tableÄ     íÜo      dtiÅ    a¤Õ      pgszÆ   ,ÆxT      th.pagesizeÇ    åLÉ2      insertBeforeÈ   =‚\k      tr td:has('input,select')É      S‚½²      .inputSearchIconÊ   /ïy@      isSBË   Pn:m      disclosureSearchBoxÌ    £Î×Ş@      <div class='filterBlock' style=''><div class='filterBlockLabel'>Í   Ëh<™      Search:Î    y4­12      </div><div class='filterBlockControl'></div></div>Ï     ±/}î      clearĞ      ÄDğ;ˆ      <div class='filterBlock' style='float:left;width:100%;'><div class='filterBlockLabel'></div><div class='filterBlockControl'></div></div>Ñ   ú°¤Ó%      .filterBlock:last .filterBlockControlÒ      Åø      .disclosureTabÓ     5Ğ«]      newTSÔ      ˜ˆæ      <div class='filterBlock' style='float:left;width:100%;'><div class='filterBlockLabel'>File Type:</div><div class='filterBlockControl filter-tableCell'><select style='width:100%;' class='mNavSelect gmSearchDD'></select></div></div>Õ     5,      .filterBlock:firstÖ     ‡."      select:last×     ~yÈ      <option Ø   7„ƒz      hasClassÙ   Å.ÈÏ      selectedÚ   &‡Ù      selected='selected'Û    ˜æd8       value='Ü   ©Ë¿      a:firstİ    µ“‘      '>Ş     ˜É	      </option>ß      ÍùÈ‘$      .filter-table-cont .filterBlock:lastà   ËŸeó      .mNavSelectá    ÖT#ß
-      selectmenuâ     çşÁ      changeã     &Ú›      valä    1@Çó      letterå     :âY      GetUrlKeyValueæ     enä      table.letterpickerç     kxg—      lfiè    Ù|®      lfbé    ÊPyN      .filterBlock:lastê      áÈÑÎ'      '><div class='filterBlock'></div></div>ë    ^Á¢3      newLFì      8m±_Í      <div class='filterBlock'><div class='filterBlockLabel'>Starts With</div><div class='filterBlockControl filter-tableCell'><div class='gmFilterBlock'><select class='mLetterPicker'></select></div></div></div>í      ™òl      lvalî   £±      tbody tr td .letterpickerlinkï      +Ã(/      letter=ğ    1<ë      selectñ     ßYã	      substringò       iŒq      selected='SELECTED'ó    ¾ñ—®      .filterBlockô   9ïx      selõ    Ş?½+      .mLetterPicker:lastö    ŒÆí!      table td:contains('There are no')÷      å¾J’      selected = 'selected' ø     õ£$      prependù    np¿(       value=' '>Select...</option>ú      p€*      runLetterFilterû    ê)a
-      #printLinkü     ;¨x      plfbı   Ù•ğ?      <div class='filterBlock' style='clear: left;float:left;'></div>ş    
-õr      .filter-table-contÿ     l‰      divW   ˜CJ      div.boxedContent:first    YóaÌ      tables    ãş4êC      div[id*='CenteredContent'],div[id*='ExpandedContent'],.boxedContent   8TR‘      .disclosureDataTable, #GLOSSARYTABLE, .disclosureTabBody .resultsTable,table.ms-rteTable-staticTable, table.staticTable, table[id*='filterTable']     >	Å      filter    VLÀê      resultsTable  ëêB±
-      fileDetail    r_IÅ      div[webpartid], td.ms-paging  3‚ƒÿ!      .filterTableInner_s1, td.sortCell	     H	ô˜      .ms-acal-month-top
-    ¹*W‰      letterpicker  c¶rÌ      .ms-acal-display  X–Ï,      filterTableInner_s1   ûúÊü5      div[id*='CenteredContent'],div[id*='ExpandedContent']     8#Å      .s4-wpTopTable    $¦«è      filedetails   ıÈ@Æ      table.fileDetail  ÔóÄ2      :hidden   )q¢•      newSTbl   “Ü»)      <div class='scrolltable' id='scrolltable_     †A“¸     '><div class='scrolltable-fixed'><table cellspacing='0'><thead></thead><tbody></tbody><tfoot></tfoot></table></div><div class='scrolltable-scroll'><div class='scrolltable-scroll-inner'><table  cellspacing='0'><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div></div>  =}âv      #hiddenresults    Õã|      tri   {¦š      td:first,th:first     ú¸mÙ      colspan   4ô†Ù      place     äÁ)      div.scrolltable:last  YD˜”      div.filter-table-cont     ±OU      There are no  ¦#õà,      .scrolltable-scroll-inner table >tbody:first  •ç      <tr><td colspan='     Éƒ9Ó1      .scrolltable-scroll-inner table:first tr:first th      øæó
-      </td></tr>!    ›ï"      mobileTableHeader"     ƒĞ       > #   ¥È²ã      th:first,td:first$     b
-è‚      :contains('There are no')%     }İXí       <span class='mobileTableHeader'>&  @#§ï      tableSubHeader'    ÒPÉ      prop(  …5Ú      tr,th,td)  ÿúÙ9      newLftTr*  œ—]B$      <tr class='scrolltable-header'></tr>+  [Ğìà"      .scrolltable-fixed > table > thead,    W±V      td:eq(0),th:eq(0)-     ÈIá¡      &nbsp;.    ñ¨2Ò      newRtTr/   ĞyÓÏ)      .scrolltable-scroll-inner > table > thead0     ù—(      td,th1     ,ñPÌ	      <tr></tr>2     36U"      .scrolltable-fixed > table > tbody3    3’8      oldTD4     ¢Gxï      td:eq(0)5  ±4®      clone6     •¹H¡      rowSpan7   Ì˜øå      rowspan8   ó’
-      removeAttr9    %‹ğ*      rsi:   “C;7      .scrolltable-fixed > table > tbody > tr:last > td:first;   b Y      background-color<  çı¢       <tr><td style='background-color:=  J	¢û      '>&nbsp;</td></tr>>    ãd)      .scrolltable-scroll-inner > table > tbody?     Wîg5      td:not(:first)@    œj      td:not([rowspan])A     Kk.      maxB   y¤(      fdiC   ƒJù      >tbody:first > trD     Û ¼µ	      min-widthE     >S¶      300pxF     ©Ãà      .fileDetailG   D!%,      inheritH   r“      div.boxedContentI  ÕELÍ      tblJ   ïÚO      dataTblK   <áä      .scrolltable-scroll-inner tableL   S-Õ      .scrolltable-scroll-innerM     ;2µú      sfTblN     ~hGO      .scrolltable-fixed table:firstO    ã[„      .scrolltable-scrollP   Zîá:      .scrolltable-scroll-inner, .scrolltable-scroll-inner tableQ    ¤²ó      .scrolltable-fixedR    Š”5Ì.      .scrolltable-scroll td, .scrolltable-scroll thS    1Ö³‘      .scrolltable-fixed:firstT  Á-›È      syncRowHeightsU    <ÍÆ”      .disclosureTabBodyV    Ù«Ô      disclosureTabBodyW     €Q‘Ö2      investors/investor_search_tools/pages/default.aspxX    ÕÆª      input[name='buttonSubmit']Y    ¶È      multiclasssecadvsrch.aspxZ     ®êáU      inline-block[  Ôæ      padding-left\  ú¬¨é      2px !important]    ]sı¬      padding-right^     d©%È      .buttonClear_  ççY\      table:not('.detailsTable') th`     æÄèú
-      min-heighta    ‘¦:\7      .scrolltable-scroll-inner table:not('.detailsTable') trb    ³¬í      tdic    #Y       .scrolltable-fixed table  tr:eq(d  \Z
-      ) td:firste    ±`ûÈ      .scrolltable-fixed table tr:eq(f   „6¦1      strg   „B—ı      updateQueryStringParamh    @Œã      DOMNodeInsertedi   ÚtV~      filterTablej   ø’      profile.aspxk  çWëã      subscribe.aspxl    ¼bk-      #formcontainerm    ¢„
-      readyn     H_¾\      lplo   Uğõ
-      loginPanelp    äÔq      <div class='loginPanel'></div>q    S`°      td[id*='MSOZoneCell']r     ”¸0è$      <div class='logincard card-2'></div>s  ô”      formcontainert     ¸‰±ø       > table > tbody > tru     RX      >tdv   ÕÛÆ˜      feiw   [L4¤	      sub-labelx     :`èô      trOrgy     $šq#      <div class='loginPanelLabel'></div>z   çPd‡#      <div class='loginPanelField'></div>{   Bé­      table.subCbList|   w=“,      table[id*='rbMedia']}  ƒ¹Ê      table:first~   ášµ;)      table:first td:not(:has('.buttonSearch'))     õ¾€#      table:first td:has('.buttonSearch')€   òÀˆ&	      sub-entry     iÖ       input.sub-button,input.btnCancel‚  ¾n÷w      ctrlsƒ     <;ë      <div/>„    ¨>Ú‹%      <table class='orgbox'><tbody><tr id='…     -ÌMhP      '><td><table><tbody><tr></tr><tr></tr></tbody></table></td></tr></tbody></table>†  ÖÍb      td:eq(1)‡  u&ƒ      table tbody tr:eq(0)ˆ  !âH      table tbody tr:eq(1)‰   [ÈNC      <div class='loginPanelLabel'><div class='sub-instruct'></div></div>Š   ùŒıº      .sub-instruct‹     ±û1      orgValŒ    ôi•C      .orgbox   Şò¹ä"      input[id*='rbMediaUpdate']:checked    Â¬j      .orgbox tr[id*='trOrg']   Bü¿;      key   ü-É      baseUrl‘   s4ê      protocol’  Ş ºª      //“    	Ş(r      host”  Ğ¨4O      pathname•  ¿(ĞP      urlQueryString–    ]-n      newParam—  ËË&<      params˜    )DîK      updateRegex™   ™rÄ       ([?&])š    oaò€      [^&]*›     Ê1i      removeRegexœ   .¡pß      =[^&;]+[&;]?  lx	      [&;]$     (˜4'      bcWŸ   ¨ÑÏ~      matches    Ëz9‰­      .boxedContent a[target='_blank'] img:not([src*='blank.gif']):not([class*='leadership-img']):not([src*='GinnieInBrief']):not([src*='ginnieinbrief']):not([src*='youtube.com'])¡     zÁ²S      auto¢  dü9      margin£    /á«B      padding¤    ~1„@      <div style='cursor:pointer;'>Click to view full size image</div>¥  üİİŸ      .boxedContent img[alt]:not([src*='blank.gif']):not([class*='leadership-img']):not([src*='GinnieInBrief']):not([src*='ginnieinbrief']):not([src*='youtube.com'])¦   »Îà¹*      <a title='Click to view full image' href='§    œ·È›      src¨   ^%8a      ' target='_blank'></a>©    LsA¿      scrollHeightª  {áş      #s4-workspace«     ìˆ       setInterval¬   Õ%Û&      cScrollHeight­     ÷BÒ€9      -webkit-overflow-scrolling: touch;-webkit-perspective: 0;®     ïÌô#	      windWidth¯     Õæä      mobileWidth°   ªÛ’{      .imgPlusName±  .oá      boxWidth²  ÅÜ&      width: 30.5% !important; height: 140px³    ¯­À:      width: 45.5% !important´   ˆL_%      margin-top: 10px; margin-bottom: 10pxµ     göî
-      .headerDiv¶    å 8      headerDivHeight·   ’³w      height: 230px !important¸  ïÿĞğ      height: 340px !important¹  s´Ìq      .filter-tableCell1º    '+©»      .wrapperDiv »  ®d7‡      max-width: 80% !important¼     û²ia      width: 24.5% !important½   !>
-      width: 75% !important¾     ßtü¨      disclTitleOrigLoc¿     ?/$_      resizeÀ    'ıL      #bm-nav-iconÁ  —x5      openÂ  Ø‰3î      #burgermenuÃ   ¥Ô&Ì      renderBurgerMenuÄ  .µ`      buildBurgerMenuÅ   †yl3      /investors/investor_search_tools/pages/default.aspxÆ   Ø¯à      #disclSrchPageTitleÇ   Îù×
-      #pageTitleÈ    ƒ¨´      #disclosureSearchMainÉ     ·b·€      disclSrchPageTitleÊ    ™hÛ»	      pageTitleË     É9ßÿ      onresizeÌ  3AtÙ
-      setTimeoutÍ    !)Y      modifierÎ  ŒıP›      orientationÏ   _w"_      .scrolltableĞ  —Û      div.ui-accordion-contentÑ  ½p©™      div.ui-accordion-content:hiddenÒ   "§'      maxWÓ  ÷(Úë&      .scrolltable-fixed,.scrolltable-scrollÔ    4áIq      .scrolltable-fixed tableÕ  7äÎ      $.fn.getHiddenDimensionsÖ  }¯o      $.fn.getHiddenDimensions/<×    ,';      GenerateAccordions/<Ø  MXàb      GenerateAccordions/</<Ù    b¸òñ      linkToAccordion/<Ü     ,qä      formatMobileTables/<İ  Bš      formatMobileTables/</<à    ­ÚE2      formatMobileTables/tables<á    c4í…      syncRowHeights/<â  ŞF‚0      syncRowHeights/</<ã    ÛŒê°      matches<ä  »ıÔc      window.onresizeå   –íÒÆ      window.onresize/<æ     ëî:C      window.onresize/</<     .   Ó  /   .          4   ï%,‰                                                                                                                     	                 
-                                        	                
-                 	                                 	                 	                 	                                                  	                 	                                                                                                                                                                                                                                                !           !                  "                 #      $           $      $           %      $           &                  '      (           (                  )                  *                  +      ,          ,      -           -      ³OŒc	   	   	       a  z  T ú  g © ¾               S  X              i `%  &  *               .  /            :  ª  <              S  g  Ph  i  P            R j  k  a  i  •              o  ’              o  ’             è  |  ‘  •  Ó  Pä  Pÿ  P              ®  İ`¯  P²  P            i  r  	  ´              Ä  ] Å  ¯  P	  P´  P            i  r  Ê               R t              o  ’ ƒ               ç  O è  ë  Pí  Pô  U ü               R l              o  ’ ƒ                i  t              i  t `    Pö`A w    I J M              [  ) . 3 6 Ğ              B Í              I PA P             i  Q              [ k              b M             ä  f              $                    P
-      Pƒ                   a  ƒ               i    a  ƒ               e  t                n Po P5 ‹             v Î ‚ K l  f               %   • – — ˜ ›                PŸ             i  – ƒ               i  – ƒ               i  – ƒ                                 ¬               ® ¯ ± ¶                                                Í P             s  %  I ÿ  Ò w  ¯Â0°;      <     >          Iô$KE®úš         G  I  J  K  L  M     
-    N  P         d          K     
-     n  v         d     
-     ƒ  †                                        ©          ¬          º                    º     
-     º                     º     
-     Ï                     Ï     
-     º       
-    º           â          º          â          D                                                                               º          º          º          Ï              [ ]             
-       `    
-      `    
-      `                                                  ¢ £              ¢ £                    ƒ                      ‡&Õª!«!.   L     nŞkL  {                6        Õ   l    ¶   v Ú³   Å   Ú¶	    ¶
-   r ÜI   ß   l   v Ú¶   I   I   ÜI   ßr  ÜI   ß   r ÿ›6   •   Ú¶   I   I   ÜI   ßr  ÜI   ß   r ÿ•   ˜(   •   ¶	       r ÜI   ßl   v Ú•   ³   l   Å   Ú¶	       r ÜI   ßl   v Ú³   Å   Ú¶	       r ÜI   ßl   v Ú¶	       r ÜI   ßl   v Ú¶	    ¶   r ÜI    ßl!   v Ú¶   l"   K#   Ú£%`F%ÿÿÿÿPD(e7€ 5`ÿÿÿÿP!ÿÿÿêPD€ ?`– PP§ 3PP•`P
-ÿÿÿúPI€ ze;€ š`P
-ÿÿÿúPD€ ±e`P
-ÿÿÿúP4€ ½`P
-ÿÿÿúP4€ ö`ÿÿÿÿP
-ÿÿÿùP4€ `@€ eP€€€<   ¾F”<                            ·  I   l   K   Ú£ `“0$P(  Tp,x(  ‡               *       ÙÈ  Ú¹  È   Ú8      ;      ;      ;   É   Ú8   ;	   ;
-   ;   ;   ;   ;   È  Ú¹   ÜI   ßr  ÜI   ßr  ÜI   ß   r È  Ú·  ˜   •   —   •   ·  •   Ç  Úg    É   Ú¹  ÜI   ßl   v Ú¹  ¹   ÜI	   ßr  K	   Ú¹  ¹   ÜI   ß·  r K   Ú¹  ¹   ÜI   ßr  K   Ú¹  ¹   ÜI
-   ßr  K
-   Ú¹  ¹   ÜI   ßr  K   Ú¹  ¹   ÜI   ß·  r K   Ú¹  ÜI   ßl   v Ú¹   £&`)`
-
- `
-+`P
-
-P
-P(`¦@`+	`ÿÿÿûPD	`P)	`"ÿÿÿõP)	`P)	`P)	`P)	`$ÿÿÿôPI	`ÿÿÿûPD!	`$Q€€€Ü   u~ÈÌ   ~         	              ÙÈ  Ú8   È   Ú¼   ]–   ^_™E   •   È  ¹   ¹  ¹  I   ¹  JMÚ¹  I   ¹  ¼   ¹  JMÚÚ—¸ÿÿÿ•	   `¼   ÜI   ß¹   v Ú£&`J`˜ ÿÿÿô$`˜ `™@L`ÿÿÿûP$	P€€Ü            M   ¤   º‰l!”   U         	             ÙÈ  Ú¼   ·  JÈ   Ú¼   ]–   ^_™,   •   È  ¹  I   ¹  ¹   ¹  JMÚÚ—Ñÿÿÿ•   `£&`.`˜ ÿÿÿô$`˜@L	P€€€¤            4   Œ  ˆàÆ3Œ  ·                a        ³   ¶   I   ¶   J   ˜)   •   ¶   I   ¶   JI   I   —(   •   ¶   I	   I
-   I   ÜI   ßr  •   Å   Ú¶      ˜   •    •   ¶       r ÜI   ßl   v Ú¶       r ÜI   ß8      ;   ;   ;   ;   ;   8      ;      ;   ;    r ÜI!   ßv  Ú¶"    ¶#   I$   I%   ÜI&   ßk'   (   r ÜI&   ßk)   *   r r È   Ú¹   ÜI&   ß+   ,   r È   Ú¶    -   r ÜI.   ß/   r ÜI0   ß1   ¹   %2   %¹   %3   %¹   %4   %r È  Ú¹   ,   š1   •E   Ú¹   š    •G   Ú¶    5   r I6   •K   ˜   •L   ¶7    ¹   v Ú—   •N   ¹   ,   š'   •P   Ú¹   š   •R   Ú¹  I6   •T   ˜P   •U   ¶    8   r ÜI9   ß8:   ¹  ÜI;   ßr  ÜI<   ßr  I=   #&;>   èv Ú•a   £0`à €  £PN`•`1<6`P
-ÿÿÿûP4/`P
--
-
- ÿÿÿoP
-€  ½PD1`– 
-ÿÿÿøP
-
-ÿÿÿøPÿÿÿÔP`• P(`PP
-9	ÿÿÿÅP(`± P™`ÿÿÿÿPN7	`À`P
-P
-P“ ÿÿÿÙP9<P€€€H  %H  İ   	                    ¸  É   Ú¶    · r ÜI   ß   r ÜI   ß   r ÜI   ßr  &È   Ú¹   ÿ˜9   •   ¶    · r ÜI   ß   r ÜI   ß   r —?   •   ¶    · r ÜI   ß   r ÜI   ß	   ¹   %
-   %r •   È  Ú¹  ÜI   ßl   v Ú£I`ÿÿÿÿPP+P
-P*`— ÿÿÿşPPP“ ÿÿÿşPP
-$ÿÿÿğP`ÿÿÿûP4"P   fìx  '         	       ?      ¶    · r ÜI   ß   r ÜI   ßr  È   Ú¹   ÜI   ß      r È   Ú¹   ÜI   ß	   r ÿ˜A   •   ¶    · r ÜI
-   ß   ¼   ÜI   ßr  %   %v Ú—ˆ  •   ¹   ÜI   ß   r ÿ˜(   •   ¶    · r ÜI   ßv  Ú —E  •   ¹   ÜI   ß   r ÿ˜¥   •    ¬­  ­  ­  Úk   ­  Ú¹  ÜI   ß¹   r ­  Ú¹  ˜   •#   ¹  J—   •$   •$   ­  Ú¹   ÜI   ß   ¹  %   %   r È   Ú   ¹  %   %¹   %È   ÚÍ•+   ¶       ¼   ÜI   ßr  %   %r ÜI   ß   ¹   %   %r ÜI   ß¶    · r ÜI   ß   r v Ú¶    · r ÜI   ßv  Ú•?   £ `ÿÿÿÿP
-P
-)P`• PH` P0`ÿÿÿÿP
-QP
-ÿÿÿ¡PN		` P`ÿÿÿÿP
-
-P`1;@` P N`*`ÿÿÿûP(`©` ÿÿÿôP`p"0` P
-ÿÿÿİP
-=ÿÿÿêP
-5ÿÿÿşPPÿÿÿîP`ÿÿÿÿP
-
-P9P€        ›   ÿÿÿÿŒ   £¯8úŒ   E                        É   Ú·  ÜI   ß   r È   ÚÉ   Ú¶    ¹   r ÜI   ßl   v Ú £ `'`P(``ÿÿÿÿP
-ÿÿÿûP4+`Q€€€$  •DõÂ$  …                ,       ¶       r ÜI   ß   r ÜI   ß   · %   %r ÜI   ßr  ÜI	   ßr  È   Ú¹   ÜI
-   ß   r È  Ú¹  I   ˜  •   ¶       r ÜI   ß¹   r È  Ú¹  ÿš   •   Ú¼   •   ˜e   •   ¹   É   ÚÉ   Ú¹  ÜI   ß8   ¹  ;   v Ú¹  ÜI   ß8   l   ;   l   ;   v Ú—d   •"   ¹  ÿ˜S   •$   ¹  ÜI   ß   r ÜI   ß¹  r È  Ú¹  ÜI   ßv  Ú¹   ÜI   ß   v Ú•,   £ `PP
-9)
-ÿÿÿÒP
-=P
-PH	` P(`• 
-`P
-!ÿÿÿúP(`¨ `*`'`	ÿÿÿõPD`%JJPN
-`‘@` P
-!ÿÿÿıP(`P$` P9%PĞ   E)'‹Ğ   ƒ                         ¶       r ÜI   ß   r ÜI   ßv  Ú¶       r ÜI   ß   v Ú¶       r ÜI   ß   v Ú¶       r ÜI   ß	   v Ú£ `PP
-P$`PP$`PP$`PPDP€x   ¬Wx   >                  
-       ¶       r ÜI   ß8   ¼   ÜI   ßr  I   P&;   èv Ú£ 	`P
-P“ ÿÿÿáP$P€€   3eŒ¸   >         
-             ·  š   •   Ú·  ÜI   ßr     •   ˜   •    •   ¶   I   I   ÜI   ßr  È   Ú¶       r I	   ˜Ì  •   ¹   ÜI
-   ß   r ÿ˜Í   •   ¶       r ÜI   ß   r ÜI   ßr  ÜI   ß8   ¶       r ÜI   ß   r ÜI   ßr  &   %;      ;   v Ú¶       r ÜI   ß   v Ú¶       r ÜI   ß8      ;   v Ú —h  •1   ¹   ÜI
-   ß   r ÿ˜P   •5   ¶        r ÜI   ß   r ÜI!   ß"   #   r ÜI$   ß%   v Ú—ı  •=   ¹   ÜI
-   ß&   r ÿ˜±   •A   ¶    '   r ÜI   ß(   r ÜI)   ßr  ÜI*   ßr  ÜI+   ßr  È  Ú¶    ,   r ÜI-   ß.   r È  Ú¹  ÜI   ß¹  v Ú¶    /   r ÜI   ß0   r ÜI1   ß2   v Ú—1  •W   ¹   ÜI
-   ß3   r ÿ˜o   •[   ¶    4   r ÜI5   ß   r ÜI6   ßr ÜI   ß87   8   ;9   v Ú¶    :   r ÜI$   ß%   v Ú—§   •i   ¹   ÜI
-   ß;   r ÿ˜‡   •m   ¶    <   r ÜI   ß=   r ÜI>   ß?   r ÜI   ß8@   A   ;   r ÜI   ß0   r ÜI>   ßB   r ÜI   ß8C   D   ;E   v Ú•   ¶    F   r ÜI   ß0   r ÜI   ß8G   H   ;I   v Ú¶    J   r ÜIK   ßlL   v Ú¶    M   r ÜIK   ßlN   v Ú¶    O   r ÜI)   ßr  I	   ˜ª   •–   ¶    P   r ÜIQ   ßR   r É   Ú¶    O   r ÜIK   ßlS   v Ú¶    T   r ÜI   ß8U   V   ;W   X   ;   r ÜIY   ßr  ÜI   ß8Z   V   ;W   X   ;   v Ú•¬   ¶    [   r ÜI\   ß8]   l^   ;_   v Ú¶`    a   r É   Ú¶    b   r ÜIK   ßlc   v Ú¶    d   r ÜIe   ßr I   É   Ú·  ˜;   •¿   ¶    f   r ÜI>   ßg   r ÜIh   ßli   r —+   •Å   ¶    j   r ÜI>   ßk   ·  %r •Ê   È  Ú¹  ÜI)   ßv  Ú¶    ¹  r ÜIl   ßm   r ÜIK   ßln   v Ú¶    o   r ÜIp   ßq   r ÜI$   ß%   r ÜI   ß8r   V   ;W   v Ú¶   I   I   ÜI   ßr  ÜI
-   ßs   r ÿ˜  •å   ¶       r ÜI$   ß%   r ÜI   ß8t   V   ;W   v Ú¶       r ÜI   ßr  ÜI!   ß"   u   v Ú¶       r ÜI>   ßv   r ÜI   ß8w   V   ;W   v Ú¶    x   r ÜI   ß8y   V   ;z   {   ;|   X   ;   r ÜI>   ß}   r ÜI   ß   X   v Ú•  ¹   ÜI
-   ß~   r ÿ˜}   •  ¶       r ÜI   ß   r ÜI   ß8   €   ;|      ;‚      ;ƒ   r ÜI>   ß„   r ÜI   ß8…   8   ;9   v Ú•  £ `š P˜`1€ |F`– PH`P”@	` P`PP
-P
-PP
-P‘ 
-ÿÿÿ«P`PP`P
-(
-ÿÿÿûP`1€ |K	` P`PP” P4PN	` P `PP
-P
-P
-P(`PEP`ÿÿÿùP`PPPN	` P`PPP
-
-
-ÿÿÿûP`P)PN
-` P`P'P*U
-
-ÿÿÿûP*UP
-
-ÿÿÿûP9#`PP
-
-ÿÿÿûP4)`P
-ÿÿÿûP4G`P
-XÿÿÿûPDq`P
-P”@s`P€  ëP`P
-ÿÿÿûP4x`P*
-
-ÿÿÿìP*P*
-
-ÿÿÿìP9~`P
-%J~PD€  ƒ`P`P
-ÿÿÿûPD€  ©`PP `š PIP
-€  ¡ÿÿÿùP˜ € ÒP
-@ÿÿÿ÷P`P`ÿÿÿÿP	P
-ÿÿÿûPD€ c`PP!P
-$
-ÿÿÿûP `– PP `PP
-$
-ÿÿÿûP$`P
-P” 	P$`PP
-
-ÿÿÿûP `P
-
-
-
-ÿÿÿÚP7P” #PI€ r` P`P*U
-
-
-#
-ÿÿÿ¾P*U
-
-ÿÿÿûP9€ |Pä   Æì"lä   …   	                     ¸ É   Ú¶    ¼   r ÜI   ßv  Ú¶       ·  %   %r ÜI   ß¼   r É   ÚÉ   Ú¶    ¼   r ÜI   ß   r ÜI   ßl	   v Ú£`ÿÿÿÿP
-PD`8
-ÿÿÿÇP
-UÿÿÿôP)``ÿÿÿÿPP
-<ÿÿÿûP4P\  +ô\  i                O       ¶    ¼   r ÜI   ß   ·  %   %r ÜI   ß   r ÜI   ßr  È  Ú¹  ˜  •   ¶       ¶    · r ÜI   ßr  %	   %r ÜI
-   ß¼   r È   Ú¼   +™(   •   ¹   ÜI   ß8      ;   v Ú•   ¹   ÜI   ß   r ÜI   ß¹  v Ú¹   ÜI   ß   r I   ˜c   •&   ¹   ÜI   ß8      ;   v Ú¹   ÜI   ßr  ÜI   ß8      ;   v Ú¼   %É   Ú—   •1   ¼   %É   Ú•2   ¹   ÜI   ß   r I   š\   •7   Ú¹   ÜI   ßr  ÜI   ß   r    š.   •=   Ú¹   ÜI   ßr  ÜI   ß   r    •B   ˜g   •C   ¹   ÜI   ß8      ;      ;   v Ú¹   ÜI   ßr  ÜI   ß8      ;   v Ú¼   %É   Ú•O   £0@`ÿÿÿÿP
-
-5
-ÿÿÿÆPAP
-*P(``
-:ÿÿÿşP
-P
-ÿÿÿ¿P
-€  ˜ÿÿÿ÷PH
-`” `
-
-ÿÿÿûP9` P
-&ÿÿÿùPD` P” =`
-
-ÿÿÿûP`P
-
-ÿÿÿûP`˜ `’ ` P  vPPŸ PP˜ `
-
-
-ÿÿÿëP&`P
-
-ÿÿÿûP`’0P€€€´  àÀë)´                  &       ¶       r ÜI   ßr  È   Ú¹   I   ˜#   •   ¶       r ÜI   ßv  Ú•   ¶    · r ÜI   ßv  Ú¶       ·  %   %r ÜI	   ß· r É   Ú¶    · r ÜI
-   ß   r ÜI   ßl   v Ú¹   I   ˜K   •   ¶       r ÜI   ß¼   v Ú¼   ÜI
-   ß   r ÜI   ß¹   v Ú•&   £@`P
-P(`•`P
-P9`ÿÿÿÿP
-P$`8
-ÿÿÿÇP
-VÿÿÿóP`ÿÿÿÿPP
-'ÿÿÿûPD`•`P
-€  –ÿÿÿ÷P`‘ P
-5ÿÿÿùP9%P€€€È  –üe³È  ß                Y       ¶    · r ÜI   ßr  ÜI   ß   r É   Ú¼   ˜§  •   ¼   I   š   •   Ú¼   JI      •   È   Ú¶       ¼   I   š   •   Ú¼   JI      •   ˜   •   	   —U   •   ¶    · r ÜI
-   ß   r ÜI   ßr  ÜI   ß   r ÜI   ß·  r ÜI   ßr  •"   %   %r ÜI   ß¼   r É   Ú·  +š8   •+   Ú¹   š(   •-   Ú¼   ÜI   ßr  ÜI   ßr  ú •2   ˜.   •3   ¼   ÜI   ß8      ;   v Ú—  •7   ¹   ˜   •8   ¼   ÜI   ß8      ;   éW¨   ;   v Ú¼   ÜI   ßr  ÜI   ß   r    ˜.   •C   ¼   ÜI   ßr  ÜI   ß      v Ú•G   —y   •G   ¼   ÜI   ßr  ÜI   ßr  ú ˜.   •M   ¼   ÜI   ß8      ;   v Ú—)   •Q   ¼   ÜI   ß8      ;   v Ú•U   ¼   ÜI   ß   r ÜI   ß¼   v Ú•Y   £`	ÿÿÿşP
-PP)`‘ `³`
-DÍ GÿÿÿşPP
-PP
-ÿÿÿıP
-PÿÿÿJP
-€  ıÿÿÿ÷P)`” œ P
-P– `
-
-ÿÿÿûP.	`.`
-
-
-ÿÿÿìP$`PP“ `P” P“ 
-`P
-P‘`
-
-ÿÿÿûPN`
-
-ÿÿÿûP9`‘ P
-&ÿÿÿùP9P€€€  şä¯  ¸                         ¼   ÜI   ß   r ÜI   ß   ¶    · r ÜI   ß   r ˜   •      —   •   	   •   %
-   %¶    · r ÜI   ß   r ÜI   ß   r %   %¶    · r ÜI   ßr  %   %v Ú£`‘ P
-ÿÿÿşPP­ @ÿÿÿşPPP
-ÿÿÿşP
-P
-ÿÿÿyPPd   ú§¹{d   .                       ÙÈ   Ú¶   I   ¶    ¹   r ÜI   ßr  K   Ú£` ÿÿÿşP
-P	P€€€X  k]ÃWX  f         	       J       ¶       r È   Ú¹   I   ˜C   •   ¶       ·  %   %r ÜI   ß· v Ú¶       r È   Ú•   ¶       r ÜI   ß¹   r É   Ú	   É   Ú¶    · r ÜI
-   ß   r ÜI   ßl   v Ú¹   ÜI
-   ß   r ÜI   ß   r ÜI   ß   r    ˜)   •   ¼   ÜI   ß8      ;   v Ú•#   ¶       r ÜI   ß   r ÜI
-   ß   r I   ˜   •,      —   •,   	   •,   È  Ú¼   ÜI
-   ß   r ÜI   ß   ¹  %   %v Ú¼   ÜI
-   ß   r ÜI   ß8   l   ;    v Ú¶    · r ÜI   ß   r ÜI
-   ß!   r ÜI"   ßr  È  Ú¶    #   r ÜI$   ß¹   ÜI   ß%   r r È  Ú¹  ÜI&   ß¹  v Ú· ÜI'   ßv  Ú£ `P(`•`8
-ÿÿÿÇP
-uÿÿÿóP`PM`P
-€  ŞÿÿÿôP)`+`ÿÿÿÿPP
-+ÿÿÿûPD` PPP“`
-
-ÿÿÿûPI`PPP²`‘ P
-$ÿÿÿìP$`‘ P
-'%J$PD
-`ÿÿÿÿPPP
-P(`P
-M PÿÿÿóP`ÿÿÿùP`
-PP€€€@  ê<—4@  Ş                         ¶    · r ÜI   ß   r ÜI   ß   r JÜI   ß   r JÉ   Ú¼   ÜI   ß   r ÜI	   ß
-   ¼  ÜI   ßr ¼   ÜI   ßr ˜   •      —   •      •   %   %¼   %   %¶    · r ÜI   ßr  %   %v Ú£ `	ÿÿÿşPPP‘ P+`‘ P
-PP® 7
-ÿÿÿşP
-P
-ÿÿÿŠP$Pd   KL¯'d   (                       ÙÈ   Ú¶    ¶    ¹   r ÜI   ßr  v Ú£`ÿÿÿşP
-Pÿÿÿ÷PP€€l  hU l  ¼                 D       ¶    · r ÜI   ß   r ›ˆ  •   Ú¶    · r ÜI   ß   r ša  •   Ú¶    · r ÜI   ß   r I   š4  •   Ú¶    · r ÜI   ßr  ÜI	   ßr  
-   š  •   Ú¶    · r ÜI   ß   r I   šÕ   •#   Ú¶    · r ÜI   ß   r I   š¨   •*   Ú¶    · r ÜI   ß   r I   š{   •1   Ú¶    · r ÜI   ß   r šT   •7   Ú¶    · r ÜI   ß   r I   š'   •>   Ú¶    · r ÜI   ß   r •C   ˜   •D    •D   £ 	`ÿÿÿÿPP $ÿÿÿşPP• ÿÿÿşPP• 3ÿÿÿşP
-P
-P› ÿÿÿşPP› ÿÿÿşPP› :ÿÿÿşPP• )ÿÿÿşPP• ÿÿÿşPP• 'ÿÿÿşPP“ #`V€€€(  %Àßc  !  	             ¡      ¸ É   Ú¶    ¼   r ÜI   ß   r ÜI   ßr  È   ÚÈ  Ú¶    ¼   r ÜI   ß   r ÜI   ß   r ˜8   •   È  Ú¶    ¼   r ÜI   ß   r ÜI	   ßv  Ú•   ¶    
-   ·  %   %r ÜI   ß¼   r É   Ú¶    ¼   r ÜI   ß   r ÜI   ß   r ÜI   ßv  ÚÉ   Ú¶    ¼   r ÜI   ß   r ÜI   ßl   v ÚÈ  Ú¹   ÜI   ßl   v Ú¼   ÜI   ß   r ÜI   ß8      ;   r ÜI   ß      v Ú¹  %È  ÚÈ  Ú¹  ˜8   •4   ¼   ÜI   ß   r ÜI   ßr I   È  Ú—5   •9   ¼   ÜI   ß   r ÜI   ßr I   &È  Ú•?   ¼   È  ÚÈ  ÚÈ  Ú¹  ÜI   ß   r ÜI   ßr I   È  Ú¹  ÜI   ß   r ÜI   ß8   ¹      %;   v Ú¹  ÜI   ß!   r ÜI   ßr I   È  Ú¼  ˜3   •R   ¹  ÜI   ß   r ÜI   ßr I   É  Ú•W   ¼  ¹  &&È  Ú¹  ÜI   ß"   r ÜI   ß8#   ¹      %;   v Ú¹  ¹  ˜7   •b   ¹  ÜI   ß$   r ÜI   ß8%   &   ;   v Ú•h   –h   ¹  ÜI   ß"   r ÜI'   ßr  I(   ¹  ÜI   ß)   r ÜI'   ßr  I(   ˜]   •t   ¹  ÜI   ß"   r ÜI   ß8*   ¹  ÜI   ß"   r ÜI   ßr  &    %;   v Ú—]ÿÿÿ•€   ¹  ÜI   ß+   r I,   ˜s   •…   ¹  ÜI   ß"   r ÜI   ßv  Ú¹  ÜI   ß8-   &   ;   v Ú¹  ÜI   ß.   r ÜI   ß8/   &   ;   v Ú•“   ¶0    ¹  v Ú¹  ˜2   •—   ¶    ¼   r ÜI   ß   r ÜI1   ßv  Ú•   ¶    ¼   r ÜI   ßv  Ú£I`ÿÿÿÿPP
-PH`&`ÿÿÿÿPP!P`&`ÿÿÿÿPP
-!PI
-`,
-ÿÿÿÓP
-€ WÿÿÿôP9`ÿÿÿÿPPP
-P$
-``ÿÿÿÿPP
-ÿÿÿûPD\`6_`ÿÿÿûP4e`‘ P
-
-ÿÿÿûP” PDh	`Lj
-`&` `‘ PP—@n`‘ PP”@t`J€  	`&`` P(P` P
-&ÿÿÿûP ` P'P-`‘ ` PP“`` P
- ÿÿÿûPD€  ”` ` P
-G
-ÿÿÿûP f P
-P P
-P“ ` P
-  P
-P‘ ÿÿÿÑPN€  ¢` P” ` P
-P$`
-ÿÿÿûP$` P
-%
-ÿÿÿûP9€  «`ÿÿÿÿP ``ÿÿÿÿPP
-!P`ÿÿÿÿP
-PP(         }  ¨   D	  Ló$4	  Ÿ                Ö      ¶    · r ÜI   ß   r ÜI   ß   r ˜ö  •      È   Ú¶    ¼   r ÜI   ß   r ÜI   ß	   r I
-   ˜   •      È   Ú•   ¶    · r ÜI   ßr  ÜI   ß   r ÿ˜t   •   ¼   ÜI   ß   r ÜI   ß   ¼   ÜI   ß   r I
-   &%   %¶    · r ÜI   ßr  %   %v Ú —ÿ   •)   ¶    ¹   r ÜI   ßr  ÜI   ß   r ˜k   •0   ¶    ¹   r ÜI   ßr  ÜI   ß   ¶    · r ÜI   ß   r ÜI   ß   r ÜI   ßr  %v Ú—b   •?   ¶       ¶    · r ÜI   ß   r ÜI   ß   r ÜI   ßr  %   %r ÜI   ß¹   v Ú•M    •M   ¶    · r ÜI   ß   r I
-   ›&   •T   Ú¶    · r ÜI   ß    r •X   ˜M  •Y   ¶    · r ÜI!   ß"   #   r ÜI!   ß$   #   v Ú¶    · r ÜI   ß%   r ÜI!   ß"   #   r ÜI!   ß$   #   v Ú¶    &   r ÜI'   ß¼   ÜI   ß(   r r È  Ú¶    · r ÜI   ß)   r ÜI   ß*   r ÜI'   ß¹  v Ú¶    &   r ÜI'   ß¼   ÜI   ß+   r r È  Ú¶    · r ÜI   ß,   r ÜI'   ß¹  v Ú—İ  •   ¶    · r ÜI!   ß"   #   r ÜI!   ß$   #   v Ú¶    · r ÜI   ß%   r ÜI!   ß"   #   r ÜI!   ß$   #   v Ú¶    -   r ÜI'   ß¼   ÜI   ß.   r r È  Ú¼   ˜k  •—   ¶    · r ÜI   ß/   r ÜI0   ßr  È  Ú¹  ÜI   ß1   r È  Ú¹  2   ˜1   •¢   ¶3    ¹  r É   Ú¹  ÜI4   ß1   v Ú•¦   ¹  ÜI'   ß¹  v Ú¼   ˜º   •ª   ³5   Å5   Ú–¬   ¶5   ¼   ˜   •¯   ¼   ÜI   ß6   r ÜI7   ß8   r È  Ú¶    9   ¹  %:   %r ÜI'   ß¼   ÜI   ß.   r v Ú³5   ¶5   /'Å5   Ú—sÿÿÿ•À   ¼   &É   Ú•Á   —   •Á   ¼   &É   Ú•Â   ¶    -   r ÜI'   ß¼   ÜI   ß;   r r È  Ú¼   ˜9   •Ê   ¶    · r ÜI   ß<   r ÜI'   ß¹  v Ú—4   •Ğ   ¶    · r ÜI   ß=   r ÜI'   ß¹  v Ú•Ö   £@`ÿÿÿÿPPP/`*`ÿÿÿÿPPP” `O	`ÿÿÿÿP
-PP`‘ P
-<‘ P‘ KÿÿÿşP
-P
-ÿÿÿ‹P`1J; `ÿÿÿÿP
-PP-`ÿÿÿÿP
-P
-ÿÿÿşPPP
-!Pÿÿÿ°PN`#ÿÿÿşPPP
-!P
-ÿÿÿ›P
-€  „ÿÿÿóP9`1JF`ÿÿÿÿPP› ÿÿÿşPP’@`ÿÿÿÿP” P” P$`ÿÿÿÿPP” P” PD `P
-2‘ PÿÿÿïP(`ÿÿÿÿPPP
-ÿÿÿ÷PD$`P
-2‘ PÿÿÿïP(`ÿÿÿÿPP
-ÿÿÿ÷P>) `ÿÿÿÿP” P” P$`ÿÿÿÿPP” P” PD-`P
-‘ PÿÿÿïP(`‘ `ÿÿÿÿPP
-P(` P(`• `ÿÿÿ÷PI5` PI7`ÿÿÿ÷P$`‘ `f `‘ P@P(`#ÿÿÿÜP
-F‘ PÿÿÿïPD9`œ@>`œ0@ `’@C`P
-‘ PÿÿÿïP(`‘ `ÿÿÿÿPP
- ÿÿÿ÷PNG`ÿÿÿÿPP
-#ÿÿÿ÷P9JP€€D	         4  ’       ı$@j    X                         ¼   ÜI   ß   r ÜI   ß·  r ÜI   ß· r ÜI   ß   r ÜI   ß8   	   ;
-   v Ú£`‘ P
-ÿÿÿıP
-ÿÿÿùPP
-
-ÿÿÿûPP€€  µeq“  ²   	                     ¸  É   ÚÉ   Ú¼   ÜI   ß   r ÜI   ßl   v Ú¼   %É   Ú¼   ÜI   ß   r ÜI   ß8   ¼      %;   ¼      %;	   v ÚÉ   Ú¼   ÜI   ß
-   r ÜI   ßl   v Ú£I``‘ P
-+ÿÿÿûP4	``‘ P
-*  ÿÿÿèP``‘ P
-EÿÿÿûP4P€p   àh¤kp   1                         ¶   ÜI   ß¶    · r ÜI   ßr  ¼   r É   Ú£@`ÿÿÿşP
-P
-ÿÿÿìP9P€€Ä  GéQöÄ  9                %       É   Ú¶    · r ÜI   ß   r ÜI   ßl   v Ú¼   ÜI   ß   ·  %   %r ÜI   ßr  È   Ú¼   ¹   ˜   •   ¼   —   •   ¹   •   É   Ú¼   %É   Ú¼   ÜI   ß	   ·  %   %r ÜI
-   ß8   ¼      %;   ¼      %;   v Ú¶    · r ÜI   ß   r ÜI
-   ß8   ¼      %;   ¼      %;   v Ú£``ÿÿÿÿPP
-ÿÿÿûPD`	#
-ÿÿÿØP
-:P`­``	"
-ÿÿÿÙP
-=  ÿÿÿèP`ÿÿÿÿPP
-  ÿÿÿèP4P€€€l   Ú{÷=l   1                         ¶   ÜI   ß¶    · r ÜI   ßr  ¼   r É   Ú£`ÿÿÿşP
-P
-ÿÿÿìPP€\   F23	\   +                        ¶       ·  r È   Ú¶   I   ¹   K   Ú£ ` ÿÿÿöP`”PĞ   ‡Ì”Ğ   „                        ¶    ·  I   r ÜI   ß   r È   Ú¹   š   •   Ú¹      •	   ˜8   •
-   ¹   ÜI   ß   r ÿ˜   •   ¶    ¹   v Ú•   £ 	`ÿÿÿÿPP(`‘ š ` P0`ÿÿÿÿP9P  }UVÕ  z                /        ¶       r I   ˜_  •   ¶       r ÜI   ß   r É   Ú¼   ÜI   ß   r ÜI   ß	   r ÜI
-   ß   v Ú¶       r È   Ú¼   ÜI   ß      v Ú¶       r ÜI   ßv  Ú¹   ÜI   ß   r ÜI   ß   r ÜI   ßl   v Ú¶       r ÜI   ß   r ÜI   ßr  ÜI   ß   r ÜI   ßr  È  Ú¹     ˜#   •)   ¶       r ÜI   ßv  Ú•-   ¼   ÜI   ßv  Ú•/   £ `P” `P#P`‘ P!PP$`P`– P4`P
-P` PP
-ÿÿÿûPD.`PP
-PP
-+P(`” `P
-P93`P96P€”  èÜÅ¡”  t         
-       ¼       ¶    · r ÜI   ß   r št   •   Ú¶    · r ÜI   ßr  ÜI   ß   r šB   •   Ú¶    · r ÜI   ßr  ÜI   ß   r ÜI   ß   r ÿ•   ˜X   •   ¶    	   r ÜI
-   ß¼   r É   Ú¶    · r ÜI   ßr  ÜI
-   ß¼   v Ú—‡  •!   ¶    · r ÜI   ß   r I   ˜M  •(   ¶       r ÜI
-   ß¼   r É   Ú¶    · r ÜI   ß   r I   ›-   •3   Ú¶    · r ÜI   ß   r I   •9   ˜:   •:   ¶    · r ÜI   ß   r ÜI
-   ß¼   v Ú—   •@   ¶    · r ÜI   ß   r ÜI   ßr  ÜI   ßr  ÜI
-   ß¼   v Ú¶    · r ÜI   ß   r ÜI   ßr  ÜI   ß   r ÜI
-   ß¼   v Ú•T   —  •T   ¶    · r ÜI   ß   r ›-   •Y   Ú¶    · r ÜI   ß   r I   •_   ˜ç  •`   ¶       r ÜI
-   ß¼   r É   Ú¶    · r ÜI   ßr  ÜI   ß   r È   Ú¶    · r ÜI   ßr  ÜI   ß   r šB   •r   Ú¶    · r ÜI   ßr  ÜI   ß   r ÜI   ß   r ÿ•{   ˜ÿ   •|   ¶       ¶    · r ÜI   ßr  ÜI   ß   r %   %r ÜI
-   ß¼   r È  Ú¶    · r ÜI   ß   r ÜI   ß   r È  Ú¶    · r ÜI   ß   r ÜI   ß    r È  Ú¹  ÜI
-   ß¹  ÜI   ß!   r v Ú¹  ÜI
-   ß¹  ÜI   ß"   r v Ú—   •œ   ¹   ÜI
-   ß¼   v Ú•   —Ú   •   ¶    · r ÜI   ßr  ÜI   ß   r šB   •¦   Ú¶    · r ÜI   ßr  ÜI   ß   r ÜI   ß   r ÿ•¯   ˜b   •°   ¶    #   r ÜI
-   ß¼   r É   Ú¶    · r ÜI   ßr  ÜI
-   ß¼   ÜI   ß$   r v Ú•¼   £ `ÿÿÿÿPP” ÿÿÿşP
-P	P– ÿÿÿşP
-P	PP• `P
-2ÿÿÿ÷P)`ÿÿÿÿP
-P
-ÿÿÿ÷P.
-`ÿÿÿÿPP” `P
-2ÿÿÿ÷P)`ÿÿÿÿPP› &ÿÿÿşPP™ `ÿÿÿÿPP
-ÿÿÿ÷P `ÿÿÿÿPP
-2P
-P
-ÿÿÿ÷P$`ÿÿÿÿPP
-,PP
-5ÿÿÿ÷P“@
-`ÿÿÿÿPP” ÿÿÿşPP™ `P
-2ÿÿÿ÷P)`ÿÿÿÿP
-PPH`ÿÿÿÿP
-P	P– ÿÿÿşP
-P	PP• `*ÿÿÿşP
-P	P
-ÿÿÿÆP
-€  £ÿÿÿ÷P(`ÿÿÿÿPPP(`ÿÿÿÿPPPH` PÿÿÿôP$` PÿÿÿôP> `ÿÿÿ÷P“@`ÿÿÿÿP
-P	P– ÿÿÿşP
-P	PP•`P
-Rÿÿÿ÷P`ÿÿÿÿP
-P
-‘ PÿÿÿóP9!Pœ  9²" œ  ó                /       g   ¶   I   h       h   ¶   I   h   ¶   I   h   ÜI   ß   r È   Ú¶   I   I	   È  Ú·  
-   %· %È  Ú   ¹  %È  Ú¹  ˜)  •   ¶      ·  %   %Ş  € È  Ú¶      ·  %   %Ş  € È  Ú·    ›$   •   Ú· ›   •   Ú·    •   ˜H   •   ¹  ÜI   ß¹     r È  Ú¹  ÜI   ßk      r È  Ú—g   •#   ¹  ÜI   ß¹  r ˜0   •'   ¹  ÜI   ß¹     ¹  %r È  Ú—   •*   ¹     %¹  %È  Ú•,   ¹     ˜   •.      —   •.   ¹  •.   È  Ú¹   ¹  % £@`™ › P(`” `	)`J	`.`ÿÿÿé(`ÿÿÿéH`½ ` 	ÿÿÿøP(`
-ÿÿÿ÷P’@`ÿÿÿúP/` ÿÿÿäP’0 `
- O`± `5Q€€€”  b¶ª”                  #        ¶       r I   ˜ô   •   ¶    ¶   r ÜI   ßr  É   Ú¶       r ÜI   ßl   r È   Ú¹   ÜI	   ß   
-   r ÜI	   ß      r ÜI   ß8   
-   ;      ;      ;      ;   r ÜI   ßr  ÜI   ß   v Ú¶       r ÜI   ßl   r ÜI   ßl   v Ú•#   £ `P” `ÿÿÿÿP
-	P)`P
-€  ¹ÿÿÿùP`• P*Z*
-
-
-
-ÿÿÿËP*P	P4`P
-€  «ÿÿÿùP*TÿÿÿûP9P€€€\   ü1B\   %                       ÙÈ   Ú¶    ¹   r ÜI   ßr  ¼    £`	ÿÿÿşP
-P
-Q€€€¬   ÷Ìß¬   h                       ÙÈ   Ú¶    ¹   r ÜI   ßr  ¼   ›.   •   Ú¶    ¹   r ÜI   ß   r I   •   ˜   •    •   £&`ÿÿÿÿP
-P
-— 	ÿÿÿşPP™ `V˜  ôSŠ˜˜                 $       ÙÈ   Ú¶    · r ÜI   ß      r ÜI   ß      r ÜI   ß8      ;   	   ;   	   ;
-      ;   v Ú¶    · r ÜI   ßr  ÜI   ß   r ™o   •   ¶    · r ÜI   ß   ¶    ¹   r ÜI   ß   r %   %v Ú¶    · r ÜI   ßr  ÜI   ß   v Ú•$   £&`ÿÿÿÿP” P*Z*
-
-
-
-ÿÿÿÌP$`ÿÿÿşP
-P	P-`ÿÿÿÿP
-
--ÿÿÿşPP
-ÿÿÿÆP$`ÿÿÿÿP
-P	PIP€€€D   «0D                             ¶    l    v Ú£`5CP4P€€€Ğ   TÂĞ   ‡                         ¶       r ÜI   ßr  È   Ú¹   ¶   ˜Z   •   ³   ¹   Å   Ú¶       r ÜI   ß   ¶       r ÜI   ß   r    %v Ú•   £ `P
-P(```P[P	ÿÿÿàP9P€€€È  üÔÃÈ  Ü                V        ¶       r I   ˜Á  •   ¶    ¶   r ÜI   ßr  È   ÚÂÈ  Ú¶       r J˜
-  •   ¶       r ÜI   ßr  ¶       r ÜI   ßr  ÜI   ßr  *d)È  Ú¹   ¹  ˜Œ   •   ¹  š   •   Ú¹  -•   ˜2   •    ¶       r ÜI   ß	   
-   v Ú—-   •$   ¶       r ÜI   ß	      v Ú•(   —-   •(   ¶       r ÜI   ß	      v Ú•,   ¶       r J˜›   •0   ¶       r ÜI   ßr  È  Ú¹  × ˜2   •6   ¶       r ÜI   ß	      v Ú—?   •:   ¹  ˜-   •<   ¶       r ÜI   ß	      v Ú•@   ¶       r J˜³   •D   ¹   ¹  ˜U   •F   ¶       r ÜI   ß	      v Ú¶       r ÜI   ß	      v Ú—P   •N   ¶       r ÜI   ß	      v Ú¶       r ÜI   ß	      v Ú•V   £@	`P” `ÿÿÿÿP
-	P(`H`P/`P
-P
-[
-P
-	PL
-`O`¨ `P” P> `P” P“0 `P” PI`P/#`P
-PH`’ `P” PN"`’ `P” PI)`PO+`/`P” P$`P” P>0 `P” P$`P” P97P€€€È  pPuÈ  %                 N        ¶       r I   š(   •   Ú¶       r ÜI   ß   r •	   ˜A   •
-   ¶       r ÜI   ßv  Ú¶       r ÜI	   ß   v Ú•   ¶       r I   ˜=   •   ¶       r I   ˜   •   ¶
-    v  Ú¶    v  Ú•    ¶   I   I   ÜI   ßr  ÜI   ß   r ÿ˜  •)   ¶   I   š    •-   Ú¶       r I   •1   ˜d   •2   ³   ¶       r ÜI   ßr  Å   Ú¶       r ÜI   ß   r ÜI   ß      v Ú—y   •>   ¶   I   š    •B   Ú¶       r I   •F   ˜<   •G   ¶       r ÜI   ß¶   r ÜI   ß      v Ú•N   £ `P  (PP’@`P
-P$`PPI`P”@`P”@`*`O`– PP `¤ P™ ` P
-P)`P*U*Z.`¤ P™ `P*ÿÿÿôP*ZI!P€D   ì¦ëD                             ¶    l   ôv Ú£`5CCP4EP€€€  ì?@  ½                          É   Ú¶       r I   ˜›   •   ¶   I   Z›8   •	   Ú¶   I   ¦›    •   Ú¶   I   ¶   I   •   ˜   •   ZÉ   Ú—   •   (É   Ú•   ¶       r ÜI	   ßl
-   v Ú•   £@`G`P”@`º Kš `’0 `M`P
-ÿÿÿûPIBP€”  M'Yd”  ”         
-       V       È   Ú¶    · r È  Ú¶    · r ÜI   ß   r ÜI   ßr I   È  Ú¹  ÜI   ß   r I   ˜z   •   ¹  ÜI   ß	   r ÜI   ßr I   È  Ú¹  ÜI   ß
-   r I   ˜.   •   È   Ú¹  ÜI   ß	   r ÜI   ßv  Ú•   ¹  ¼   &*È  Ú¶       r ÜI   ß8   ¹     %;   v Ú¶       r ÜI   ß   r ÜI   ß8   ¹     %;   v Ú¹  ÜI   ß   r ÜI   ßr I   È  Ú¹  ÜI   ß   r ÜI   ß8   ¹     %;   v Ú¹  ÜI   ß   r ÜI   ßr I   È  Ú¹  ¹  &&È  Ú¹  ¹  ÜI   ß   r ÜI   ßr I   ˜7   •H   ¹  ÜI   ß   r ÜI   ß8      ;   v Ú•N   ¶    ¹  v Ú¹   ˜(   •R   ¹  ÜI   ß	   r ÜI   ßv  Ú•V   £ `&`ÿÿÿÿP(`ÿÿÿÿPPP-` P” ` PP-` P” `&` P
-PI`N`P
-/ÿÿÿûP$`PP
-ÿÿÿûPD` P(PM` P
-&ÿÿÿûPD` P'PM`M ` P"P“@"` P
-G
-ÿÿÿûPI$`ÿÿÿÿP$` ` P
-PI(P€€€3õØ  `$  ¦   0  1  «  2  ˆ   3  4  5  6  ø  7  8  9  {    `   P˜   }  =  >  ?  @  A  B  C  D    `$  '  (  )  ó   +  ¦   ,  -  )  „     p  `        F    %  ³    !  "  #  1  $  $  „     pE  F     @H  G  I  J  K  L    @O  N  Q  P  M  R  f   T  U  S  «    PV    PW  #  ˆ   Y  Z  [  ¦   \  ]  ^  _  `  0  a  b  c    @e  Š  f  d    `$  p  h  )  q  r  s  t  u    `$  b  c    @Š  f  d    `$  Y  Z  [  ¦   l  _  e  m  '  E  0  `  ó   F    @K    @
-  pn    pv  w  š R  x  y    `¯  ;  $  „   	  p  `$  ¦   µ  )  ¶  ”  ·  1  ¸  ¹  ‚    @»  º  ¼  A  ½  0    @¾    ¿    @À  Á  Â    @  @
-  `$  q  °  ±  —  ¦   ³  „     p  `$  “    É  0   Ë  Ì  Í  '  [ ¿  ¦   Q š 1  Î  ¹    ‚    @»  º    @Á  Ï  Â    @  @¼  A    `$  Æ  “  0  9  q  °  ±  Ç  ¦   È  „     pĞ  ¹  Ñ  A    `¦   Ö  A  ×  $  Ø  Ù  Ú  ˆ   Û  Ü    }  İ  1  Ş    `T  U  $  ã  }    `$    }  ¯  ï  &  ¦   ğ  A  ×  ñ  ò  ˆ   Û  İ  1  Ş    `ú  $  ã    `$  é  0  °  ê  Ç  ì  —  ˆ   ¦   î  „     pÖ  '  ó  ‚  º  Á    @»  õ  š  ö  ÷  ø  ×  ù  á    @  pâ  û  ”  ı  ¹  ş  A  9    `$  Ø    ¦    0  1  {  ˆ   ¥   	 
-     `$  ¦        '  š  ş  0   1  3    A    İ    ¿  Ø  ! " #   $ % >  Ç  Q & ' =   ˆ   ä  ( * ¹  + , - / 0 1 2 4 5 7 F  •  8 9 : ‚  ; < = > ? @   `¦   C š A  '  M ‚    @E D   `$  ¦    ”  '  w  œ  R    —   [ 9  „     p  pF ‚    @G   ' ˆ   H      K L   @a N O   @P   @Â    f  Q   @R 0     @S !  @T q  	  `{  ˆ   T  U  }  ~  $    0  3  €    '  )  m  ‚    @„  …    a ƒ  ‡  †  A  ˆ  ‰    @Š    ‹  Œ    ä    x      ’  M q  “  ”  –  —  ˜  ™  š  ›  œ      Ÿ  š   @¡     ¢  £  ¤  ¥  ¦   ¦  	  @§  ¨  
-  @ª  ©  «    @  ¬  ­  „     pÃ    pÒ  Ô  Ç  Õ    pß    @Á  º  Â  ¿    @à  á    @  pâ  å  ä  æ    p          p #       pU r  V "  @W #  @   p  $  @é  %  @Ï  	    X Y &  @Z \ [ ] ^ '  @  `V  A $      `V  A $      `$  ¦   M „     pc d   e ‚  )  @a ` *  @  `¦   _ „     p‚  (  @a   ` a   p  `g ä  T  U  }    `-  @ä      `ä    `+  @        	    ,  @                    „     p  p  `×   p      `$  è  '  F  3  i z  "  `$  Ø  w m  '  3  x y ¹  “  ¦   ¥  0  z { | } ~ 5  ›  €  ƒ   „ … '  [ 4 † ‡ ˆ ‰ Š !  `$    0  p —  l '  q ¥  ›  r '  s q  ¦   t u „   !  pŒ )  ¿   ã  1   R  #  `U  ‘ ’ “ ” (  ˆ     ¬  =  ?  Y  ™ š œ F  «     Pª  &  %  `$    &  `$      a  0  '  `$  '   Â    ˆ   ‚  /  @¡ ¢ G £ m  œ a  ›  ¦   § ¨ A  ¤ $  `$    0  T       $  p' Â    ˆ   ‚  .  @¡ ¢ G £ m  A  ¤ ¥ %  p„   &  p)  `$  ª   ©   ä  ­ (  `« (  p*  `$    0  T    ° m    ä  ² ³ ´ µ   · ¸ ¹ º » ¼ ½ +  `$    0  À Ø  Á Â q  r  Ã Ä T  U  }  ~  3  Å   Æ ¾ Ç ¿  Ç  È    É —  Ê .  `$  '  H        Ğ 0  š  Ñ R  Ó ‚  0  @a   Ô ¦   0 1  @ƒ  K L 2  @N P 3  @Â  T q  -  `$    0  T  Î     Ï „   -  p,  `Ì ,  p   `  p  p  p  p  p  p    $     h   pT  U  }  ~  3  j k l m    pg "  pH #  p© ª '  p)  p¿ *  p+  pË ÿX„¯  $              ¤                    Õ       ˆ     Ö       Œ     Ö       *   ?                  ×              Ø       —      a         {      Ù       i   
-   n       
- s      v       
- ×  †   z         º   
-   Ü             İ       ä      Ü       Ä       İ       ö      Ü            â       
- #  (   Ü            İ            â       
- K     à       ¥  2   Ü       \  >   İ       š     İ       v     T        ]     á       g     á       b     â       ‚     ú         ¨  	             Ö               ±  %             ó     g      
- )               	     ã                                     K               C               N               d               ¬     ä       ¡     å       ‚     æ       H©À      ü‡      ü‡                 Z   1  Q   1               ‚Š   .     .     )           C  (  :  (     &            u    l       &           u  0  Z  0  *              €(  $     $  5   &            Î    Æ    :             €L  m  4  m  h              À  W  ¸  W  l               )    !    y               &  Š    Š  €             €Š  =R  o  =R  •             €d  È!  \  È!  ¾   $            >  Û   6  Û   Ã   K          €]"  Ì'  U"  Ì'  Ü   b            œ#  Ë&  ”#  Ë&  æ   6            İ)  *  Õ)  *  	  "           {+  °+  s+  °+              €,  42  ,  42    &            P.  </  H.  </  "  ;           1  B1  
-1  B1  /              ,4  ê5  $4  ê5  A           €{6  ŸN  s6  ŸN  C  .            «9  C  £9  C  R              =D  ©D  5D  ©D  ¢            €XR  <V  AR  <V                ËR  vS  ÃR  vS    8           cT  %V  [T  %V    R            ”T  ÆT  ŒT  ÆT  !              XV  ³V  @V  ³V  0              èV  ˜W  ßV  ˜W  6  ,          €gX   c  _X   c  B  #             4Z  ´a  ,Z  ´a  K  >            Oc  h  Fc  h  {  '          €Ëh  m  Ãh  m  ›  %            ëi  j  ãi  j    Ñ           ©k  şk  ¡k  şk  ¦  µ           l  „m  l  „m  §  \           Ém  én  Ám  én  ³  "             âm  àn  Úm  àn  ´               o  by  o  by  ¾  &             ›y  …}  “y  …}  ù              â}  ò‡  Ú}  ò‡               €ú}  Ã‡  ò}  Ã‡                 È€  ‚‡  À€  ‚‡  3  !          5¡İ&Î¢^ödm´ïè      f­²f­³FÁÒ°       o    O^partitionKey=%28https%2Cginniemae.gov%29,:https://www.ginniemae.gov/Style%20Library/GNMA%20Scripts/content.js strongly-framed 1 security-info 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 request-method GET response-head HTTP/2 200 
-content-type: application/javascript
-content-length: 34815
-last-modified: Thu, 27 Jul 2023 15:03:36 GMT
-etag: "{B20EEB1B-ABFE-42EA-92CD-49F118FFCC99},198"
-resourcetag: rt:B20EEB1B-ABFE-42EA-92CD-49F118FFCC99@00000000198
-content-disposition: attachment; filename*=utf-8''content%2ejs; filename="content.js"
-x-download-options: noopen
-strict-transport-security: max-age=31536000; includeSubDomains; preload
-x-frame-options: SAMEORIGIN, SAMEORIGIN
-content-security-policy: frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com *.teams.microsoft.us local.teams.office.com *.powerapps.com *.yammer.com *.officeapps.live.com *.office.com *.stream.azure-test.net *.microsoftstream.com *.dynamics.com *.microsoft.com onedrive.live.com *.onedrive.live.com;, frame-ancestors 'self'
-date: Sat, 06 Apr 2024 20:16:54 GMT
-expires: Fri, 22 Mar 2024 20:16:54 GMT,0
-sprequestguid: b6731ca1-b633-2062-3bd5-98449bce73ba
-request-id: b6731ca1-b633-2062-3bd5-98449bce73ba
-sprequestduration: 1137
-spiislatency: 1
-cache-control: private,max-age=0,no-cache
-pragma: no-cache
-accept-ranges: bytes
-x-sharepointhealthscore: 0
-public-extension: http://schemas.microsoft.com/repl-2
-microsoftsharepointteamservices: 16.0.0.10407
-x-content-type-options: nosniff
-x-ms-invokeapp: 1; RequireReadOnly
-x-from: WEB01
-access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept
-access-control-allow-methods: POST,GET,OPTIONS,PUT,DELETE
-x-xss-protection: 1; mode=block
-X-Firefox-Spdy: h2
- original-response-headers date: Sat, 06 Apr 2024 19:40:08 GMT
-content-type: application/javascript
-content-length: 34815
-set-cookie: AWSALB=c9jo5wgNj+hkdBnOFfPIJTeZ8DgA3fxoz9c8a+l43sCUeAA+owOqdmwIWQArwX5UQKhqmcKfVax5Y9Y8Az3VLWPUx+606x0YQxIGfuTztF1xsz4To0uWvv+6MHKZ; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/
-set-cookie: AWSALBCORS=c9jo5wgNj+hkdBnOFfPIJTeZ8DgA3fxoz9c8a+l43sCUeAA+owOqdmwIWQArwX5UQKhqmcKfVax5Y9Y8Az3VLWPUx+606x0YQxIGfuTztF1xsz4To0uWvv+6MHKZ; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/; SameSite=None; Secure
-set-cookie: AWSALB=JtBbi9YIVp6WRsrh31nxHiBzNciybxyN4TBNAOmxxq4py6tVURY1nCRVpyY1ajmiE+xHfPIBUOa8auIMDIpU7anKlXbn7VzLdVaZ+DCGPbdF6xht0t/bq+eEINyi; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/
-set-cookie: AWSALBCORS=JtBbi9YIVp6WRsrh31nxHiBzNciybxyN4TBNAOmxxq4py6tVURY1nCRVpyY1ajmiE+xHfPIBUOa8auIMDIpU7anKlXbn7VzLdVaZ+DCGPbdF6xht0t/bq+eEINyi; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/; SameSite=None; Secure
-cache-control: private,max-age=0,no-cache
-pragma: no-cache
-expires: Fri, 22 Mar 2024 19:40:08 GMT,0
-last-modified: Thu, 27 Jul 2023 15:03:36 GMT
-accept-ranges: bytes
-etag: "{B20EEB1B-ABFE-42EA-92CD-49F118FFCC99},198"
-x-sharepointhealthscore: 0
-resourcetag: rt:B20EEB1B-ABFE-42EA-92CD-49F118FFCC99@00000000198
-content-disposition: attachment; filename*=utf-8''content%2ejs; filename="content.js"
-x-download-options: noopen
-public-extension: http://schemas.microsoft.com/repl-2
-sprequestguid: 9b711ca1-16b1-2062-aa45-1fdd930f0d4f
-request-id: 9b711ca1-16b1-2062-aa45-1fdd930f0d4f
-x-frame-options: SAMEORIGIN
-content-security-policy: frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com *.teams.microsoft.us local.teams.office.com *.powerapps.com *.yammer.com *.officeapps.live.com *.office.com *.stream.azure-test.net *.microsoftstream.com *.dynamics.com *.microsoft.com onedrive.live.com *.onedrive.live.com;
-sprequestduration: 1086
-spiislatency: 1
-microsoftsharepointteamservices: 16.0.0.10407
-x-content-type-options: nosniff
-x-ms-invokeapp: 1; RequireReadOnly
-x-from: WEB02
-x-frame-options: SAMEORIGIN
-content-security-policy: frame-ancestors 'self'
-access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept
-access-control-allow-methods: POST,GET,OPTIONS,PUT,DELETE
-strict-transport-security: max-age=31536000; includeSubDomains; preload
-x-xss-protection: 1; mode=block
-X-Firefox-Spdy: h2
- ctid 2 uncompressed-len 0 net-response-time-onstart 1679 net-response-time-onstop 1725 alt-data 1;34815,javascript/moz-script-bytecode-20240222211730-8l alt-data-from-child 1  à
