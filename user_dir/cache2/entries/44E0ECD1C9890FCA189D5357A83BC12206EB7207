@@ -1,0 +1,192 @@
+Ôªø// JavaScript Document
+
+function menuPer()
+{
+
+
+document.writeln("<div> ");
+document.writeln("                            <!--Columracna 1--> ");
+document.writeln("                            <div class='col-sm-6 col-md-3 colSubmenu'> ");
+document.writeln("                                <ul class='list-unstyled ulMenuNivel1'> ");
+document.writeln("                                    <li>Obligaciones</li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/ruc-personas'> ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> RUC</li> ");
+document.writeln("                                    <li class='liMenuNivel3'> ");
+document.writeln("                                        <span class='spanOpcion'>Requisitos</span>,  ");
+document.writeln("                                        <span class='spanOpcion'>Inscripci&oacute;n</span>,  ");
+document.writeln("                                        <span class='spanOpcion'>Modificaci&oacute;n</span>,  ");
+document.writeln("                                        <span class='spanOpcion'>Otros</span>. ");
+document.writeln("                                    </li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/comprobantes-de-pago'> ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Comprobantes de Pago</li> ");
+document.writeln("                                    <li class='liMenuNivel3'> ");
+document.writeln("                                        <span class='spanOpcion'>Recibos por honorarios</span> ");
+document.writeln("                                    </li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/libros-electronicos-personas2'> ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Libros Electr√≥nicos</li> ");
+document.writeln("                                    <li class='liMenuNivel3'> ");
+document.writeln("                                        <span class='spanOpcion'>Libro de Ingresos y Gastos</span> ");
+document.writeln("                                    </li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/declaracion-y-pago-personas1'> ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Declaraci&oacute;n y Pago</li> ");
+document.writeln("                                    <li class='liMenuNivel3'> ");
+document.writeln("                                    </li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/declaracion-de-predios'> ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Declaraci&oacute;n de Predios</li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/regimen-temporal-y-sustitutorio-del-impuesto-a-la-renta-repatriacion'> ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> R√©gimen Temporal y Sustitutorio del Impuesto a la Renta - Repatriaci√≥n</li> ");
+document.writeln("                                    <li class='liMenuNivel3'> ");
+document.writeln("                                </ul> ");
+document.writeln("                            </div> ");
+document.writeln("                            <!--Columna 2--> ");
+document.writeln("                            <div class='col-sm-6 col-md-3 colSubmenu'> ");
+document.writeln("                                <ul class='list-unstyled ulMenuNivel1'> ");
+document.writeln("                                    <li>Tributos</li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/impuesto-a-la-renta-personas'> ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Impuesto a la Renta</li> ");
+document.writeln("                                    <li class='liMenuNivel3'> ");
+document.writeln("                                        <span class='spanOpcion'>Alquileres</span>, ");
+document.writeln("                                        <span class='spanOpcion'>Dividendos</span>, ");
+document.writeln("                                        <span class='spanOpcion'>Ganancia de Capital</span>, ");
+document.writeln("                                        <span class='spanOpcion'>Trabajadores Independientes</span>, ");
+document.writeln("                                        <span class='spanOpcion'>otros</span>. ");
+document.writeln("                                    </li> ");
+document.writeln("                                </ul> ");
+
+
+
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/contribuciones-y-aportaciones'> ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Contribuciones y/o Aportaciones</li> ");
+document.writeln("                                    <li class='liMenuNivel3'> ");
+document.writeln("                                        <span class='spanOpcion'>ESSALUD</span>, ");
+document.writeln("                                        <span class='spanOpcion'>ONP</span>, ");
+document.writeln("                                        <span class='spanOpcion'>Trabajadores del Hogar</span>, ");
+document.writeln("                                        <span class='spanOpcion'>otros</span>. ");
+document.writeln("                                    </li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/impuesto-a-las-transacciones-financieras-itf-bancarizacion-y-medios-de-pago'> ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Impuesto a las Transacciones Financieras - ITF</li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/impuesto-a-las--embarcaciones-de-recreo'> ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Impuesto a las Embarcaciones de Recreo</li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/impuesto-extraordinario-para-la-promocion-y-desarrollo-turistico-nac1'> ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Impuesto Extraordinario para la Promoci&oacute;n y Desarrollo Tur&iacute;stico</li> ");
+document.writeln("                                </ul> ");
+document.writeln("                            </div> ");
+document.writeln("                            <!--Columna 3--> ");
+document.writeln("                            <div class='col-sm-6 col-md-3 colSubmenu'> ");
+document.writeln("                                <ul class='list-unstyled ulMenuNivel1'> ");
+document.writeln("                                    <li>Procedimientos y Tr&aacute;mites</li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/devoluciones-personas'> ");                                    
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> <span class='spanOpcionTitulo'>Devoluciones</span></li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/fraccionamiento-y-o-aplazamiento-personas'>  ");                                    
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Fraccionamiento, Aplazamiento y Refinanciamiento de deudas</li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/acciones-de--fiscalizacion'>                                     ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Acciones de Fiscalizaci&oacute;n</li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/acciones-de-cobranza-personas'>                                     ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Acciones de Cobranza</li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/recursos-impugnatorios-personas'>             ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Recursos Impugnatorios</li> ");
+document.writeln("                                    <li class='liMenuNivel3'> ");
+document.writeln("                                        <span class='spanOpcion'>Reclamaci√≥n</span>, ");
+document.writeln("                                        <span class='spanOpcion'>Apelaci√≥n</span>, ");
+document.writeln("                                        <span class='spanOpcion'>otros</span>, ");
+document.writeln("                                    </li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://emprender.sunat.gob.pe/tributando/interactuando-con-sunat/infracciones-tributarias'>             ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Infracciones</li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/sistema-sol---sunat-operaciones-en-linea---personas'>             ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Clave SOL</li> ");
+document.writeln("                                    <li class='liMenuNivel3'> ");
+document.writeln("                                        <span class='spanOpcion'>Requisitos</span>, ");
+document.writeln("                                        <span class='spanOpcion'>Recuperaci&oacute;n de clave</span>, ");
+document.writeln("                                        <span class='spanOpcion'>Usuarios secundarios</span>, ");
+document.writeln("                                        <span class='spanOpcion'>otros</span>, ");
+document.writeln("                                    </li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://www.sunat.gob.pe/legislacion/tupa/2015/index.html'> ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Texto √önico de Procedimientos Administrativos - TUPA</li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/otros-procedimientos-y-tramites-personas'>               ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Otros Temas</li> ");
+document.writeln("                                    <li class='liMenuNivel3'> ");
+document.writeln("                                        <span class='spanOpcion'>Otros procedimientos</span> ");
+document.writeln("                                    </li> ");
+document.writeln("                                </ul> ");
+document.writeln("                            </div> ");
+document.writeln("                            <!--Columna 4--> ");
+document.writeln("                            <div class='col-sm-6 col-md-3 colSubmenu'> ");
+document.writeln("                                <ul class='list-unstyled ulMenuNivel1'> ");
+document.writeln("                                    <li>Otros Servicios</li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='/padronesnotificaciones/index.html'>  ");                                   
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Padrones y Notificaciones</li> ");
+document.writeln("                                    <li class='liMenuNivel3'> ");
+document.writeln("                                        <span class='spanOpcion'>Contribuyentes No</span> ");
+document.writeln("                                        <span class='spanOpcion'>Hallados y No Habidos, otros</span>. ");
+document.writeln("                                    </li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='/orientacionaduanera/viajeros/index.html'>           ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Viajeros - Equipaje y Menaje</li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='/orientacionaduanera/exportafacil/index.html'>      ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Env√≠os Postales - Exporta F√°cil</li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='/orientacionaduanera/importaFacil/index.html'>       ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Env√≠os Postales - Importa F√°cil</li> ");
+document.writeln("                                </ul> ");
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='/orientacionaduanera/internamientovehiculos/index.html'>      ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Veh&iacute;culos para Turismo - Ingreso y Salida Temporal</li> ");
+document.writeln("                                </ul> ");
+
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='/orientacionaduanera/incentivosmigratorios/index.html'>     ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Incentivos Migratorios</li> ");
+document.writeln("                                </ul> ");
+
+document.writeln("                                <ul class='list-unstyled liMenuNivel1b' data-url='https://orientacion.sunat.gob.pe/centro-de-tramites-virtual'>     ");
+document.writeln("                                    <li class='liMenuNivel2'><img src='/p/imagenes/menuFlecha.png'/> Centro de Servicios Virtual</li> ");
+document.writeln("                                </ul> ");
+
+document.writeln("                                 ");
+document.writeln("                            </div> ");
+document.writeln("                        </div> ");
+
+
+}
+
+Ñ.«îMÁ      f©f©!Fø≥Zf„ü   _    O^partitionKey=%28https%2Csunat.gob.pe%29,:https://www.sunat.gob.pe/p/js/script/menuPersonas.js strongly-framed 1 security-info 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 request-method GET response-head HTTP/1.1 200 OK
+Date: Sat, 06 Apr 2024 19:57:23 GMT
+Content-Type: application/javascript
+Content-Length: 17376
+Last-Modified: Thu, 27 May 2021 22:36:59 GMT
+ETag: "60b01f0b-43e0"
+Access-Control-Allow-Origin: https://ww3.sunat.gob.pe
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With
+Accept-Ranges: bytes
+ original-response-headers Date: Sat, 06 Apr 2024 19:57:23 GMT
+Content-Type: application/javascript
+Content-Length: 17376
+Last-Modified: Thu, 27 May 2021 22:36:59 GMT
+Connection: keep-alive
+ETag: "60b01f0b-43e0"
+Access-Control-Allow-Origin: https://ww3.sunat.gob.pe
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With
+Accept-Ranges: bytes
+Set-Cookie: f5avraaaaaaaaaaaaaaaa_session_=JFGGIMHKCPKGLLOIKHBJIIOPLMGKFJGKCPLDJBIDADNOOKHPMOJJIBLEOBEEALOGPCIDNMBGBHJOGOHKKDCABCIMGKKGIPPBPNNIODFANAPEFGBAMLNODKKKHLEGHOKL; HttpOnly; secure
+Set-Cookie: TS01df7e47=014dc399cb6419cc5d359467a4e194c15a7cabc43b74d95f8d8d0d58b7079ff7f2e96266ae665b3c7f08c6d361824a130b387868f7d3bd9887eb3389d29b7032d92abe6f3eb456b8f1b54b3e6a3bd00c2f5b7052ec; Path=/; Domain=.www.sunat.gob.pe
+Set-Cookie: TSf806e172027=08fe7428c8ab2000d552736170d43f5e6e0f774d091be6a7ceb3d772ba9ce017ce769bc1ad27c83b08d76723f01130006a35d7b5a0f91cf4eec97318ec7cac453b00747fc1d76700e00182145791921a60cbaf126395d925c366559239c4071e; Path=/
+ ctid 2 uncompressed-len 0 net-response-time-onstart 1919 net-response-time-onstop 1922   C‡

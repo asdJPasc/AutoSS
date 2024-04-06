@@ -1,0 +1,490 @@
+//2016 04 14 - 09:58  mejora en el hover
+(function($) {
+    $.fn.hoverIntent = function(handlerIn,handlerOut,selector) {
+
+        // default configuration values
+        var cfg = {
+            interval: 100,
+            sensitivity: 1,
+            timeout: 0
+        };
+
+        if ( typeof handlerIn === "object" ) {
+            cfg = $.extend(cfg, handlerIn );
+        } else if ($.isFunction(handlerOut)) {
+            cfg = $.extend(cfg, { over: handlerIn, out: handlerOut, selector: selector } );
+        } else {
+            cfg = $.extend(cfg, { over: handlerIn, out: handlerIn, selector: handlerOut } );
+        }
+
+        // instantiate variables
+        // cX, cY = current X and Y position of mouse, updated by mousemove event
+        // pX, pY = previous X and Y position of mouse, set by mouseover and polling interval
+        var cX, cY, pX, pY;
+
+        // A private function for getting mouse position
+        var track = function(ev) {
+            cX = ev.pageX;
+            cY = ev.pageY;
+        };
+
+        // A private function for comparing current and previous mouse position
+        var compare = function(ev,ob) {
+            ob.hoverIntent_t = clearTimeout(ob.hoverIntent_t);
+            // compare mouse positions to see if they've crossed the threshold
+            if ( Math.sqrt( (pX-cX)*(pX-cX) + (pY-cY)*(pY-cY) ) < cfg.sensitivity ) {
+                $(ob).off("mousemove.hoverIntent",track);
+                // set hoverIntent state to true (so mouseOut can be called)
+                ob.hoverIntent_s = true;
+                return cfg.over.apply(ob,[ev]);
+            } else {
+                // set previous coordinates for next time
+                pX = cX; pY = cY;
+                // use self-calling timeout, guarantees intervals are spaced out properly (avoids JavaScript timer bugs)
+                ob.hoverIntent_t = setTimeout( function(){compare(ev, ob);} , cfg.interval );
+            }
+        };
+
+        // A private function for delaying the mouseOut function
+        var delay = function(ev,ob) {
+            ob.hoverIntent_t = clearTimeout(ob.hoverIntent_t);
+            ob.hoverIntent_s = false;
+            return cfg.out.apply(ob,[ev]);
+        };
+
+        // A private function for handling mouse 'hovering'
+        var handleHover = function(e) {
+            // copy objects to be passed into t (required for event object to be passed in IE)
+            var ev = $.extend({},e);
+            var ob = this;
+
+            // cancel hoverIntent timer if it exists
+            if (ob.hoverIntent_t) { ob.hoverIntent_t = clearTimeout(ob.hoverIntent_t); }
+
+            // if e.type === "mouseenter"
+            if (e.type === "mouseenter") {
+                // set "previous" X and Y position based on initial entry point
+                pX = ev.pageX; pY = ev.pageY;
+                // update "current" X and Y position based on mousemove
+                $(ob).on("mousemove.hoverIntent",track);
+                // start polling interval (self-calling timeout) to compare mouse coordinates over time
+                if (!ob.hoverIntent_s) { ob.hoverIntent_t = setTimeout( function(){compare(ev,ob);} , cfg.interval );}
+
+                // else e.type == "mouseleave"
+            } else {
+                // unbind expensive mousemove event
+                $(ob).off("mousemove.hoverIntent",track);
+                // if hoverIntent state is true, then call the mouseOut function after the specified delay
+                if (ob.hoverIntent_s) { ob.hoverIntent_t = setTimeout( function(){delay(ev,ob);} , cfg.timeout );}
+            }
+        };
+
+        // listen for mouseenter and mouseleave
+        return this.on({'mouseenter.hoverIntent':handleHover,'mouseleave.hoverIntent':handleHover}, cfg.selector);
+    };
+})(jQuery);
+
+
+
+//Portal
+$(document).ready(function() {
+    iniciaVariables();
+    iniciaBotones();
+    iniciaHover();
+	tipoCambioAjax();	
+	
+});
+
+//** modificar tamaño del textofecha actualización: 11-02-16  **// 
+
+$(document).ready(function(){
+	
+	$( "#aumentar" ).on( "click", function() {
+		increaseFontSize();
+	});
+	
+	$( "#disminuir" ).on( "click", function() {
+		 decreaseFontSize();
+	});
+});
+
+var min=8;
+var max=18;
+
+// aumentar tamaño del texto 
+
+function increaseFontSize() {
+
+   var p = document.getElementsByTagName('div');  
+  
+    for(i=0;i<p.length;i++) {
+
+      if(p[i].style.fontSize) {
+         var s = parseInt(p[i].style.fontSize.replace("px",""));
+      } else {
+
+         var s = 14;
+      }
+      if(s!=max) {
+
+         s += 1;
+      }
+      p[i].style.fontSize = s+"px"
+
+   }
+   
+    var p2 = document.getElementsByTagName('h1');
+   
+    for(i=0;i<p2.length;i++) {
+
+      if(p2[i].style.fontSize) {
+         var s = parseInt(p2[i].style.fontSize.replace("px",""));
+      } else {
+
+         var s = 36;
+      }
+      if(s!=max) {
+
+         s += 1;
+      }
+      p2[i].style.fontSize = s+"px"
+
+   }
+   
+    var p3 = document.getElementsByTagName('blockquote');
+   
+    for(i=0;i<p3.length;i++) {
+
+      if(p3[i].style.fontSize) {
+         var s = parseInt(p3[i].style.fontSize.replace("px",""));
+      } else {
+
+         var s = 14;
+      }
+      if(s!=max) {
+
+         s += 1;
+      }
+      p3[i].style.fontSize = s+"px"
+
+   }
+}
+
+// disminuir tamaño del texto 
+
+function decreaseFontSize() {
+   
+   var p = document.getElementsByTagName('div');
+   
+   for(i=0;i<p.length;i++) {
+
+      if(p[i].style.fontSize) {
+         var s = parseInt(p[i].style.fontSize.replace("px",""));
+      } else {
+
+         var s = 12;
+      }
+      if(s!=min) {
+
+         s -= 1;
+      }
+      p[i].style.fontSize = s+"px"
+
+   }
+   
+    var p2 = document.getElementsByTagName('h1');
+	
+    for(i=0;i<p2.length;i++) {
+
+      if(p2[i].style.fontSize) {
+         var s = parseInt(p2[i].style.fontSize.replace("px",""));
+      } else {
+
+         var s = 17;
+      }
+      if(s!=min) {
+
+         s -= 1;
+      }
+      p2[i].style.fontSize = s+"px"
+
+    }
+	
+	var p3 = document.getElementsByTagName('blockquote');
+	
+	for(i=0;i<p3.length;i++) {
+
+      if(p3[i].style.fontSize) {
+         var s = parseInt(p3[i].style.fontSize.replace("px",""));
+      } else {
+
+         var s = 12;
+      }
+      if(s!=min) {
+
+         s -= 1;
+      }
+      p3[i].style.fontSize = s+"px"
+
+   }
+}
+
+//** Fin modificar tamaño de texto **//
+
+
+//Inicia
+function iniciaBotones(){  
+    /*aOpcionMenu.bind('click',function(event) {         
+        aOpcionMenu.removeClass("aOpcionMenuActivo");   
+        $(this).addClass("aOpcionMenuActivo");
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+    });*/
+}
+function iniciaVariables() {
+    liOpcionMenu=$(".liOpcionMenu");
+    aOpcionMenu=$(".aOpcionMenu");
+}   
+function iniciaHover(){  
+    //Opcion Menu
+   /* $("#ulMenu").on('mouseenter','.liOpcionMenu',function() {
+        $(this).addClass('open');
+    });
+    $("#ulMenu").on('mouseleave','.liOpcionMenu',function() {
+        $(this).removeClass('open');
+    });*/
+	
+	$(".liOpcionMenu").hoverIntent(
+	function() {
+        $(this).addClass('open');
+    },function() {
+        $(this).removeClass('open');
+    });
+	
+	
+    
+    $(".liMenuNivel1b").bind('click', function (event) {
+        var url=$(this).attr("data-url");
+        if (typeof url !== 'undefined' && url!='') {
+            window.location=url; 
+        }
+        return false;
+    });
+    
+    
+}   
+document.onreadystatechange = function() {
+    if (document.readyState === 'complete') {
+        calculaPosicion();
+    }
+};
+$(window).bind('resize', function() {
+    calculaPosicion();
+});
+function calculaPosicion(){    
+    if ($(window).width() < 668) {
+        reseteaPosicionMenu();
+    }
+    else if ($(window).width() >= 668 &&  $(window).width() <= 992) {
+        // do something for medium screens
+        calculaPosicionMenu(100);
+    }
+    else if ($(window).width() > 992 &&  $(window).width() <= 1200) {
+        // do something for big screens
+        calculaPosicionMenu(180);
+    }
+    else  {
+        // do something for huge screens
+        calculaPosicionMenu(180);
+    }
+}
+function calculaPosicionMenu(ancho){    
+    $(".divSubmenu").each(function(index, value){
+        //var parentWidth = $(this).parent().innerWidth();
+        /*var menuWidth = $(this).innerWidth();
+        var windowWidth=$(window).width();
+        var margin = (windowWidth - menuWidth) / 2; ;
+        $(this).css("left", "-"+posMenu+ "px");*/
+        var a=0;
+        if(index==0){
+            a=ancho;
+        }else if(index==1){
+            a=ancho*2;
+        }else if(index==2){
+            a=ancho*3;
+        }
+        $(this).css("left", "-"+(a)+ "px");
+    });
+}
+function reseteaPosicionMenu(){      
+    $(".divSubmenu").each(function(){
+        $(this).css("left", "0px");
+    });
+}
+var liOpcionMenu=null;    
+var aOpcionMenu=null; 
+
+
+/*INICIO DECLARACION Y PAGOS*/
+
+/*function declaraSimplificada(){      
+	window.open("https://www.sunat.gob.pe/ol-at-itcanal/canal.do", "Menu", "toolbar=no,top=0,left=0,location=0,directories=no,status=yes,menubar=no,scrollbars=yes,resizable=yes,width=800, height=600")      
+}*/	
+
+/*FIN DECLARACION Y PAGOS */
+
+
+/*INICIO RENTA 2019*/
+function rentaEmpresa(){
+	window.open('/renta/2019/renta2019.html','mywindow1','toolbar=no,location=no,top=190,left=470,directories=no,status=no,menubar=no,scrollbars=no,resizable=no, width=1024,height=700,scrollbars=yes');} <!-- AVISO RENTA EMPRESAS-->
+
+function rentaPersona(){
+	window.open("https://api-seguridad.sunat.gob.pe/v1/clientessol/03590141-c69c-438c-a36a-8ee2a3ad9747/oauth2/login?originalUrl=https://e-renta.sunat.gob.pe/loader/recaudaciontributaria/declaracionpago/formularios", "mywindow2", "toolbar=no,top=0,left=0,location=0,directories=no,status=yes,menubar=no,scrollbars=yes,resizable=yes,width=800, height=600");} <!-- AVISO RENTA PERSONAS-->
+
+
+/*FIN RENTA 2019*/
+
+
+
+/*INICIO DECLARACION Y PAGOS*/
+function declaraSimplificada(){   
+	window.open("https://e-plataformaanterior.sunat.gob.pe/ol-at-itcanal/canal.do", "Menu", "toolbar=no,top=0,left=0,location=0,directories=no,status=yes,menubar=no,scrollbars=yes,resizable=yes,width=800, height=600")  
+	
+window.open("/mensajes/setiembre/2020/aviso-ti-090920.html","msg2","toolbar=no,location=no,,top=150,left=300,directories=no,status=yes,menubar=no,scrollbars=no,resizable=yes,width=555, height=420")
+	   
+ 
+} 	/*FIN DECLARACION Y PAGOS */
+
+
+/*INICIO CCI */
+function cci(){
+	window.open('https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?pestana=*&agrupacion=*&exe=58.1.1.1.1','NewWindow','width=800,height=540,resizable=yes,scrollbars=yes')
+}/*FIN CCI*/
+
+
+/*INICIO DECLARACION Y PAGOS NUEVA PLATAFORMA*/
+function declaraSimplificadaNueva(){      
+	window.open("https://e-menu.sunat.gob.pe/cl-ti-itmenu2/MenuInternetPlataforma.htm?exe=55.1.1.1.1", "Menu", "toolbar=no,top=0,left=0,location=0,directories=no,status=yes,menubar=no,scrollbars=yes,resizable=yes,width=800, height=600")      
+ 
+} 	/*FIN DECLARACION Y PAGOS */
+
+
+
+/*INICIO BUZÓN ELECTRÓNICO */
+function buzonElect(){
+	window.open('https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?exe=buzon','NewWindow','width=740,height=540,resizable=yes,scrollbars=yes')
+}/*FIN BUZÓN ELECTRÓNICO*/
+
+
+
+
+/*INICIO TRAMITES Y CONSUOTAS */
+function sol(){
+	window.open('https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm','NewWindow','width=740,height=540,resizable=yes,scrollbars=yes')
+}/*FIN TRAMITES Y CONSULTAS*/
+
+
+/*PERSONAS*/
+/*INICIO •	Reporte Tributario de Rentas de Cuarta Categoría */
+function solrtrib4ta(){
+	window.open('https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?pestana=*&agrupacion=*&exe=10.11.1.1.3','NewWindow','width=740,height=540,resizable=yes,scrollbars=yes')
+}/*FIN •	Reporte Tributario de Rentas de Cuarta Categoría*/
+
+/*INICIO •	Gastos Deducibles */
+function solGastosD(){
+	window.open('https://www.sunat.gob.pe/cl-ti-itgastosdeduciblesconsulta/index.htm','NewWindow','width=740,height=540,resizable=yes,scrollbars=yes')
+}/*FIN •	Gastos Deducibles*/ 
+
+/*INICIO Reporte Tributario */
+function solrtribu(){
+	window.open('https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?exe=10.11.1.1.1','NewWindow','width=740,height=540,resizable=yes,scrollbars=yes')
+}/*FIN •	Reporte Tributario */
+
+/*EMPRESAS*/
+/*INICIO Registro de Trabajadores T-Registro*/
+function soltregistro(){
+	window.open('https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?exe=10.5.3.1.1','NewWindow','width=740,height=540,resizable=yes,scrollbars=yes')
+}/*FIN Registro de Trabajadores T-Registro */
+
+
+/*INICIO Ficha RUC Electrónica */
+function solficharuc(){
+	window.open('https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?exe=10.2.1.1.1','NewWindow','width=740,height=540,resizable=yes,scrollbars=yes')
+}/*FIN Ficha RUC Electrónica */
+
+
+/*INICIO Reporte Tributario para Terceros */
+function solrterceros(){
+	window.open('https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?exe=10.11.1.1.1','NewWindow','width=740,height=540,resizable=yes,scrollbars=yes')
+}/*FIN Reporte Tributario para Terceros */
+
+/*INICIO Reporte Tributario para Terceros */
+function solrterceros(){
+	window.open('https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?exe=10.11.1.1.1','NewWindow','width=740,height=540,resizable=yes,scrollbars=yes')
+}/*FIN Reporte Tributario para Terceros */
+
+
+/*INICIO Consulta de Factura y Notas Electrónicas */
+function solfnotase(){
+	window.open('https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?exe=11.5.3.1.2','NewWindow','width=740,height=540,resizable=yes,scrollbars=yes')
+}/*FIN Consulta de Factura y Notas Electrónicas */
+
+/*INICIO Detracciones */
+function soldetrac(){
+	window.open('https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?exe=12.4.1.1.1','NewWindow','width=740,height=540,resizable=yes,scrollbars=yes')
+}/*FIN Detracciones */
+
+
+/*INICIO QUEJAS Y RECLAMOS */
+function solquejas(){
+	window.open('https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?pestana=*&agrupacion=*&exe=13.12.1.1.1','NewWindow','width=740,height=540,resizable=yes,scrollbars=yes')
+}/*FIN QUEEJAS Y RECLAMOS */
+
+
+/*ADUANAS*/
+
+/*INICIO Sistema de Despacho Aduanero*/
+function solsdespacho(){
+	window.open('https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?exe=ad','NewWindow','width=740,height=540,resizable=yes,scrollbars=yes')
+}/*FIN Sistema de Despacho Aduanero*/
+
+/*INICIO Drawback*/
+function soldrawback(){
+	window.open('https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?exe=17.1.6.1.6','NewWindow','width=740,height=540,resizable=yes,scrollbars=yes')
+}/*FIN Drawback */
+
+
+
+
+fechaVTO();
+//Portal
+$(document).ready(function(){
+	iniciaVariables();
+	iniciaBotones();
+	iniciaHover();
+	tipoCambioAjax();
+	fechaVTO();
+});
+ퟹ�T      f�f�!F��Zf�   U    O^partitionKey=%28https%2Csunat.gob.pe%29,:https://www.sunat.gob.pe/p/js/apps/main.js strongly-framed 1 security-info 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 request-method GET response-head HTTP/1.1 200 OK
+Date: Sat, 06 Apr 2024 19:57:24 GMT
+Content-Type: application/javascript
+Content-Length: 15125
+Last-Modified: Tue, 02 Feb 2021 20:52:00 GMT
+ETag: "6019bb70-3b15"
+Access-Control-Allow-Origin: https://ww3.sunat.gob.pe
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With
+Accept-Ranges: bytes
+ original-response-headers Date: Sat, 06 Apr 2024 19:57:24 GMT
+Content-Type: application/javascript
+Content-Length: 15125
+Last-Modified: Tue, 02 Feb 2021 20:52:00 GMT
+Connection: keep-alive
+ETag: "6019bb70-3b15"
+Access-Control-Allow-Origin: https://ww3.sunat.gob.pe
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With
+Accept-Ranges: bytes
+Set-Cookie: f5avraaaaaaaaaaaaaaaa_session_=LAFDKPGAFDHEHFPPJLHOCDMOKGLJGJFLDHILBKHFMOPICLMMLKNANJHIBEELMBILJMADIDGLCHHNEFDAMOIAJBGEGKEOPPBLKKCBPBBGNHOANJHKODJEFBHOMBHOHMFB; HttpOnly; secure
+Set-Cookie: TS01df7e47=014dc399cb21e0c94d2a2b2eba7937786b2a3873b474d95f8d8d0d58b7079ff7f2e96266ae665b3c7f08c6d361824a130b387868f7ea19bd6902f67e43c5e08d88e5cb8d17a9df09aff1dc87de73008c5691acdfe1; Path=/; Domain=.www.sunat.gob.pe
+Set-Cookie: TSf806e172027=08fe7428c8ab2000e72f57ecbd2246908de475bb213924bb81524a635024500ccaa7220c0136f34908f741b1ba11300034f953e56b684c3c51764b5a44822636665888770b91efe30f8ba42617a90458af0c39a5964105a905e0abf27676e762; Path=/
+ ctid 2 uncompressed-len 0 net-response-time-onstart 1934 net-response-time-onstop 1937   ;

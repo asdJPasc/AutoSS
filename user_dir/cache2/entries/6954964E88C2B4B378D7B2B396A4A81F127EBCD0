@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js" lang="es"> <![endif]-->
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Diario Oficial El Peruano | Boletin Oficial | El Peruano | Decretos | Normas Legales | Separatas Especiales | Normas Legales del día| Derecho | TUPA | Sentencias en Casación | Jurisprudencia | Procesos Constitucionales | Declaraciones Juradas | Patentes y Signos Distintivos | Boletín Oficial | Concesiones Mineras | Remates Judiciales | Edictos Judiciales Lima y Provincias</title>
+    <meta name="keywords" content="Diario oficial del estado del Perú, El Peruano, Decretos, Normas Legales ,Separatas Especiales, Normas Legales del dia, Derecho, T.U.P.A., tupa, Sentencias en Casación, Jurisprudencia, Procesos Constitucionales, Declaraciones Juradas, Patentes, Signos Distintivos y Otros, Separatas del Boletin Oficial, Concesiones Mineras, Remates Judiciales, Edictos Judiciales Lima y Provincias, Sitio Oficial">
+    <meta name="description" content="Ultimas Normas Legales,Sumillas, Boletin Oficial, Peru, mundo, deportes, política, economía, cultura y tecnología en EL PERUANO">
+    <meta name="language" content="es">
+    <meta name="news_keywords" content="Dario Oficial el Peruano , elperuano.pe ">
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index, follow">
+    <meta name="organization" content="Empresa Peruana de Servicios Editorales S.A.">
+    <link rel="shortcut icon" type="image/x-icon" href="https://diariooficial.elperuano.pe/Normas/img/escudoperu.ico" />
+    <link href="/Content/estilos.css?20240104v01" rel="stylesheet">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/blitzer/jquery-ui.css" />
+    <script src="/Scripts/jquery-latest.min.js"></script>
+    <script src="/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="/Scripts/jquery-ui.min.js"></script>
+
+    
+    <script src="/Scripts/Portal.js"></script>
+    <!--[if IE ]>
+      <script src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js' type='text/javascript'/>
+    <![endif]-->
+<!-- TAG ANALITICA -->
+<script>
+    (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+            (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+
+    ga('create', 'UA-69837093-1', 'auto', { 'allowLinker': true });
+    ga('require', 'linker');
+    ga('linker:autoLink', ['diarioficial.elperuano.pe']);
+    ga('send', 'pageview');
+
+</script>
+<!-- TAG ANALITICA -->
+
+
+    <!-- IMPLEMENTACION PROGRAMATICA -->
+    <script type='text/javascript'>
+        //Captura variables para DFP desde la url
+        var getQueryString = function (field, url) {
+            var href = url ? url : window.location.href;
+            var reg = new RegExp('[?&]' + field + '=([^&#]*)', 'i');
+            var string = reg.exec(href);
+            return string ? string[1] : null;
+        };
+        dfp_demo = getQueryString("demo");
+    </script>
+    <!-- Start GPT Tag -->
+    
+    <script src="//delivery.pubgenius.io/elperuan-CDCO61Cq/shim-gpt.js"></script>
+    <script async src="//delivery.pubgenius.io/elperuan-CDCO61Cq/wrapper.js"></script>
+
+    <script>
+        window.googletag = window.googletag || { cmd: [] };
+        googletag.cmd.push(function () {
+            var mappingtop1 = googletag.sizeMapping()
+                .addSize([992, 0], [[728, 90]])
+                .addSize([768, 0], [[728, 90]])
+                .addSize([320, 0], [[320, 100], [320, 50], [300, 100]])
+                .addSize([0, 0], [[320, 100], [320, 50], [300, 250]]).build();
+            var mappingtop = googletag.sizeMapping()
+                .addSize([992, 0], [[728, 90]])
+                .addSize([768, 0], [[728, 90]])
+                .addSize([320, 0], [[320, 100], [320, 50], [300, 100], [300, 250]])
+                .addSize([0, 0], [[320, 100], [320, 50], [300, 100], [300, 250]]).build();
+            var mappingcenter = googletag.sizeMapping()
+                .addSize([992, 0], [[120, 600], [160, 600]])
+                .addSize([768, 0], [[120, 600], [160, 600]])
+                .addSize([320, 0], [])
+                .addSize([0, 0], []).build();
+            var mappingmbl = googletag.sizeMapping()
+                .addSize([992, 0], [])
+                .addSize([768, 0], [])
+                .addSize([320, 0], [[320, 100], [320, 50], [300, 100]])
+                .addSize([0, 0], [[320, 100], [320, 50], [300, 100]]).build();
+            var mappingcenter2 = googletag.sizeMapping()
+                .addSize([992, 0], [[468, 60]])
+                .addSize([768, 0], [[468, 60]])
+                .addSize([320, 0], [[300, 250], [320, 100]])
+                .addSize([0, 0], [[300, 250], [320, 100]]).build();
+            //adUnits
+            googletag.defineSlot('21678864329/elperuano/Top1', [[320, 100], [320, 50], [728, 90]], 'Top1').defineSizeMapping(mappingtop1).addService(googletag.pubads());
+            googletag.defineSlot('21678864329/elperuano/Top2', [[320, 100], [320, 50], [728, 90]], 'Top2').defineSizeMapping(mappingtop).addService(googletag.pubads());
+            googletag.defineSlot('21678864329/elperuano/Top3', [[320, 100], [320, 50], [728, 90]], 'Top3').defineSizeMapping(mappingtop).addService(googletag.pubads());
+            googletag.defineSlot('/21678864329/elperuano/Middle1', [[320, 100], [320, 50], [300, 100]], 'Middle1').defineSizeMapping(mappingmbl).addService(googletag.pubads());
+            googletag.defineSlot('/21678864329/elperuano/Leader1', [[320, 100], [320, 50]], 'Leader1').defineSizeMapping(mappingmbl).addService(googletag.pubads());
+            googletag.defineSlot('/21678864329/elperuano/Center1', [[120, 600], [160, 600]], 'Center1').defineSizeMapping(mappingcenter).addService(googletag.pubads());
+            googletag.defineSlot('/21678864329/elperuano/Center2', [[468, 60], [300, 250]], 'Center2').defineSizeMapping(mappingcenter2).addService(googletag.pubads());
+            googletag.defineSlot('/21678864329/elperuano/Floating', [1, 1], 'Floating').addService(googletag.pubads());
+            googletag.defineSlot('/21678864329/elperuano/Inread', [1, 1], 'Inread').addService(googletag.pubads());
+            googletag.pubads().setTargeting('EP_Seccion', 'Normas');
+            googletag.pubads().setTargeting('EP_Tipo', 'Portada');
+            googletag.pubads().setTargeting('Demo', dfp_demo);
+            googletag.pubads().enableSingleRequest();
+            googletag.pubads().collapseEmptyDivs();
+            googletag.enableServices();
+        });
+    </script>
+    <!-- End GPT Tag -->
+</head>
+
+    <body>
+        
+        <div id="contenedor">
+
+            
+
+            <!-- ///////////// HEADER //////////// -->
+            <header>
+                <div id="statusDolar" class="cotizacion">
+                    <b> Cargando...</b>
+                    
+<form action="/home/LoadUltimoStatusDolar?Length=0" data-ajax="true" data-ajax-method="post" data-ajax-mode="replace" data-ajax-update="#statusDolar" id="space_StatusDolar" method="post"></form>                </div>
+                <div class="logo">
+                    <a href="http://elperuano.pe"><img src="../../img/logo_elperuano2.png" alt="El Peruano"></a>
+                </div>
+                <div class="boton_social">
+                    <strong>S&#193;BADO 06</strong><br>
+                    <p>de abril de 2024</p>
+                </div>
+
+            </header>
+            <!-- ///////////// NAVEGADOR //////////// -->
+            <nav id="mimenu">
+                <ul>
+                    <li id="logomin" class="logomin"></li>
+                    <li><a href="/home">INICIO</a></li>
+                    
+                    <li>
+                        <a href="/Normas">NORMAS LEGALES</a>
+                        <ul>
+                            <li><a href="/Normas/Indices">Indices Quincenales</a></li>
+                            <li><a href="/ROF">ROF</a></li>
+                            <li><a href="/Normas/Verificador">Verificador</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="/Normas/DOPElectronico">DOP ELECTRÓNICO</a></li>
+                    <li><a href="/Normas/normasactualizadas">NORMAS ACTUALIZADAS</a></li>
+                    <li>
+                        <a href="/BoletinOficial">BOLETIN OFICIAL</a>
+                        <ul>
+                            <li><a href="/Patentes">Patentes</a></li>
+                            <li><a href="/Concesiones">Con. Mineras</a></li>
+                            <li><a href="/RematesJudiciales">Rem. Judiciales</a></li>
+                            <li><a href="/EdictosJudiciales">Edic. Judiciales</a></li>
+
+
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#">JURISPRUDENCIA</a>
+                        <ul>
+                            <li><a href="/Casaciones">CASACIONES</a></li>
+                            <li><a href="/Jurisprudencia">PRECEDENTES</a></li>
+                            <li><a href="/Procesos">PROCESOS</a></li>
+                            <li><a href="/Plenos">PLENOS</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="/declaraciones">DDJJ</a></li>
+                    
+                    <li><a href="/Tupa">TUPA</a></li>
+                </ul>
+            </nav>
+
+            <section class="normaslegaleswrapper">
+
+
+                
+
+
+<div id="pubhorizontalGoogle" class="pub001">
+    <!--Programatica Top1-->
+    <div id='Top1'>
+        <script>
+            googletag.cmd.push(function () { googletag.display('Top1'); });
+        </script>
+    </div>
+</div>
+<h2>Normas Legales</h2>
+<div id="busqueda">
+    Use un Rango de Fechas personalizado para filtrar su resultado.
+
+    
+<form action="/Normas/Filtro?dateparam=04%2F06%2F2024%2000%3A00%3A00" data-ajax="true" data-ajax-begin="MensajeBusquedaGeneral" data-ajax-method="post" data-ajax-mode="replace" data-ajax-success="Resultado" data-ajax-update="#NormasEPPortal" id="space_PortalNormasLegalesN" method="post">        <!--Prueba de Nuevo datepicker UI-->
+        <span>Desde:</span>
+        <input id="cddesde" name="cddesde" contenteditable="false" class="fechainput" />
+        <span>Hasta:</span>
+        <input id="cdhasta" name="cdhasta" contenteditable="false" class="fechainput" />
+        <button id="btnBuscar" name="btnBuscar" class="buttonaction"> Buscar</button><br />
+        <span class="extraor">Solo edición extraordinaria</span>
+        <input type="checkbox" class="checkboxedp" id="tipo" name="tipo" />
+</form>
+</div>
+
+<div id="resultado">
+
+
+</div>
+<div id="dynapagin">
+
+</div>
+
+<div id="NormasEPPortal">
+
+    Cargando Normas Legales...
+    
+
+<form action="/Normas/LoadNormasLegales?Length=0" data-ajax="true" data-ajax-method="get" data-ajax-mode="replace" data-ajax-success="Resultado" data-ajax-update="#NormasEPPortal" id="space_PortalNormasLegales" method="post"></form>
+</div>
+<div id="Error" style="visibility:hidden">
+    No se encontro información.
+</div>
+<script src="/Scripts/NormasLegales.js?20240103V1"></script>
+
+
+
+            </section>
+
+            <!-- ///////////// ASIDE ///////////// -->
+            <aside>
+                <div class="aside_botonsbucador">
+                    <a href="https://diariooficial.elperuano.pe/Normas/normasactualizadas" target="_blank">
+                        <img src="../../img/normas-actualizadas.jpg" alt="Normas Actualizadas" />
+                    </a>
+                </div>
+                <div class="aside_botonsbucador">
+                    <a href="https://diariooficial.elperuano.pe/pdf/gabinete-ministros.pdf" target="_blank">
+                        <img src="../../img/gabinete-ministerial-2024.jpg" alt="Gabinete Ministerial" />
+                    </a>
+                </div>
+                <div class="aside_botonsbucador">
+                    <a href="http://busquedas.elperuano.pe/">
+                        <p>Buscador en línea</p>
+                        <span class="icon-search"></span>
+                    </a>
+                </div>
+                <div class="aside_botonsbucador">
+                    <a href="http://online.elperuano.pe/cotizadoranuncios/Inicio.aspx">
+                        <p>Cotizador de avisos comerciales </p>
+                        <span class="icon-user-tie"></span>
+                    </a>
+                </div>
+                <div class="aside_botonsbucador">
+                    <a href="http://elperuano.pe/GestionOP">
+                        <p>Buscar por Orden de Publicación</p>
+                        <span class="icon-newspaper"></span>
+                    </a>
+                </div>
+                <a href="https://diariooficial.elperuano.pe/Normas/designaciones">
+                    <img src="../../img/designaciones.jpg" alt="Designaciones en el sector público" />
+                </a>
+                
+                <a href="https://diariooficial.elperuano.pe/Normas/Verificador" target="_blank">
+                    <img src="../../img/validacion.jpg" alt="Autenticidad de la publicación digital" />
+                </a>
+                <!--NO SE PUEDE TRABAJAR CON EL SERVIDOR DE ANDINA. COMENTADO -->
+                <div id="AndinaNoticias">
+
+ 		<!--BANNER SERVICIO GPO -->
+		<a href="" id="urlRedSocial" target ="_blank">
+			<img src="/img/banner_dopgpo.jpg" width="250"/>
+		</a>
+
+
+
+                </div>
+                <!--NO SE PUEDE TRABAJAR CON EL SERVIDOR DE ANDINA. COMENTADO -->
+                <div class="publicidad02">
+
+                </div>
+
+                <div id="EdicionImpresa">
+
+                    
+                    
+                    
+                </div>
+                <div id="publicidadGoogle">
+                    <div id='Center1'>
+                        <script>
+                            googletag.cmd.push(function () { googletag.display('Center1'); });
+                        </script>
+                    </div>
+                </div>
+
+            </aside>
+            <!-- ///////////// FOOTER ///////////// -->
+            <footer>
+                <ul>
+                    <li><a href="http://www.editoraperu.com.pe/EditoraP/tarifas.html">Tarifas</a></li>
+                    <li><a href="http://www.editoraperu.com.pe/EditoraP/gestion-comercial-suscripciones.html">Suscripciones</a></li>
+                    <li><a href="http://www.editoraperu.com.pe/EditoraP/tarifas-dopagweb.html">Publicidad Web</a></li>
+                    <li><a href="http://www.editoraperu.com.pe/EditoraP/gestion-comercial-distribuidores.asp">Distribuciones</a></li>
+                    <li><a href="http://www.editoraperu.com.pe/EditoraP/gestion-operadores-judiciales.html">Operadores</a></li>
+                    <li><a href="http://transparencia.editoraperu.com.pe/Mapa/">Transparencia</a></li>
+                </ul>
+                <figure><a href="http://www.editoraperu.com.pe/EditoraP/index.html" class="button hover-shadow"><img src="https://diariooficial.elperuano.pe/img/logo_editora.png" alt="#"></a></figure>
+                <div class="direccion1">
+                    <p>Presidente del Directorio: Hugo David Aguirre Castañeda</p>
+                    <p>Gerente General (e): Félix Alberto Paz Quiroz</p>
+                    <p>Gerente de Publicaciones Oficiales: Ricardo Montero Reyes</p>
+                    <p>Editora Perú  Av. Alfonso Ugarte 873, Lima 1 Central Telefónica (51-1) 3150400 </p>
+                    <p>Informaciones (51-1) 315-0400 anexos 2206 / 2218 / 2298</p>
+                    <p>Empresa Peruana de Servicios Editoriales S.A. RUC 20100072751</p>
+                </div>
+                <div class="direccion2">
+                    <p>Presidente del Directorio: Hugo David Aguirre Castañeda</p>
+                    <p>Gerente General (e): Félix Alberto Paz Quiroz</p>
+                    <p>Gerente de Publicaciones Oficiales: Ricardo Montero Reyes</p>
+                    <p>Editora Perú  Av. Alfonso Ugarte 873,</p>
+                    <p>Lima 1 Central Telefónica (51-1) 3150400 </p>
+                    <p>Informaciones (51-1) 315-0400 </p>
+                    <p>anexos 2206 / 2218 / 2298</p>
+                    <p>Empresa Peruana de Servicios Editoriales S.A.</p>
+                    <p>RUC 20100072751</p>
+                </div>
+            </footer>
+
+        </div>
+
+    <!-- Portal desarrollado por Daniel Lazarte daniellazarte on twitter -->
+    <!-- V1.0 -->
+
+	<a href="" id="urlRedSocial" target ="_blank">
+		<img src="images/banner_dopgpo.jpg" width="250"/>
+	</a>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    
+    <script>
+		document.addEventListener('DOMContentLoaded', function() {
+			f_get_redsocial();
+		
+		});
+
+	function f_get_redsocial()
+		{
+			//var vurl = "https://qa.editoraperu.com.pe/webdop-api/api/consulta/redSocialGpo";
+			var vurl = "https://servicios.editoraperu.com.pe/webdop-api/api/consulta/redSocialGpo";
+			
+			fetch(vurl)
+			.then(response => response.json())
+			.then(data => {
+
+				const urlRedSocial = document.getElementById('urlRedSocial');
+				
+				if (data.status == "S"){
+					urlRedSocial.setAttribute('href', data.data.url);
+				}
+				else{
+					console.log(data.message);
+					urlRedSocial.setAttribute('href', "#");
+				}
+				
+							
+			})
+			.catch(error => {
+				// Manejar errores en caso de que la solicitud falle
+				console.error('Error al obtener datos:', error);
+			});
+		
+		}
+
+
+        function downloadURI(uri, name) {
+            var link = document.createElement("a");
+            link.download = name;
+            link.href = uri;
+            link.click();
+        }
+
+        $(function () {
+            $('a.show-option').click(function (evt) {
+                evt.preventDefault();
+                $(this).siblings('.options').slideToggle();
+            });
+        })
+    </script>
+
+    <!-- Begin comScore Tag -->
+    <script>
+        var _comscore = _comscore || [];
+        _comscore.push({ c1: "2", c2: "7147557" });
+        (function () {
+            var s = document.createElement("script"), el = document.getElementsByTagName("script")[0]; s.async = true;
+            s.src = (document.location.protocol == "https:" ? "https://sb" : "http://b") + ".scorecardresearch.com/beacon.js";
+            el.parentNode.insertBefore(s, el);
+        })();
+    </script>
+    <noscript>
+        <img src="https://sb.scorecardresearch.com/p?c1=2&c2=7147557&cv=2.0&cj=1" />
+    </noscript>
+    <!-- End comScore Tag -->
+
+<script type="text/javascript" src="/bnith__86K_qHaIJl0WCu0ZQL86UF4fLeB-oLENE1WAHikS5M8yziTPJrkOYwcVusPgcy1mEN-qMH70oqI="></script> <script language="JavaScript" type="text/javascript">const _0x35e8=['visitorId','18127kSXadA','356575NPKVMA','7306axxsAH','get','657833TzFjkt','717302TQdBjl','34lMHocq','x-bni-rncf=1712433583818;expires=Thu, 01 Jan 2037 00:00:00 UTC;path=/;','61XMWbpU','cookie',';expires=Thu, 01 Jan 2037 00:00:00 UTC;path=/;','then','651866OSUgMa','811155xdatvf','x-bni-fpc='];function _0x258e(_0x5954fe,_0x43567d){return _0x258e=function(_0x35e81f,_0x258e26){_0x35e81f=_0x35e81f-0x179;let _0x1280dc=_0x35e8[_0x35e81f];return _0x1280dc;},_0x258e(_0x5954fe,_0x43567d);}(function(_0x5674de,_0xdcf1af){const _0x512a29=_0x258e;while(!![]){try{const _0x55f636=parseInt(_0x512a29(0x17b))+-parseInt(_0x512a29(0x179))*parseInt(_0x512a29(0x17f))+-parseInt(_0x512a29(0x183))+-parseInt(_0x512a29(0x184))+parseInt(_0x512a29(0x187))*parseInt(_0x512a29(0x17d))+parseInt(_0x512a29(0x188))+parseInt(_0x512a29(0x17c));if(_0x55f636===_0xdcf1af)break;else _0x5674de['push'](_0x5674de['shift']());}catch(_0xd3a1ce){_0x5674de['push'](_0x5674de['shift']());}}}(_0x35e8,0x6b42d));function getClientIdentity(){const _0x47e86b=_0x258e,_0x448fbc=FingerprintJS['load']();_0x448fbc[_0x47e86b(0x182)](_0x4bb924=>_0x4bb924[_0x47e86b(0x17a)]())[_0x47e86b(0x182)](_0x2f8ca1=>{const _0x44872c=_0x47e86b,_0xa48f50=_0x2f8ca1[_0x44872c(0x186)];document[_0x44872c(0x180)]=_0x44872c(0x185)+_0xa48f50+_0x44872c(0x181),document[_0x44872c(0x180)]=_0x44872c(0x17e);});}getClientIdentity();</script></body>
+
+</html>
+#OcGB           f��F���f��   T    O^partitionKey=%28https%2Celperuano.pe%29,:https://diariooficial.elperuano.pe/Normas strongly-framed 1 security-info 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 request-method GET response-head HTTP/1.1 200 OK
+Cache-Control: private
+Content-Type: text/html; charset=utf-8
+X-AspNetMvc-Version: 4.0
+Date: Sat, 06 Apr 2024 19:59:43 GMT
+ original-response-headers Cache-Control: private
+Content-Type: text/html; charset=utf-8
+X-AspNetMvc-Version: 4.0
+Date: Sat, 06 Apr 2024 19:59:43 GMT
+Transfer-Encoding: chunked
+ ctid 1 uncompressed-len 0   RB

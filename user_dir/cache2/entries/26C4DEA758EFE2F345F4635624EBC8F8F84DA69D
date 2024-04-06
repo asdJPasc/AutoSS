@@ -1,0 +1,1091 @@
+var navscrolling = false;
+var gnav;
+var srchBoxSel = "#SearchBox .ms-srch-sb";
+function renderMegaMenu() {
+    gnav.find("nav:first").css({ 'visibility': 'visible' }).accessibleMegaMenu();
+    //$("div[id*='_CurrentNavigation']:first").show();
+    if (gnav.find("nav.megamenu .accessible-megamenu-top-nav-item h2 a.current").length == 0) {
+        //refresh megamenu current if loads after sec/ter
+        $(".sncBg").trigger("mouseout");
+    }
+
+    
+}
+
+
+function renderBurgerMenu(){
+
+
+////////////////////Burger Menu///////////////
+$('div.gmHeader').on('click', '#bm-nav-icon', function(){
+//var sb = $(srchBoxSel).parent();
+if($("#mSearchCont > *").length > 0)
+{
+$("#mSearchLink").trigger('click');
+}
+
+ $(this).toggleClass('open');//make the burgermenu icon turn to X
+ 
+ 
+if($(this).hasClass('open')){ 
+if($("#mSecNav:visible").length > 0){
+//$("#burgermenu").css('top','-90px');
+ }
+//open accordion
+//var top = $("div.gmHeaderBar").outerHeight()-3;
+//$("#burgermenu").css({'top':top+'px'});
+navscrolling = true;
+$("#s4-workspace,html").animate({scrollTop: $("body,html").offset().top}, 100, function(){
+      setTimeout(function(){navscrolling = false;},1000);
+   });
+
+// //if(navigator.userAgent.match(/(iPod|iPhone|iPad|Android)/)) { 
+//     document.getElementById("s4-workspace").scrollIntoView({ block: 'start',  behavior: 'smooth' });
+//     navscrolling = false;
+// //}
+
+
+$("#burgermenu").show('slow');
+//console.log(getCookie("mGMNAV"));
+var cookie = getCookie("mGMNAV");
+	if(cookie!=null && cookie.split("|")[0]=="burgermenu" && $("#burgermenu .ui-accordion-header:contains('"+cookie.split("|")[1]+"')").not(".ui-accordion-header-active").length > 0){
+	//$("#burgermenu .ui-accordion-header:contains('"+cookie.split("|")[1]+"')").not(".ui-accordion-header-active").click();
+	}else{
+	//$("#burgermenu .bmselectedmi:first").closest("li").closest("ol").closest("div").prev(".ui-accordion-header").not(".ui-accordion-header-active").click();
+	}
+ }else{
+//close accordion
+
+$("#burgermenu").hide('slow');
+ }
+ 
+});
+
+
+
+
+}
+
+
+function buildMegaMenu() {
+if($("#bm-nav-icon:visible").length > 0){
+ $("div[id*='_CurrentNavigation']:first").hide();
+ //mobile search icon
+ var msl = $("<div id=\"mSearchLinkCont\"><a id=\"mSearchLink\" title=\"Search GinnieMae.gov\" href=\"#\">&nbsp;</a></div>").insertAfter("#gm-logo");
+var msc = $("<div id=\"mSearchOuterCont\"><div id=\"mSearchCont\"></div></div>").appendTo("div.gmHeaderBar");
+renderBurgerMenu();
+$("#mSearchLink").on('click touchend',function(evt){
+evt.preventDefault();
+
+showMobileSearch(this,evt);
+evt.stopPropagation();
+});
+
+
+
+}
+ 
+    // console.log("build megamenu");
+    gnav = $("div.gmGlobalNav");
+    var altRender = false;
+    //var mm = $("<nav class=\"megamenu\"><ol></ol></nav>").insertBefore("div.gmGlobalNav div[id*='_CurrentNavigation']:first");//.menu-horizontal
+    //var selector = "#zz2_RootAspMenu ul ul";// "div[id*='_CurrentNavigation']:first div.menu-horizontal>ul>li";//$("#zz2_RootAspMenu ul ul")
+    gnav.prepend("<nav class=\"megamenu\"><ol></ol></nav>");//.insertBefore("div.gmGlobalNav div[id*='_CurrentNavigation']:first");//.menu-horizontal
+    var mm = gnav.find("nav.megamenu");
+    var selector = "div[id*='_TopNavigationMenu'] ul:eq(1)>li";//#zz13_RootAspMenu
+    if(window.location.href.toLowerCase().indexOf("/investors/investor_search_tools/pages/default.aspx")>-1 || window.location.href.toLowerCase().indexOf("/pages/disclosurehistoryfiles.aspx") > -1){
+    	//selector = "div[id*='_CurrentNavigation']:first div.menu-horizontal ul.root:first > li:contains('Disclosure') > ul > li:has(a[title='Group'])";
+    	selector = "div[id*='DeltaTopNavigation']:first > div > ul > li > ul > li:contains('Disclosure') > ul > li:has(a[title='Group'])";
+    	altRender = true;
+     }
+    
+     
+    gnav.find(selector).each(function (i, mi) {
+        
+         
+		//skip home link	
+		if($(mi).find("span.menu-item-text:first()").text()==="Home" && $(mi).find("span.menu-item-text:first()").closest("a").attr('href').toLowerCase() === '/pages/default.aspx')
+			return true;
+			
+        
+        var mitem = $("<li><h2><a   href=\"#\" onclick=\"return false\">" + $(mi).find("span.menu-item-text:first()").text() + "</a></h2></li>").appendTo($(mm).find(">ol:first()"));
+	
+	
+			
+        if ($(mi).find("ul>li").length > 0 || altRender) {
+            var grps = $(mi).find("ul>li a[title='Group']").length;
+            var subnav = $("<div class=\"cols-" + (grps > 1 ? grps.toString() : "1") + "\"><ol></ol></div>").appendTo(mitem);
+			var miSel =$(mi).find("ul>li a");
+			
+			if(altRender)
+				miSel =  $(mi).nextUntil(":has(a[title='Group'])").find("a");
+			
+           miSel.each(function (ii, smi) {
+                var cssClass = "";
+               
+
+                if (typeof $(smi).attr('title') !== "undefined" && $(smi).attr('title').toLowerCase().indexOf("heading") > -1) {
+                    $("<li class=\"heading\"><a " + (typeof $(smi).attr('target') != 'undefined' ? "target=\"" + $(smi).attr('target') + "\"" : "") + " href=\"" + $(smi).attr('href') + "\">" + $(smi).find("span.menu-item-text:first()").text() + "</a></li>").appendTo($(subnav).find("ol:last()"));
+                }
+                else if (typeof $(smi).attr('title') !== "undefined" && $(smi).attr('title').toLowerCase().indexOf("group") > -1) {
+                    cssClass = "accessible-megamenu-panel-group";
+                    //console.log('smi:'+ $(smi).text() + ':' + $(smi).attr('href'));
+                    if ($(smi).attr('href') == "#" || $(smi).attr('href') == '/')
+                        $("<li class=\"accessible-megamenu-panel-group\"><h3><a  style=\"cursor:default !important;\"  href=\"#\" onclick=\"return false;\">" + $(smi).find("span.menu-item-text:first()").text() + "</a></h3></li>").appendTo($(subnav).find(">ol"));
+                    else
+                        $("<li class=\"accessible-megamenu-panel-group\"><h3><a " + (typeof $(smi).attr('target') != 'undefined' ? "target=\"" + $(smi).attr('target') + "\"" : "") + " href=\"" + $(smi).attr('href') + "\">" + $(smi).find("span.menu-item-text:first()").text() + "</a></h3></li>").appendTo($(subnav).find(">ol"));
+
+
+                    $("<ol></ol>").appendTo($(subnav).find("li:last"));
+                }
+                else {
+                    $("<li "+ (altRender ? "style='clear:both;border-left:none;'" : "") +"><a " + (typeof $(smi).attr('target') != 'undefined' ? "target=\"" + $(smi).attr('target') + "\"" : "") + " href=\"" + $(smi).attr('href') + "\">" + $(smi).find("span.menu-item-text:first()").text() + "</a></li>").appendTo($(subnav).find("ol:last()"));
+                }
+
+            });//end each submenu item
+
+        }//end if
+
+
+
+    }); //end each main menu item
+    gnav.find("div[id*='_CurrentNavigation']:first").hide();
+    //$("nav:first").hide();
+    $(".accessible-megamenu-panel").hide();
+    //setTimeout(function () { $(".gmHeaderBar").css({ "overflow": "visible" }); console.log('setting done'); }, 6000);
+
+
+
+
+
+    //$(document).ready(function(){
+    renderMegaMenu();
+    //add search link
+    if (window.location.href.toLowerCase().indexOf("/search/") == -1) {
+        var srch = $("<li class=\"accessible-megamenu-top-nav-item\"><a id=\"mmSearchLink\" style=\"width:25px;\"  title=\"Search GinnieMae.gov\" href=\"javascript:void(0);\" onclick=\"showSearch(this,event)\">&nbsp;</a></li>").appendTo($("nav:first ol:first"));
+        $("input.ms-sbplain").keydown(function () {
+            if ($(this).val().length >= 0) {
+                $(this).closest("tr").find("td.ms-sbgo").css('background-image', 'url(/PublishingImages/search-blue@2x.png)');
+            } else {
+                $(this).closest("tr").find("td.ms-sbgo").css('background-image', 'url(/PublishingImages/search-grey@2x.png)');
+                $(this).closest("tr").find("div.ms-sbclear").remove();
+            }
+        }).attr('placeholder', 'Search...');
+        $("input.ms-sbplain").closest("td[id*='MSOZoneCell_WebPartWP']").closest("tr").hide();
+
+        handleGlobalSearchWarnings();
+        highlightNavigation();
+      
+    }
+    //end add search
+
+
+    //Banner Add, only include when you need a banner
+    /*
+    setTimeout(function(){
+    $("<div style='color:#1266da;font-size:22px;font-weight:bold;text-align:center;padding:10px;'>Website is down for maintenance.<br/>To access Disclosure Data, please use <a href='http://bulk.ginniemae.gov'>http://bulk.ginniemae.gov</a>.</div>").insertAfter("#searchContainer");
+    },500);
+    */
+    /*
+    setTimeout(function(){
+    $("<div style='color:Red;font-size:22px;font-weight:bold;text-align:center;padding:10px;'>We are planning maintenance on Saturday, April 21st.<br/>During that day users may experience intermittent downtime from 7am EST until 6pm EST. We apologize for any inconvenience.</div>").insertAfter("#searchContainer");
+    },300);
+    //});
+    */
+    
+//buildBurgerMenu();
+}
+
+function showSearch(el, ev) {
+var sb = $(srchBoxSel).parent();
+
+    $("ol.accessible-megamenu").hide();
+
+    sb.detach().prependTo($("ol.accessible-megamenu").closest('div'));
+    //fix up search
+    $(".gmGlobalNav td.ms-sbgo a").html("<div>&nbsp;</div>").click(function () { searchExecuted = true; });
+
+    //$("#SRSB").css({'position':'fixed'});
+    //var pos = $(el).position();
+
+    //get the position of the placeholder element
+    //var sb = $(srchBoxSel).parent();
+
+
+    if (sb.find("div.ms-sbclear").length == 0) { $("<div class='ms-sbclear ms-sbcell'><a href=\"javascript:void(0);\" onclick=\"closeSearch(this)\">&nbsp;&nbsp;&nbsp;&nbsp;</a></div>").insertAfter(sb.find(".ms-srch-sb-searchLink")); }
+
+    
+
+    sb.show('fast');
+    //if($("input.ms-sbplain").text()=="")//if not blank, no focus, so last search text is retained
+$("div.gmHeaderBar input.ms-srch-sb-prompt")
+	.val("")
+	.attr('placeholder',"Search...")
+	.focus();
+
+
+//    $("input.ms-sbplain").focus();
+
+
+    sb.focusout(function () {
+        //console.log('lost it');
+        setTimeout(function () { if (!(searchExecuted)) { $(".ms-sbclear a").trigger('click'); } }, 400);
+    });
+
+
+}
+var searchExecuted = false;
+
+function closeSearch(el) {
+var sb = $(srchBoxSel).parent();
+
+    sb.hide('fast');
+    $("ol.accessible-megamenu").show('fast');
+    //$(el).parent().closest('tr').find('input.ms-sbplain').val('');
+    $(this).closest('td').remove();
+}
+
+
+
+function buildBurgerMenu(){
+//mSearchLink
+
+if($(".megamenu").is(":visible")){
+return true;
+}
+gnav = $("div.gmGlobalNav");
+    var bm = $("<div id='burgermenu'></div>").prependTo("#contentBox");//prependTo("#gmContentContainer div:first");//.menu-horizontal
+    gnav.find("div[id*='_TopNavigationMenu']:first ul:gt(0) > .static.dynamic-children").each(function (i, mi) { //pjp 10/2/2020 update*/
+        var mitem = $("<h3>" + $(mi).find("span.menu-item-text:first()").text() + "</h3><div class=\"bm-nav-panel\"><p></p></div>").appendTo(bm);
+		var panel = $(bm).find(".bm-nav-panel:last p:first");
+        if ($(mi).find("ul>li").length > 0) {
+			// var grps = $(mi).find("ul>li a[title='Group']").length;
+            
+
+            $(mi).find("ul>li a").each(function (ii, smi) {
+                var cssClass = "";
+                //Heading
+                if (typeof $(smi).attr('title') !== "undefined" && $(smi).attr('title').toLowerCase().indexOf("heading") > -1) {
+                    $("<li class=\"bm-heading\"><h3><a " + (typeof $(smi).attr('target') != 'undefined' ? "target=\"" + $(smi).attr('target') + "\"" : "") + " href=\"" + $(smi).attr('href') + "\">" + $(smi).find("span.menu-item-text:first()").text() + "</a></h3></li>").appendTo(panel);
+                }//Grouping
+                else if (typeof $(smi).attr('title') !== "undefined" && $(smi).attr('title').toLowerCase().indexOf("group") > -1) {
+                    cssClass = "";
+                    //console.log('smi:'+ $(smi).text() + ':' + $(smi).attr('href'));
+                    if ($(smi).attr('href') == "#" || $(smi).attr('href') == '/')
+                        $("<li><h3><a style=\"cursor:default !important;\"  href=\"#\" onclick=\"return false;\">" + $(smi).find("span.menu-item-text:first()").text() + "</a></h3></li>").appendTo(panel);//.find(">ol")
+                    else
+                        $("<li class=\"\"><h3><a " + (typeof $(smi).attr('target') != 'undefined' ? "target=\"" + $(smi).attr('target') + "\"" : "") + " href=\"" + $(smi).attr('href') + "\">" + $(smi).find("span.menu-item-text:first()").text() + "</a></h3></li>").appendTo(panel);//.find(">ol")
+
+
+                    $("<ol></ol>").appendTo(panel.find("li:last"));
+                }//regular link
+                else {
+                    $("<li><a class=\"" +(window.location.href.toLowerCase().indexOf($(smi).attr('href').toLowerCase()) > -1 ? "bmselectedmi" : "" )+ "\" " + (typeof $(smi).attr('target') != 'undefined' ? "target=\"" + $(smi).attr('target') + "\"" : "") + " href=\"" + $(smi).attr('href') + "\">" + $(smi).find("span.menu-item-text:first()").text() + "</a></li>").appendTo(panel.find("ol:last()"));
+                }
+
+            });//end each submenu item
+
+
+		}
+});
+
+
+
+ $("#burgermenu").accordion({
+ 	  active: false,
+      collapsible: true
+    });
+    
+  			$("#s4-workspace").on("scroll", function(){   
+                  
+            if($('#bm-nav-icon').hasClass('open') && navscrolling===false && !($('#burgermenu').isInViewport())){
+ 			$("#burgermenu").hide('slow');
+ 			$('#bm-nav-icon').toggleClass('open');
+ 			}
+			});   
+
+
+   
+//nav tracking
+//burger
+$("#burgermenu a").on('click',function(evt){
+
+var menu = $(this).closest("div.ui-accordion").attr("id");
+var panel = $(this).closest("div.bm-nav-panel").prev("h3").text();
+
+setCookie("mGMNAV",menu+"|"+panel,1);
+
+});
+//end burger
+//end nav tracking
+ 
+// 
+}
+
+function showMobileSearch(el,evt){
+ 
+if($("#bm-nav-icon.open").length > 0){
+$("#bm-nav-icon").trigger('click');
+}
+
+if($("#mSearchOuterCont").css('visibility')=='collapse'){
+
+$(srchBoxSel).detach().prependTo($("#mSearchCont"));
+$("#mSearchCont").find("td.ms-sbgo a").html("<div>&nbsp;</div>")
+$("#mSearchCont td.ms-sbgo").find("a").click(function () { searchExecuted = true; });
+
+var sb = $(srchBoxSel).parent();
+
+if (sb.find("div.ms-sbclear").length == 0) { $("<div class='ms-sbclear ms-sbcell'><a href=\"javascript:void(0);\" onclick=\"closeMobileSearch(this)\">&nbsp;&nbsp;&nbsp;&nbsp;</a></div>").insertAfter(sb.find(".ms-srch-sb-searchLink")) }
+sb.find("input.ms-sbplain")
+	.val("")
+	.focus();
+
+$("#mSearchOuterCont")
+	.css({'visibility':'visible'}).show().slideDown('slow');
+$("#mSearchOuterCont div.srch-AutoCompContainer").css({'width':  $("#mSearchCont").width()-40+'px'});//size of autocompl items
+$("#mSearchOuterCont input[name='InputKeywords']").css({'width':  ($("#mSearchCont").width()-30)+'px'});//size of search input line with icons
+//$("#mSearchOuterCont td.ms-sbclear").remove();//remove x on search line
+$("#mSearchLink").css({'background-image':'url("/publishingimages/closeX.png")'});
+}else{
+$("#mSearchOuterCont")
+	.hide().slideUp('slow')
+	.css({'visibility':'collapse'});
+	$("#mSearchLink").css({'background-image':'url("/publishingimages/search-grey@2x.png")'});
+
+}
+}
+
+
+function handleGlobalSearchWarnings(){
+    $(".gmHeaderBar #SearchBox .ms-srch-sb-searchLink:first").each(function(i,el){
+        $(el).attr('onclick',"validateGMSearchInput(this);" + $(el).attr('onclick'));  
+     });
+
+     $(".gmHeaderBar #SearchBox input:first").each(function(i,el){
+        $(el).attr('onkeypress',"if (Srch.U.isEnterKey(String.fromCharCode(event.keyCode))) {validateGMSearchInput(this);}" + $(el).attr('onkeypress'));
+     });
+}
+
+function validateGMSearchInput(el){
+          
+    if($(el).closest('#SearchBox, #mSearchCont').find('input:first').val()=='' || $(el).closest('#SearchBox, #mSearchCont').find('input:first').val().indexOf('Search...')>-1){
+        alert('Please enter one or more search words.');
+        return false;
+    } 
+}
+
+///////////////COOKIE FUNCTIONS//////////////////////////
+
+function setCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+function eraseCookie(name) {   
+    document.cookie = name+'=; Max-Age=-99999999;';  
+}
+
+
+function highlightNavigation(){
+
+if($(".accessible-megamenu a[href='"+window.location.pathname+"' i]").length > 0){
+	//page pathname is found in top nav, highlight and trace up
+	$(".accessible-megamenu a[href='"+window.location.pathname+"' i]").addClass('current');
+	$(".accessible-megamenu a[href='"+window.location.pathname+"' i]").closest(".accessible-megamenu-top-nav-item").find("a:first").addClass('current');
+}else{
+// page pathname not found in top nav, work from tertiary nav up
+   var pg = $(".secNav.currentSNav a").attr('href');
+   $(".accessible-megamenu a[href='"+pg+"' i]").addClass('current');
+	$(".accessible-megamenu a[href='"+pg+"' i]").closest(".accessible-megamenu-top-nav-item").find("a:first").addClass('current');
+
+}
+
+}
+
+$.fn.isInViewport = function() {
+  var elementTop = $(this).offset().top;
+  var elementBottom = elementTop + $(this).outerHeight();
+
+  var viewportTop = $(window).scrollTop();
+  var viewportBottom = viewportTop + $(window).height();
+
+  return elementBottom > viewportTop && elementTop < viewportBottom;
+};        ÃØ  xÃØ3P   20240222211730-8lØØ  [¢q¸M   https://www.ginniemae.gov/Style%20Library/GNMA%20Scripts/megamenu/megamenu.js      ‚F  var navscrolling = false;
+var gnav;
+var srchBoxSel = "#SearchBox .ms-srch-sb";
+function renderMegaMenu() {
+    gnav.find("nav:first").css({ 'visibility': 'visible' }).accessibleMegaMenu();
+    //$("div[id*='_CurrentNavigation']:first").show();
+    if (gnav.find("nav.megamenu .accessible-megamenu-top-nav-item h2 a.current").length == 0) {
+        //refresh megamenu current if loads after sec/ter
+        $(".sncBg").trigger("mouseout");
+    }
+
+    
+}
+
+
+function renderBurgerMenu(){
+
+
+////////////////////Burger Menu///////////////
+$('div.gmHeader').on('click', '#bm-nav-icon', function(){
+//var sb = $(srchBoxSel).parent();
+if($("#mSearchCont > *").length > 0)
+{
+$("#mSearchLink").trigger('click');
+}
+
+ $(this).toggleClass('open');//make the burgermenu icon turn to X
+ 
+ 
+if($(this).hasClass('open')){ 
+if($("#mSecNav:visible").length > 0){
+//$("#burgermenu").css('top','-90px');
+ }
+//open accordion
+//var top = $("div.gmHeaderBar").outerHeight()-3;
+//$("#burgermenu").css({'top':top+'px'});
+navscrolling = true;
+$("#s4-workspace,html").animate({scrollTop: $("body,html").offset().top}, 100, function(){
+      setTimeout(function(){navscrolling = false;},1000);
+   });
+
+// //if(navigator.userAgent.match(/(iPod|iPhone|iPad|Android)/)) { 
+//     document.getElementById("s4-workspace").scrollIntoView({ block: 'start',  behavior: 'smooth' });
+//     navscrolling = false;
+// //}
+
+
+$("#burgermenu").show('slow');
+//console.log(getCookie("mGMNAV"));
+var cookie = getCookie("mGMNAV");
+	if(cookie!=null && cookie.split("|")[0]=="burgermenu" && $("#burgermenu .ui-accordion-header:contains('"+cookie.split("|")[1]+"')").not(".ui-accordion-header-active").length > 0){
+	//$("#burgermenu .ui-accordion-header:contains('"+cookie.split("|")[1]+"')").not(".ui-accordion-header-active").click();
+	}else{
+	//$("#burgermenu .bmselectedmi:first").closest("li").closest("ol").closest("div").prev(".ui-accordion-header").not(".ui-accordion-header-active").click();
+	}
+ }else{
+//close accordion
+
+$("#burgermenu").hide('slow');
+ }
+ 
+});
+
+
+
+
+}
+
+
+function buildMegaMenu() {
+if($("#bm-nav-icon:visible").length > 0){
+ $("div[id*='_CurrentNavigation']:first").hide();
+ //mobile search icon
+ var msl = $("<div id=\"mSearchLinkCont\"><a id=\"mSearchLink\" title=\"Search GinnieMae.gov\" href=\"#\">&nbsp;</a></div>").insertAfter("#gm-logo");
+var msc = $("<div id=\"mSearchOuterCont\"><div id=\"mSearchCont\"></div></div>").appendTo("div.gmHeaderBar");
+renderBurgerMenu();
+$("#mSearchLink").on('click touchend',function(evt){
+evt.preventDefault();
+
+showMobileSearch(this,evt);
+evt.stopPropagation();
+});
+
+
+
+}
+ 
+    // console.log("build megamenu");
+    gnav = $("div.gmGlobalNav");
+    var altRender = false;
+    //var mm = $("<nav class=\"megamenu\"><ol></ol></nav>").insertBefore("div.gmGlobalNav div[id*='_CurrentNavigation']:first");//.menu-horizontal
+    //var selector = "#zz2_RootAspMenu ul ul";// "div[id*='_CurrentNavigation']:first div.menu-horizontal>ul>li";//$("#zz2_RootAspMenu ul ul")
+    gnav.prepend("<nav class=\"megamenu\"><ol></ol></nav>");//.insertBefore("div.gmGlobalNav div[id*='_CurrentNavigation']:first");//.menu-horizontal
+    var mm = gnav.find("nav.megamenu");
+    var selector = "div[id*='_TopNavigationMenu'] ul:eq(1)>li";//#zz13_RootAspMenu
+    if(window.location.href.toLowerCase().indexOf("/investors/investor_search_tools/pages/default.aspx")>-1 || window.location.href.toLowerCase().indexOf("/pages/disclosurehistoryfiles.aspx") > -1){
+    	//selector = "div[id*='_CurrentNavigation']:first div.menu-horizontal ul.root:first > li:contains('Disclosure') > ul > li:has(a[title='Group'])";
+    	selector = "div[id*='DeltaTopNavigation']:first > div > ul > li > ul > li:contains('Disclosure') > ul > li:has(a[title='Group'])";
+    	altRender = true;
+     }
+    
+     
+    gnav.find(selector).each(function (i, mi) {
+        
+         
+		//skip home link	
+		if($(mi).find("span.menu-item-text:first()").text()==="Home" && $(mi).find("span.menu-item-text:first()").closest("a").attr('href').toLowerCase() === '/pages/default.aspx')
+			return true;
+			
+        
+        var mitem = $("<li><h2><a   href=\"#\" onclick=\"return false\">" + $(mi).find("span.menu-item-text:first()").text() + "</a></h2></li>").appendTo($(mm).find(">ol:first()"));
+	
+	
+			
+        if ($(mi).find("ul>li").length > 0 || altRender) {
+            var grps = $(mi).find("ul>li a[title='Group']").length;
+            var subnav = $("<div class=\"cols-" + (grps > 1 ? grps.toString() : "1") + "\"><ol></ol></div>").appendTo(mitem);
+			var miSel =$(mi).find("ul>li a");
+			
+			if(altRender)
+				miSel =  $(mi).nextUntil(":has(a[title='Group'])").find("a");
+			
+           miSel.each(function (ii, smi) {
+                var cssClass = "";
+               
+
+                if (typeof $(smi).attr('title') !== "undefined" && $(smi).attr('title').toLowerCase().indexOf("heading") > -1) {
+                    $("<li class=\"heading\"><a " + (typeof $(smi).attr('target') != 'undefined' ? "target=\"" + $(smi).attr('target') + "\"" : "") + " href=\"" + $(smi).attr('href') + "\">" + $(smi).find("span.menu-item-text:first()").text() + "</a></li>").appendTo($(subnav).find("ol:last()"));
+                }
+                else if (typeof $(smi).attr('title') !== "undefined" && $(smi).attr('title').toLowerCase().indexOf("group") > -1) {
+                    cssClass = "accessible-megamenu-panel-group";
+                    //console.log('smi:'+ $(smi).text() + ':' + $(smi).attr('href'));
+                    if ($(smi).attr('href') == "#" || $(smi).attr('href') == '/')
+                        $("<li class=\"accessible-megamenu-panel-group\"><h3><a  style=\"cursor:default !important;\"  href=\"#\" onclick=\"return false;\">" + $(smi).find("span.menu-item-text:first()").text() + "</a></h3></li>").appendTo($(subnav).find(">ol"));
+                    else
+                        $("<li class=\"accessible-megamenu-panel-group\"><h3><a " + (typeof $(smi).attr('target') != 'undefined' ? "target=\"" + $(smi).attr('target') + "\"" : "") + " href=\"" + $(smi).attr('href') + "\">" + $(smi).find("span.menu-item-text:first()").text() + "</a></h3></li>").appendTo($(subnav).find(">ol"));
+
+
+                    $("<ol></ol>").appendTo($(subnav).find("li:last"));
+                }
+                else {
+                    $("<li "+ (altRender ? "style='clear:both;border-left:none;'" : "") +"><a " + (typeof $(smi).attr('target') != 'undefined' ? "target=\"" + $(smi).attr('target') + "\"" : "") + " href=\"" + $(smi).attr('href') + "\">" + $(smi).find("span.menu-item-text:first()").text() + "</a></li>").appendTo($(subnav).find("ol:last()"));
+                }
+
+            });//end each submenu item
+
+        }//end if
+
+
+
+    }); //end each main menu item
+    gnav.find("div[id*='_CurrentNavigation']:first").hide();
+    //$("nav:first").hide();
+    $(".accessible-megamenu-panel").hide();
+    //setTimeout(function () { $(".gmHeaderBar").css({ "overflow": "visible" }); console.log('setting done'); }, 6000);
+
+
+
+
+
+    //$(document).ready(function(){
+    renderMegaMenu();
+    //add search link
+    if (window.location.href.toLowerCase().indexOf("/search/") == -1) {
+        var srch = $("<li class=\"accessible-megamenu-top-nav-item\"><a id=\"mmSearchLink\" style=\"width:25px;\"  title=\"Search GinnieMae.gov\" href=\"javascript:void(0);\" onclick=\"showSearch(this,event)\">&nbsp;</a></li>").appendTo($("nav:first ol:first"));
+        $("input.ms-sbplain").keydown(function () {
+            if ($(this).val().length >= 0) {
+                $(this).closest("tr").find("td.ms-sbgo").css('background-image', 'url(/PublishingImages/search-blue@2x.png)');
+            } else {
+                $(this).closest("tr").find("td.ms-sbgo").css('background-image', 'url(/PublishingImages/search-grey@2x.png)');
+                $(this).closest("tr").find("div.ms-sbclear").remove();
+            }
+        }).attr('placeholder', 'Search...');
+        $("input.ms-sbplain").closest("td[id*='MSOZoneCell_WebPartWP']").closest("tr").hide();
+
+        handleGlobalSearchWarnings();
+        highlightNavigation();
+      
+    }
+    //end add search
+
+
+    //Banner Add, only include when you need a banner
+    /*
+    setTimeout(function(){
+    $("<div style='color:#1266da;font-size:22px;font-weight:bold;text-align:center;padding:10px;'>Website is down for maintenance.<br/>To access Disclosure Data, please use <a href='http://bulk.ginniemae.gov'>http://bulk.ginniemae.gov</a>.</div>").insertAfter("#searchContainer");
+    },500);
+    */
+    /*
+    setTimeout(function(){
+    $("<div style='color:Red;font-size:22px;font-weight:bold;text-align:center;padding:10px;'>We are planning maintenance on Saturday, April 21st.<br/>During that day users may experience intermittent downtime from 7am EST until 6pm EST. We apologize for any inconvenience.</div>").insertAfter("#searchContainer");
+    },300);
+    //});
+    */
+    
+//buildBurgerMenu();
+}
+
+function showSearch(el, ev) {
+var sb = $(srchBoxSel).parent();
+
+    $("ol.accessible-megamenu").hide();
+
+    sb.detach().prependTo($("ol.accessible-megamenu").closest('div'));
+    //fix up search
+    $(".gmGlobalNav td.ms-sbgo a").html("<div>&nbsp;</div>").click(function () { searchExecuted = true; });
+
+    //$("#SRSB").css({'position':'fixed'});
+    //var pos = $(el).position();
+
+    //get the position of the placeholder element
+    //var sb = $(srchBoxSel).parent();
+
+
+    if (sb.find("div.ms-sbclear").length == 0) { $("<div class='ms-sbclear ms-sbcell'><a href=\"javascript:void(0);\" onclick=\"closeSearch(this)\">&nbsp;&nbsp;&nbsp;&nbsp;</a></div>").insertAfter(sb.find(".ms-srch-sb-searchLink")); }
+
+    
+
+    sb.show('fast');
+    //if($("input.ms-sbplain").text()=="")//if not blank, no focus, so last search text is retained
+$("div.gmHeaderBar input.ms-srch-sb-prompt")
+	.val("")
+	.attr('placeholder',"Search...")
+	.focus();
+
+
+//    $("input.ms-sbplain").focus();
+
+
+    sb.focusout(function () {
+        //console.log('lost it');
+        setTimeout(function () { if (!(searchExecuted)) { $(".ms-sbclear a").trigger('click'); } }, 400);
+    });
+
+
+}
+var searchExecuted = false;
+
+function closeSearch(el) {
+var sb = $(srchBoxSel).parent();
+
+    sb.hide('fast');
+    $("ol.accessible-megamenu").show('fast');
+    //$(el).parent().closest('tr').find('input.ms-sbplain').val('');
+    $(this).closest('td').remove();
+}
+
+
+
+function buildBurgerMenu(){
+//mSearchLink
+
+if($(".megamenu").is(":visible")){
+return true;
+}
+gnav = $("div.gmGlobalNav");
+    var bm = $("<div id='burgermenu'></div>").prependTo("#contentBox");//prependTo("#gmContentContainer div:first");//.menu-horizontal
+    gnav.find("div[id*='_TopNavigationMenu']:first ul:gt(0) > .static.dynamic-children").each(function (i, mi) { //pjp 10/2/2020 update*/
+        var mitem = $("<h3>" + $(mi).find("span.menu-item-text:first()").text() + "</h3><div class=\"bm-nav-panel\"><p></p></div>").appendTo(bm);
+		var panel = $(bm).find(".bm-nav-panel:last p:first");
+        if ($(mi).find("ul>li").length > 0) {
+			// var grps = $(mi).find("ul>li a[title='Group']").length;
+            
+
+            $(mi).find("ul>li a").each(function (ii, smi) {
+                var cssClass = "";
+                //Heading
+                if (typeof $(smi).attr('title') !== "undefined" && $(smi).attr('title').toLowerCase().indexOf("heading") > -1) {
+                    $("<li class=\"bm-heading\"><h3><a " + (typeof $(smi).attr('target') != 'undefined' ? "target=\"" + $(smi).attr('target') + "\"" : "") + " href=\"" + $(smi).attr('href') + "\">" + $(smi).find("span.menu-item-text:first()").text() + "</a></h3></li>").appendTo(panel);
+                }//Grouping
+                else if (typeof $(smi).attr('title') !== "undefined" && $(smi).attr('title').toLowerCase().indexOf("group") > -1) {
+                    cssClass = "";
+                    //console.log('smi:'+ $(smi).text() + ':' + $(smi).attr('href'));
+                    if ($(smi).attr('href') == "#" || $(smi).attr('href') == '/')
+                        $("<li><h3><a style=\"cursor:default !important;\"  href=\"#\" onclick=\"return false;\">" + $(smi).find("span.menu-item-text:first()").text() + "</a></h3></li>").appendTo(panel);//.find(">ol")
+                    else
+                        $("<li class=\"\"><h3><a " + (typeof $(smi).attr('target') != 'undefined' ? "target=\"" + $(smi).attr('target') + "\"" : "") + " href=\"" + $(smi).attr('href') + "\">" + $(smi).find("span.menu-item-text:first()").text() + "</a></h3></li>").appendTo(panel);//.find(">ol")
+
+
+                    $("<ol></ol>").appendTo(panel.find("li:last"));
+                }//regular link
+                else {
+                    $("<li><a class=\"" +(window.location.href.toLowerCase().indexOf($(smi).attr('href').toLowerCase()) > -1 ? "bmselectedmi" : "" )+ "\" " + (typeof $(smi).attr('target') != 'undefined' ? "target=\"" + $(smi).attr('target') + "\"" : "") + " href=\"" + $(smi).attr('href') + "\">" + $(smi).find("span.menu-item-text:first()").text() + "</a></li>").appendTo(panel.find("ol:last()"));
+                }
+
+            });//end each submenu item
+
+
+		}
+});
+
+
+
+ $("#burgermenu").accordion({
+ 	  active: false,
+      collapsible: true
+    });
+    
+  			$("#s4-workspace").on("scroll", function(){   
+                  
+            if($('#bm-nav-icon').hasClass('open') && navscrolling===false && !($('#burgermenu').isInViewport())){
+ 			$("#burgermenu").hide('slow');
+ 			$('#bm-nav-icon').toggleClass('open');
+ 			}
+			});   
+
+
+   
+//nav tracking
+//burger
+$("#burgermenu a").on('click',function(evt){
+
+var menu = $(this).closest("div.ui-accordion").attr("id");
+var panel = $(this).closest("div.bm-nav-panel").prev("h3").text();
+
+setCookie("mGMNAV",menu+"|"+panel,1);
+
+});
+//end burger
+//end nav tracking
+ 
+// 
+}
+
+function showMobileSearch(el,evt){
+ 
+if($("#bm-nav-icon.open").length > 0){
+$("#bm-nav-icon").trigger('click');
+}
+
+if($("#mSearchOuterCont").css('visibility')=='collapse'){
+
+$(srchBoxSel).detach().prependTo($("#mSearchCont"));
+$("#mSearchCont").find("td.ms-sbgo a").html("<div>&nbsp;</div>")
+$("#mSearchCont td.ms-sbgo").find("a").click(function () { searchExecuted = true; });
+
+var sb = $(srchBoxSel).parent();
+
+if (sb.find("div.ms-sbclear").length == 0) { $("<div class='ms-sbclear ms-sbcell'><a href=\"javascript:void(0);\" onclick=\"closeMobileSearch(this)\">&nbsp;&nbsp;&nbsp;&nbsp;</a></div>").insertAfter(sb.find(".ms-srch-sb-searchLink")) }
+sb.find("input.ms-sbplain")
+	.val("")
+	.focus();
+
+$("#mSearchOuterCont")
+	.css({'visibility':'visible'}).show().slideDown('slow');
+$("#mSearchOuterCont div.srch-AutoCompContainer").css({'width':  $("#mSearchCont").width()-40+'px'});//size of autocompl items
+$("#mSearchOuterCont input[name='InputKeywords']").css({'width':  ($("#mSearchCont").width()-30)+'px'});//size of search input line with icons
+//$("#mSearchOuterCont td.ms-sbclear").remove();//remove x on search line
+$("#mSearchLink").css({'background-image':'url("/publishingimages/closeX.png")'});
+}else{
+$("#mSearchOuterCont")
+	.hide().slideUp('slow')
+	.css({'visibility':'collapse'});
+	$("#mSearchLink").css({'background-image':'url("/publishingimages/search-grey@2x.png")'});
+
+}
+}
+
+
+function handleGlobalSearchWarnings(){
+    $(".gmHeaderBar #SearchBox .ms-srch-sb-searchLink:first").each(function(i,el){
+        $(el).attr('onclick',"validateGMSearchInput(this);" + $(el).attr('onclick'));  
+     });
+
+     $(".gmHeaderBar #SearchBox input:first").each(function(i,el){
+        $(el).attr('onkeypress',"if (Srch.U.isEnterKey(String.fromCharCode(event.keyCode))) {validateGMSearchInput(this);}" + $(el).attr('onkeypress'));
+     });
+}
+
+function validateGMSearchInput(el){
+          
+    if($(el).closest('#SearchBox, #mSearchCont').find('input:first').val()=='' || $(el).closest('#SearchBox, #mSearchCont').find('input:first').val().indexOf('Search...')>-1){
+        alert('Please enter one or more search words.');
+        return false;
+    } 
+}
+
+///////////////COOKIE FUNCTIONS//////////////////////////
+
+function setCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+function eraseCookie(name) {   
+    document.cookie = name+'=; Max-Age=-99999999;';  
+}
+
+
+function highlightNavigation(){
+
+if($(".accessible-megamenu a[href='"+window.location.pathname+"' i]").length > 0){
+	//page pathname is found in top nav, highlight and trace up
+	$(".accessible-megamenu a[href='"+window.location.pathname+"' i]").addClass('current');
+	$(".accessible-megamenu a[href='"+window.location.pathname+"' i]").closest(".accessible-megamenu-top-nav-item").find("a:first").addClass('current');
+}else{
+// page pathname not found in top nav, work from tertiary nav up
+   var pg = $(".secNav.currentSNav a").attr('href');
+   $(".accessible-megamenu a[href='"+pg+"' i]").addClass('current');
+	$(".accessible-megamenu a[href='"+pg+"' i]").closest(".accessible-megamenu-top-nav-item").find("a:first").addClass('current');
+
+}
+
+}
+
+$.fn.isInViewport = function() {
+  var elementTop = $(this).offset().top;
+  var elementBottom = elementTop + $(this).outerHeight();
+
+  var viewportTop = $(window).scrollTop();
+  var viewportBottom = viewportTop + $(window).height();
+
+  return elementBottom > viewportTop && elementTop < viewportBottom;
+};”ò¿Ÿ            =<ph      navscrolling   jL0ï      gnav   FJ›
+      srchBoxSel     ûòÃ„      #SearchBox .ms-srch-sb     çñÄ      renderMegaMenu     ˇ|6	      nav:first      >ü      css    1“— 
+      visibility     ?Iqõ      visible	    ÿ*êß      accessibleMegaMenu
+     F –k;      nav.megamenu .accessible-megamenu-top-nav-item h2 a.current    Rjn      .sncBg     ˘!p¬      trigger    †©˝c      mouseout   •‘&Ã      renderBurgerMenu   Äñˆ∏      div.gmHeader   ü™‚X      click      '˝L      #bm-nav-icon   ^É<“      #mSearchCont > *   úPúØ      #mSearchLink   ì˛(I      toggleClass    óx5      open   7ÑÉz      hasClass   K; ≈      #mSecNav:visible   #Ø≠&      #s4-workspace,html     ÷q1º      animate    ìGÎ	      scrollTop      tG—c	      body,html      $√Á      top    3AtŸ
+      setTimeout     ÿâ3Ó      #burgermenu    HáíK      show    b{su      slow!   _YNx      cookie"     ËIkí	      getCookie#      U¶…ú      mGMNAV$     9L,q
+      burgermenu%     ˛>¡+      #burgermenu .ui-accordion-header:contains('&    ˙u”      ')'     qûÅÄ      not(    _~•·      .ui-accordion-header-active)    üvÙ}      hide*   »;W{      buildMegaMenu+      è…(≤      #bm-nav-icon:visible,   Gk¡#      div[id*='_CurrentNavigation']:first-    ú†m¢      msl.    A.Qäd      <div id="mSearchLinkCont"><a id="mSearchLink" title="Search GinnieMae.gov" href="#">&nbsp;</a></div>/   ää≥(      insertAfter0    ºq      #gm-logo1   Yz      msc2    S1”$=      <div id="mSearchOuterCont"><div id="mSearchCont"></div></div>3      †Á„V      appendTo4   àL¸      div.gmHeaderBar5    „éA‘      click touchend6     Ûçg      evt7    B9∫¿      preventDefault8     1Ën      showMobileSearch9   ı/F/      stopPropagation:    ”ãhi      div.gmGlobalNav;    ∂“	      altRender<      ı£$      prepend=    SÙU%      <nav class="megamenu"><ol></ol></nav>>      Úì{…      nav.megamenu?    _l$      selector@   …W∂ô)      div[id*='_TopNavigationMenu'] ul:eq(1)>liA      ¯2áâ      windowB     0+QA      locationC   ª©`X      hrefD   RâDo      toLowerCaseE    ⁄Eú¡      indexOfF    Üyl3      /investors/investor_search_tools/pages/default.aspxG    ˛1„"      /pages/disclosurehistoryfiles.aspxH     ÜÚgt      div[id*='DeltaTopNavigation']:first > div > ul > li > ul > li:contains('Disclosure') > ul > li:has(a[title='Group'])I   :Cˆ      span.menu-item-text:first()J    à3¿µ      textK   ñÊù      HomeL   /ﬂ‰ï      closestM    A¢Ωê      attrN   äVóF      /pages/default.aspxO    ¿oáÚ      mitemP      £=n›-      <li><h2><a   href="#" onclick="return false">Q      ` øZ      </a></h2></li>R     Ω≤Í      >ol:first()S    ¸ıi      ul>liT      a      grpsU   H◊©√      ul>li a[title='Group']V     í?iÔ      subnavW     mæ≠      <div class="cols-X      ì?‚      "><ol></ol></div>Y      ë?„t      miSelZ      _ûﬁî      ul>li a[    8È<ƒ	      nextUntil\      µ∑      :has(a[title='Group'])]     Úæt      smi^    s0XÓ      cssClass_   “E      title`      c˝)/      headinga    ßíÂÅ      <li class="heading"><a b    o9 .      target="c   ·bP$       href="d    +®¢      ">e     #—\≥	      </a></li>f      ·c	      ol:last()g      Tix      accessible-megamenu-panel-grouph    (Ò<Åy      <li class="accessible-megamenu-panel-group"><h3><a  style="cursor:default !important;"  href="#" onclick="return false;">i      ¡j>      </a></h3></li>j     ys≤â      >olk    X˙öe3      <li class="accessible-megamenu-panel-group"><h3><a l    /e¸Ñ	      <ol></ol>m      oÓl«      li:lastn    T„Q?      <li o   xè¯å$      style='clear:both;border-left:none;'p   ƒgOˇ      ><a q   ±Ù¸      .accessible-megamenu-panelr     n9Ω      /search/s   cÛ‘Ø      srcht   úcv∂ø      <li class="accessible-megamenu-top-nav-item"><a id="mmSearchLink" style="width:25px;"  title="Search GinnieMae.gov" href="javascript:void(0);" onclick="showSearch(this,event)">&nbsp;</a></li>u    é’ƒn      nav:first ol:firstv     #@«r      input.ms-sbplainw   ù∫”      keydownx    &⁄õ      valy    è®
+      td.ms-sbgoz     å¬S      background-image{   à∏ )      url(/PublishingImages/search-blue@2x.png)|      1˛ó‹)      url(/PublishingImages/search-grey@2x.png)}      ◊x$á      div.ms-sbclear~     *N∑∆      remove     ﬁ∞π:      placeholderÄ    ŒTûD	      Search...Å      E◊5Ë      td[id*='MSOZoneCell_WebPartWP']Ç    SÓõR      handleGlobalSearchWarningsÉ     µˇ<Ò      highlightNavigationÑ    è∫·˛
+      showSearchÖ     ˛Ë˘2      parentÜ     ∏b¯^      ol.accessible-megamenuá     vﬂY…      detachà     ©8GR	      prependToâ      ú≥ÊŸ      divä    Ïf      .gmGlobalNav td.ms-sbgo aã      ‘„X      htmlå   mì(W      <div>&nbsp;</div>ç      ^€7ë      searchExecutedé     +Kº”~      <div class='ms-sbclear ms-sbcell'><a href="javascript:void(0);" onclick="closeSearch(this)">&nbsp;&nbsp;&nbsp;&nbsp;</a></div>è     3´¿      .ms-srch-sb-searchLinkê     ˆï5û      fastë   %ÏT'      div.gmHeaderBar input.ms-srch-sb-promptí    KÃÌ      focusì      ZMÎÕ      focusoutî   ˆ      .ms-sbclear aï       }ï¢      closeSearchñ    .µ`      buildBurgerMenuó    ∏—¯	      .megamenuò      SZK#      :visibleô   >€      <div id='burgermenu'></div>ö    ˜.¬–      #contentBoxõ    ’Ì	ËG      div[id*='_TopNavigationMenu']:first ul:gt(0) > .static.dynamic-childrenú    z…†	      <h3>ù   â™”Ø,      </h3><div class="bm-nav-panel"><p></p></div>û   ~õ›&      panelü      ø[lª      .bm-nav-panel:last p:first†     ø &4      <li class="bm-heading"><h3><a °     û©JËP      <li><h3><a style="cursor:default !important;"  href="#" onclick="return false;">¢   Ä»e”      <li class=""><h3><a £   ^⁄‘ÿ      <li><a class="§     d≤Q      bmselectedmi•   `Á'      " ¶     ∏˝Y	      accordionß      å®Px      active®     /Í•æ      collapsible©    {·˛é      #s4-workspace™      \z˚      scroll´     ¿Ñ‹      isInViewport¨   à
+[	      #burgermenu a≠      ™€q      menuÆ   Àøí}      div.ui-accordionØ   Ùõﬂb      div.bm-nav-panel∞   >∆ß"      prev±   éK∑	      setCookie≤      Ø‰8˚      #bm-nav-icon.open≥      Â      #mSearchOuterCont¥      #ùÁ¢      collapseµ   UUç‡      #mSearchCont∂   M]r.      td.ms-sbgo a∑   ›èßú      #mSearchCont td.ms-sbgo∏    <<÷Ñ      <div class='ms-sbclear ms-sbcell'><a href="javascript:void(0);" onclick="closeMobileSearch(this)">&nbsp;&nbsp;&nbsp;&nbsp;</a></div>π   #+≈ò	      slideDown∫      uá:,      #mSearchOuterCont div.srch-AutoCompContainerª   ÎƒJ˚      widthº      Âˆ-      #mSearchOuterCont input[name='InputKeywords']Ω      +Éë#      url("/publishingimages/closeX.png")æ    ¡Ÿ™W      slideUpø    ¡lﬁ√+      url("/publishingimages/search-grey@2x.png")¿    öÕıº4      .gmHeaderBar #SearchBox .ms-srch-sb-searchLink:first¡   EﬁS      onclick¬    “[j      validateGMSearchInput(this);√   –Ù#      .gmHeaderBar #SearchBox input:firstƒ    <¡~ß
+      onkeypress≈     K∞Ê∆Y      if (Srch.U.isEnterKey(String.fromCharCode(event.keyCode))) {validateGMSearchInput(this);}∆      _¿'      validateGMSearchInput«      ≠Foª      #SearchBox, #mSearchCont»   Ñ˜O      input:first…    “Ô¢Z      alert       kæ∏&      Please enter one or more search words.À     ¯æR      expiresÃ    ∞åÙ      setTimeÕ    uÙ.      getTimeŒ    }∫¬m
+      ; expires=œ     ∏OÄ      document–   ≠j˛œ      ; path=/—   ¶°æ      nameEQ“     våƒ      charAt”     ﬂY„	      substring‘      ô◊H·      eraseCookie’    ™∞
+Ò      =; Max-Age=-99999999;÷      •z›Ì      .accessible-megamenu a[href='◊      –®4O      pathnameÿ   ∫∑À¿      ' i]Ÿ   Bå|      addClass⁄   ÜÉÎ˝      current€    ê"~Ä!      .accessible-megamenu-top-nav-item‹      ©Àø      a:first›    ∏˛â∫      .secNav.currentSNav aﬁ      ÆåáÛ
+      elementTopﬂ     ^≤“ä      elementBottom‡      k]2      outerHeight·    ´O      viewportTop‚    œüÕ6      viewportBottom„     ∑…≈      height‰     6»ﬁ;      renderBurgerMenu/<Â     ?ı      renderBurgerMenu/</<Ê   º`3      renderBurgerMenu/</</<Á     i0r˘      buildMegaMenu/<Ë    £ÿ®      buildMegaMenu/</<È      £'H      showSearch/<Í   ≈;¶      showSearch/</<Î     wﬁÑ.      buildBurgerMenu/<Ï      55à      buildBurgerMenu/</<Ì    'ñ¿      showMobileSearch/<Ó     ÷9qD      handleGlobalSearchWarnings/<Ô   ±àô      $.fn.isInViewport         Û                  	   Ô%,â                                                                                                                                                                        	                 
+                                                                                                                                                                                                                                                                                                                                                                                    ≥Oåc                  ê  ê*  êÑ  êç  ï  êñ  ê8  êÇ  ê∆  ê±  ê"  ê‘  êÉ  ê                                              !  É                                                 -  1  ;  Pñ`?  s              6  É               i  í O  T  V  PY              í ]  ^                É               ï ü                                                              ï  É                  ÷`            i  í O  û  P            í ]  ^                              6  ≠  û  É               ï 6                                                i  ï              i  ï              ï             a  %  _   À  V               a  —  
+ i  c               a                P               ﬁ  ﬂ  ·  ‚  É   Ø¬0∞IÙ$KEÆ˙ö                        
+     ß  ®                   ª          ª          z                    z  á&’™ç!´!    Ä      –]ã˝Ä   C                 	        ’   ≥   ≈   ⁄≥      ≈   ⁄≥   ≈   ⁄∂   I   l   K   ⁄£
+` eKÄ  Ïe7Ä £`ï@Ä ´PÃ   “6ÔJÃ   Å                          ∂   ‹I   ﬂ   r ‹I   ﬂ8      ;   r ‹I   ﬂv  ⁄∂   ‹I   ﬂ	   r I
+   ò(   ï   ∂       r ‹I   ﬂ   v ⁄ï   £ `ë P
+
+ˇˇˇ˙P
+!PD	`ë Pî@	`PP9	P\   (%Ø
+\   )                          ∂       r ‹I   ﬂ      l   v ⁄£0`Pî -ˇˇˇ‰P43Pò  ç$ÿò  Ï               A        Ÿ»  ⁄∂       r I   ò(   ï   ∂       r ‹I   ﬂ   v ⁄ï	   ∂    π  r ‹I   ﬂ   v ⁄∂    π  r ‹I	   ﬂ   r òB  ï   ∂    
+   r I   ò   ï   ≥   ≈   ⁄∂       r ‹I   ﬂ8   ∂       r ‹I   ﬂr  I   ;   dl   v ⁄∂       r ‹I   ﬂ   v ⁄∂       r »   ⁄π   öq   ï,   ⁄π   ‹I   ﬂ   r J   öK   ï1   ⁄∂       π   ‹I   ﬂ   r J%   %r ‹I   ﬂ   r I   ï<   ò   ï=   ó   ï=   ó(   ï=   ∂       r ‹I    ﬂ   v ⁄ïA   £F`Pî`PPI`ˇˇˇˇPPD
+`ˇˇˇˇPP-`Pî0``P
+P
+Pˇˇˇ…P4`PPD`	P(`° Pú !.ê Pˇˇˇ…PKP£0!:$0'`PP9*PÄD   ëò°JD                             ∂    l   Ëv ⁄£ `ˇˇˇˇP$PÄÄ4   )ıQ«4                             ≥   ≈   ⁄£ `P‘  h çÑ‘  ’         	       d        ∂       r I   òî   ï   ∂       r ‹I   ﬂv  ⁄∂       r ‹I   ﬂ   r »   ⁄∂    	   r ‹I
+   ﬂ   r »  ⁄∂    v  ⁄∂       r ‹I   ﬂ   l   v ⁄ï   ≥   ∂       r ≈   ⁄…   ⁄∂   ‹I   ﬂ   v ⁄∂   ‹I   ﬂ   r …   ⁄   »  ⁄∂   I   I   ‹I   ﬂr  ‹I   ﬂ   r ˇõ6   ï*   ⁄∂   I   I   ‹I   ﬂr  ‹I   ﬂ   r ˇï2   ò   ï3      »  ⁄…   ⁄ï3   ∂   ‹I   ﬂπ  r ‹I    ﬂl!   v ⁄∂   ‹I   ﬂ   r ‹I   ﬂv  ⁄∂    "   r ‹I   ﬂv  ⁄∂#    v  ⁄∂   I   I   ‹I   ﬂr  ‹I   ﬂ$   r ˇò≤   ïL   ∂    %   r ‹I
+   ﬂ∂    &   r r »  ⁄∂    '   r ‹I(   ﬂl)   r ‹I*   ﬂ+   ,   v ⁄∂    '   r ‹I-   ﬂ.   r ‹I-   ﬂ/   r ‹I   ﬂv  ⁄∂0    v  ⁄∂1    v  ⁄ïd   £ `Pî `P
+(PD`PqP(`PFP``P%ˇˇˇÏPI`ê P)`G`ë P$`ë P)`*`ñ PPß ZPPï@`*`L!`
+ˇˇˇ˚P
+ˇˇˇ˚PDR`ë P
+,PDT`P
+PD\`J^	`ñ PPê `P
+Ä  Ÿ[ˇˇˇ˜P(	`P
+ˇˇˇ¯PJgZ$	`PP+P
+PDj	`*	`?Pp   ¿°∂p   4                       Ÿ»   ⁄∑  ‹I   ﬂv  ⁄∂    π   ∑  v ⁄∑  ‹I   ﬂv  ⁄£`
+P4`ˇˇˇ˙P`
+PPÄÄ(  f©ÿ§(  9         	       H       ∂    ∑ r ‹I   ﬂ   r ‹I   ﬂr     öT   ï   ⁄∂    ∑ r ‹I   ﬂ   r ‹I   ﬂ   r ‹I   ﬂ	   r ‹I
+   ﬂr     ï   ò   ï   †ï   ∂       ∂    ∑ r ‹I   ﬂ   r ‹I   ﬂr  %   %r ‹I   ﬂ∂    º  r ‹I   ﬂ   r r »   ⁄∂    ∑ r ‹I   ﬂ   r I   õ   ï+   ⁄º  ï+   ò  ï,   ∂    ∑ r ‹I   ﬂ   r I   »  ⁄∂       π  ò   ï4   π  ‹I   ﬂr  ó   ï6      ï6   %   %r ‹I   ﬂπ   r …   ⁄∂    ∑ r ‹I   ﬂ   r »  ⁄º  ò9   ï@   ∂    ∑ r ‹I   ﬂ   r ‹I   ﬂ   r »  ⁄ïF   π  ‹I   ﬂl   v ⁄ïH   £@`ˇˇˇˇPP
+$Pö ˇˇˇ˛PP$PP
+Pò `A0F`6ˇˇˇ˛PP
+$P
+ˇˇˇüP
+Ä  Öˇˇˇ˛PPˇˇˇÒPH`ˇˇˇˇPP© `ˇˇˇˇPP-`õ Pû ˇˇˇ◊P
+\ˇˇˇ˜P)`ˇˇˇˇPPH`/`ˇˇˇ˛PP$PM`ˇˇˇ˚PI0PÄÄÄ  1ñDÓ                  ∏          »   ⁄∂    ∑ r ‹I   ﬂ   r    öB   ï   ⁄∂    ∑ r ‹I   ﬂ   r ‹I   ﬂr  ‹I   ﬂ   r ˇï   ò  ï   ∂    	   ∂    ∑ r ‹I   ﬂ
+   r    ò6   ï      ∂    ∑ r ‹I   ﬂ
+   r %   %ó   ï      ï   %   %∂    ∑ r ‹I   ﬂ   r %   %∂    ∑ r ‹I   ﬂ   r ‹I   ﬂr  %   %r ‹I   ﬂ∂    º   r ‹I   ﬂ   r v ⁄óß  ï6   ∂    ∑ r ‹I   ﬂ   r    öB   ï=   ⁄∂    ∑ r ‹I   ﬂ   r ‹I   ﬂr  ‹I   ﬂ   r ˇïF   ò  ïG      »   ⁄∂    ∑ r ‹I   ﬂ   r    õ,   ïM   ⁄∂    ∑ r ‹I   ﬂ   r    ïR   òq   ïS   ∂       ∂    ∑ r ‹I   ﬂ   r ‹I   ﬂr  %   %r ‹I   ﬂ∂    º   r ‹I   ﬂ   r v ⁄ó¸   ïc   ∂       ∂    ∑ r ‹I   ﬂ
+   r    ò6   ïk      ∂    ∑ r ‹I   ﬂ
+   r %   %ó   ïq      ïq   %   %∂    ∑ r ‹I   ﬂ   r %   %∂    ∑ r ‹I   ﬂ   r ‹I   ﬂr  %   %r ‹I   ﬂ∂    º   r ‹I   ﬂ   r v ⁄ïà   ∂       r ‹I   ﬂ∂    º   r ‹I   ﬂ   r v ⁄ó+  ïê   ∂        º  ò   ïí   !   ó   ïí      ïí   %"   %∂    ∑ r ‹I   ﬂ
+   r    ò6   ïõ      ∂    ∑ r ‹I   ﬂ
+   r %   %ó   ï°      ï°   %   %∂    ∑ r ‹I   ﬂ   r %   %∂    ∑ r ‹I   ﬂ   r ‹I   ﬂr  %   %r ‹I   ﬂ∂    º   r ‹I   ﬂ   r v ⁄ï∏   £  `J`	ˇˇˇ˛PPõ #ˇˇˇ˛PP
+PPï `	ˇˇˇ˛PPô .ˇˇˇ˛PP• +ˇˇˇ˛PP
+ˇˇˇ˛PP
+$P
+ˇˇˇ)P
+Ä  ˆˇˇˇ˛P
+PˇˇˇÌPN`	ˇˇˇ˛PPõ #ˇˇˇ˛PP
+PPï `J
+`ˇˇˇˇPPö ˇˇˇ˛PPò `Ä  Üˇˇˇ˛PP
+$P
+ˇˇˇNP
+Ä  ÷ˇˇˇ˛P
+PˇˇˇÌPN`;	ˇˇˇ˛PPô .ˇˇˇ˛PP• +ˇˇˇ˛PP
+ˇˇˇ˛PP
+$P
+ˇˇˇP
+Ä ˇˇˇ˛P
+PˇˇˇÌPI`P
+ˇˇˇ˛P
+PˇˇˇÌP> `	Ø D	ˇˇˇ˛PPô .ˇˇˇ˛PP• +ˇˇˇ˛PP
+ˇˇˇ˛PP
+$P
+ˇˇ˛˚P
+Ä $ˇˇˇ˛P
+PˇˇˇÌPIPÄÄÄh  R–MYh  Ù                        Ÿ»   ⁄∂    π   r ‹I   ﬂr  I   òO   ï   ∂    π   r ‹I   ﬂ   r ‹I   ﬂ   r ‹I   ﬂ	   
+   v ⁄óÄ   ï   ∂    π   r ‹I   ﬂ   r ‹I   ﬂ   r ‹I   ﬂ	      v ⁄∂    π   r ‹I   ﬂ   r ‹I   ﬂ   r ‹I   ﬂv  ⁄ï   £&`ˇˇˇˇP
+Pî `ˇˇˇˇPPPî P `ˇˇˇˇPPPî P$`ˇˇˇˇPPP
+PI	PÄ¯  Èˆ˛¯  S                .       ∂    ∂   r ‹I   ﬂr  »   ⁄∂       r ‹I   ﬂv  ⁄π   ‹I   ﬂr  ‹I   ﬂ∂       r ‹I   ﬂ	   r v ⁄∂    
+   r ‹I   ﬂ   r ‹I   ﬂl   v ⁄π   ‹I   ﬂ   r I   ò6   ï   ∂       r ‹I   ﬂπ   ‹I   ﬂ   r v ⁄ï"   π   ‹I   ﬂ   v ⁄∂       r ‹I   ﬂ   r ‹I   ﬂ      r ‹I   ﬂv  ⁄π   ‹I   ﬂl   v ⁄£ 
+`ˇˇˇˇP
+PH`P
+PD`P
+[Pˇˇˇ⁄PD`PP
+ ˇˇˇ˙PD	`ê Pî &`P
+Ä  ìê PˇˇˇÒPI`ê P4`P*U*Z*PD`ˇˇˇ˜P4%PÄÄÄ4   ﬂÄƒ[4                             ≥   ≈   ⁄£ `PD   b[}ŒD                             ∂    l   êv ⁄£@	`ˇˇˇˇP$PÄd   ÚvÛd   3                          ∂   ô(   ï   ∂       r ‹I   ﬂ   v ⁄ï   £ 	``PP	PÄ‘    Få‘   }                       Ÿ»  ⁄∂    ∂   r ‹I   ﬂr  »   ⁄π   ‹I   ﬂ   v ⁄∂       r ‹I   ﬂ   v ⁄∂    π  r ‹I   ﬂ	   r ‹I
+   ﬂv  ⁄£&
+`ˇˇˇˇP
+PH`ê P$`PPD`ˇˇˇˇPP
+PPÄÄÄÄ  áÊ±6Ä  ˇ                  !        ∂       r ‹I   ﬂ   r ò   ï   †ï   ≥   ∂       r ≈   ⁄∂       r ‹I   ﬂ	   r …   ⁄∂   ‹I
+   ﬂ   r ‹I   ﬂl   v ⁄∂       r ‹I   ﬂ8   ;   ;   v ⁄∂       r ‹I   ﬂ   l   v ⁄∂       r ‹I   ﬂ   l   v ⁄£@`PP`1I6`ê P)`P P)`ë P
+Uˇˇˇ˚PD,`P
+%&F,PD1`PˇˇˇÛP4=`PˇˇˇıP4IPÄÄL  §k™ÂL  Œ                        ∂       ∂    ∑ r ‹I   ﬂ   r ‹I   ﬂr  %   %r ‹I   ﬂº  r »   ⁄∂    º  r ‹I   ﬂ   r …   ⁄∂    ∑ r ‹I   ﬂ	   r I
+   ò5   ï   ∂    ∑ r ‹I   ﬂ   r ‹I   ﬂl   v ⁄ï   £ `	ˇˇˇ˛PP
+$P
+ˇˇˇÃP
+xˇˇˇ˜P(`ˇˇˇˇPP)`ˇˇˇˇPPî@`ˇˇˇˇPP
+ˇˇˇ˚P9 PÄÄÄ‡  ˜”¿@‡           	       ∂          »   ⁄∂    ∑ r ‹I   ﬂ   r    öB   ï   ⁄∂    ∑ r ‹I   ﬂ   r ‹I   ﬂr  ‹I   ﬂ   r ˇï   òÈ   ï   ∂    	   ∂    ∑ r ‹I   ﬂ
+   r    ò6   ï      ∂    ∑ r ‹I   ﬂ
+   r %   %ó   ï      ï   %   %∂    ∑ r ‹I   ﬂ   r %   %∂    ∑ r ‹I   ﬂ   r ‹I   ﬂr  %   %r ‹I   ﬂº   v ⁄ó´  ï2   ∂    ∑ r ‹I   ﬂ   r    öB   ï9   ⁄∂    ∑ r ‹I   ﬂ   r ‹I   ﬂr  ‹I   ﬂ   r ˇïB   ò’  ïC      »   ⁄∂    ∑ r ‹I   ﬂ   r    õ,   ïI   ⁄∂    ∑ r ‹I   ﬂ   r    ïN   òY   ïO   ∂       ∂    ∑ r ‹I   ﬂ   r ‹I   ﬂr  %   %r ‹I   ﬂº   v ⁄ó‰   ï[   ∂       ∂    ∑ r ‹I   ﬂ
+   r    ò6   ïc      ∂    ∑ r ‹I   ﬂ
+   r %   %ó   ïi      ïi   %   %∂    ∑ r ‹I   ﬂ   r %   %∂    ∑ r ‹I   ﬂ   r ‹I   ﬂr  %   %r ‹I   ﬂº   v ⁄ï|   ∂       r ‹I   ﬂº   ‹I   ﬂ   r v ⁄óh  ïÇ   ∂       ∂   I   I   ‹I   ﬂr  ‹I   ﬂ∂    ∑ r ‹I   ﬂ   r ‹I   ﬂr  r ˇò   ïí      ó   ïí      ïí   %    %∂    ∑ r ‹I   ﬂ
+   r    ò6   ïõ      ∂    ∑ r ‹I   ﬂ
+   r %   %ó   ï°      ï°   %   %∂    ∑ r ‹I   ﬂ   r %   %∂    ∑ r ‹I   ﬂ   r ‹I   ﬂr  %!   %r ‹I   ﬂº   ‹I   ﬂ"   r v ⁄ï∂   £  `J`	ˇˇˇ˛PPõ #ˇˇˇ˛PP
+PPï `&	ˇˇˇ˛PPô .ˇˇˇ˛PP• +ˇˇˇ˛PP
+ˇˇˇ˛PP
+$P
+ˇˇˇ"P
+Ä ˇˇˇ˜PN`	ˇˇˇ˛PPõ #ˇˇˇ˛PP
+PPï `J	`ˇˇˇˇPPö ˇˇˇ˛PPò `[ˇˇˇ˛PP
+$P
+ˇˇˇyP
+Ä  ´ˇˇˇ˜PN`	ˇˇˇ˛PPô .ˇˇˇ˛PP• +ˇˇˇ˛PP
+ˇˇˇ˛PP
+$P
+ˇˇˇ,P
+Ä  ¯ˇˇˇ˜PI`P
+ë PˇˇˇÒP> `ñ P
+ˇˇˇ˛PP
+Pˇˇˇ‰P∞ R	ˇˇˇ˛PPô .ˇˇˇ˛PP• +ˇˇˇ˛PP
+ˇˇˇ˛PP
+$P
+ˇˇ˛øP
+Ä `ë PˇˇˇÒPIPÄÄÄ   ~Gñä   §                          ∂       r ‹I   ﬂ   r ö6   ï   ⁄∂   ö$   ï   ⁄∂       r ‹I   ﬂr  ï   òF   ï   ∂       r ‹I   ﬂ	   v ⁄∂       r ‹I
+   ﬂ   v ⁄ï   £@`PP† ,P
+Pì `PP$`PPIPÄË   oæ¡Ë   ê                       Ÿ»  ⁄∂    π  r ‹I   ﬂ   r ‹I   ﬂ   r »   ⁄∂    π  r ‹I   ﬂ   r ‹I   ﬂ   r ‹I	   ﬂr  »  ⁄∂
+       π      %π  %v ⁄£F`ˇˇˇˇPPP(`ˇˇˇˇPPP
+P8`
+	ˇˇˇÌP4PÄ(  kt◊"(                  r       ∂       r I   ò(   ï   ∂       r ‹I   ﬂ   v ⁄ï	   ∂       r ‹I   ﬂ	   r 
+   ò*  ï   ∂    ∂   r ‹I   ﬂr  ‹I   ﬂ∂       r v ⁄∂       r ‹I   ﬂ   r ‹I   ﬂ   v ⁄∂       r ‹I   ﬂ   r ‹I   ﬂl   v ⁄∂    ∂   r ‹I   ﬂr  »   ⁄π   ‹I   ﬂ   r I   ò6   ï.   ∂       r ‹I   ﬂπ   ‹I   ﬂ   r v ⁄ï4   π   ‹I   ﬂ   r ‹I   ﬂ   r ‹I   ﬂv  ⁄∂       r ‹I   ﬂ8       ;	   r ‹I!   ﬂr  ‹I"   ﬂ#   v ⁄∂    $   r ‹I   ﬂ8%   ∂       r ‹I&   ﬂr  (&'   %;&   v ⁄∂    (   r ‹I   ﬂ8)   ∂       r ‹I&   ﬂr  &'   %;&   v ⁄∂    *   r ‹I   ﬂ8+   ,   ;-   v ⁄ós   ïb   ∂       r ‹I.   ﬂr  ‹I/   ﬂ#   r ‹I   ﬂ80   
+   ;	   v ⁄∂    *   r ‹I   ﬂ81   2   ;-   v ⁄ïr   £@`Pî`PPI`PPì0`ˇˇˇˇP
+P
+[ˇˇˇˆP`PPP`PP
+ˇˇˇ˙PD
+`ˇˇˇˇP
+PH`ê Pî &`P
+Ä  ôê PˇˇˇÒP`ê P*U*P4`P*
+ˇˇˇ˚P
+PP`P
+5
+P
+Pë ˇˇˇﬂP`P
+6P
+Pë ˇˇˇﬁP4`P
+
+ˇˇˇ˚P`P*PP*
+ˇˇˇ˚P$`P
+
+ˇˇˇ˚P9 PÄÄÄ4   ﬂÄƒ[4                             ≥   ≈   ⁄£ `PÄ   r0åÄ   =                          ∂       r ‹I   ﬂl   v ⁄∂       r ‹I   ﬂl   v ⁄£ `P
+>ˇˇˇ˚PD`P
+-ˇˇˇ˚P4PÄÄÑ   Â8UhÑ   >                  	       ∂    ∑ r ‹I   ﬂ      ∂    ∑ r ‹I   ﬂ   r %v ⁄£ 	`ˇˇˇˇP!ˇˇˇ˛PPˇˇˇ P$PÄÄÑ   lZıÑ   >                  	       ∂    ∑ r ‹I   ﬂ      ∂    ∑ r ‹I   ﬂ   r %v ⁄£ 	`ˇˇˇˇP^ˇˇˇ˛PPˇˇˇäP$PÄÄ  §ÃJ  ±                         ∂    ∑  r ‹I   ﬂ   r ‹I   ﬂ   r ‹I   ﬂr     õQ   ï
+   ⁄∂    ∑  r ‹I   ﬂ   r ‹I   ﬂ   r ‹I   ﬂr  ‹I   ﬂ	   r ˇï   ò   ï   ∂
+       v ⁄†ï   £@`ˇˇˇˇPP$P
+Pö ˇˇˇ˛PP$P
+PPï 	`P$	`1VÄÄÄ   CM‚   Æ                           »   ⁄∑ òc   ï   ∂   ﬁ  Ä  »  ⁄π  ‹I   ﬂπ  ‹I   ﬂr  ∑ )<)<)Ë)%v ⁄   π  ‹I   ﬂr  %»   ⁄ï   ∂   ∑     %∑ õ   ï   ⁄   ï   %π   %	   %K
+   ⁄£ `*	`-`í 	`Pë ˇˇˇÊP$	`PN` ô ëPÄÄ†  èâ“Ä                        ∑     %»   ⁄∂   I   ‹I   ﬂ   r »  ⁄»  ⁄ñ   π  π  I   òπ   ï   π  π  J»  ⁄‚ñ	   π  ‹I   ﬂr    ò,   ï   π  ‹I	   ﬂπ  I   r »  ⁄óæˇˇˇï   π  ‹I
+   ﬂπ   r ò+   ï   π  ‹I	   ﬂπ   I   π  I   r †ï   π  /'»  ⁄ó8ˇˇˇï   †£ `.`ñ P(	 `fî `.	fPì `	ˇˇˇÙPí `
+ˇˇˇ¯P`		ˇˇˇËP3	F`ï@`QÄÄ†         _   G          2   Õ   <   N 1¯<                            ∂   ∑     %K   ⁄£ `îPÏ  V‘‹ÙÏ  ]                4        ∂       ∂   I   I   %   %r I   òï   ï
+   ∂       ∂   I   I   %   %r ‹I   ﬂ	   v ⁄∂       ∂   I   I   %   %r ‹I
+   ﬂ   r ‹I   ﬂ   r ‹I   ﬂ	   v ⁄óú   ï    ∂       r ‹I   ﬂ   r »   ⁄∂       π   %   %r ‹I   ﬂ	   v ⁄∂       π   %   %r ‹I
+   ﬂ   r ‹I   ﬂ   r ‹I   ﬂ	   v ⁄ï4   £@` ñ ˇˇˇﬂPî@` ñ ˇˇˇﬂPBP$` ñ ˇˇˇﬂPBP-PP@`PP(` ˇˇˇﬂP,P$` ˇˇˇﬂP,P-PP9PÄ  £=_  ´         	               Ÿ»  ⁄∂    π  r ‹I   ﬂr  I   »   ⁄π   ∂    π  r ‹I   ﬂr  %»  ⁄∂    ∂   r ‹I   ﬂr  »  ⁄π  ∂    ∂   r ‹I   ﬂr  %»  ⁄π  π  ö   ï   ⁄π   π  ï   †£&`ˇˇˇˇP
+P-`ˇˇˇ˛P
+PI`ˇˇˇˇP
+	P(`ˇˇˇ˛P
+
+PI`î Q3ıÿ  `  ¶          @    	  
+  0  $          `     `    p  `$    0                         @  ä        p       "  #  Ø  |  $  %  &  '  (  )    `$           p  `7  8  9  	  `à   $  M  _  F  D  E  `  a  Ë  b  "  c  C  d  ¶   I  J  e  3  f  ÿ   g  #  /  h  i  j  k  l  m  n  o  p    `$  ¶   I  J  K  L  a  M  C  D  N  P  Q  3  R  S  0  U  W  ¯  1  X  Z  [  \  Ñ   	  p
+  `$  x  0  L  [ ¶   y    z  {  |  }  ~    `$  +  0  ,  )  .  /  0  2  3  4       5    p  :  <  =  ¶   >  @  A  B  C  D  E  F  G  H  Ñ     pq    r  t  u  v  w  
+  pM    Ä  L  Å  [ Ç  É    `ç    `ç  $  î        `    p  `$    Ö  Ü  )  á  à  L  â  ä  ã  å      p¶   }  0  é  /  è    ê  ë  x  à   M    Ä  í  ì    p  `$    Ö  )  ê  Ü    L  M ~    `à   $  M  _  F  D  E  `  †  Ë  b  "  c  C  d  ¶   I  J  i  3  ÿ   #  /  °  ¢  l  m  £  A  B  §  •  e  f    `$  ú  ¶   I  J  ù  3  ü  S  0  Z  Ñ     p  `$             ´  )         `$  L  Æ  M  ç Ø  ∞  C J  ±  #  |    `$  ó  ú ò    :  ô  à  ö  ¶   õ  Ñ     p  ¶    @ß  ®  ©   ™    p¨      p  `ç    `$  ≤  0        ≥      ¥    á  à  µ  ¶   ∂  ã  å  ∑  a    pÖ  }  ∏  /  è  v  x  à   í    @    π     ∫    @ª  a º    @    @Ω  z  )  æ    @  @ø    `$  M  ¡  ¬    `$  M  ƒ  ≈    `$  ¿  Ñ     p√    p  `$  L  «  ¶   »  x  à   E  Ä  …       `à   U  Ã  Õ  Œ  ˙  œ  =  –  !    `=  œ  !  Ø  ;  0  “     ”  E    `œ  ’  !    `$  ÷  A  B  ◊  ÿ  0  Ÿ  ⁄  L  €  ¶   ‹  ›  M  C    `$  ä    ‡  A    „     `  p  p  p  p  p  p  p  p  p  p  p  p  p       ç  $  ◊   p´  ˇXÑ›                             †  5            †     !   ‰      †       Â      †       Ê      † ç   2   *      †  <      Á      † c      Á      † @   #   Ë      †       Á      †         Ñ      †  ø      È      † «      È      † ¡      Í      † Í      ï      †  >     ñ      †       Î      † ı   #   Ï      † &     Î      † 1     Î      † Z  3   8      †  X     Ì      † ó     Ç      †  ç     Ó      † í     Ó      † û     ∆      †  ™     ±      †  µ     "      †  ¿     ‘      †  ƒ     É      †  ’     Ô      † ùH©¿      ‚F      ‚F                  i   –  R   –                 Ô  +  ÷  +                ^    V       7            s  ∑  k  ∑  &   X             ë  ™  â  ™  '              ÄG  à#  1  à#  F               
+  b
+  
+  b
+  M   /          ÄK  √  B  √  g   '            ∂  à  ≠  à  {               ¿  j  ∑  j  ¶   0            ü#  9(  å#  9(  «               £$  ¿$  ö$  ¿$  Œ   M            ó'  0(  é'  0(  Ê                ‹'  "(  ”'  "(  Ë               n(  K)  Z(  K)  Ô             Äk)  Ê6  S)  Ê6  ˙              Ä√*  54  ∫*  54    h            a,  4  X,  4  	  1            «4  ±5  ø4  ±5  +  .            6  ∑6  ˘5  ∑6  7  '           7  z<  Í6  z<  E              N8  k8  E8  k8  O  7            £<  J>  Ä<  J>  h  $             Û<  [=  Î<  [=  i  L            ú=  E>  î=  E>  m  <            l>  ä?  N>  ä?  r              ›?  A  À?  A  |              A  OB  A  OB  Ö              eB  ™B  QB  ™B  è              ÃB  •E  ∞B  •E  î              ≈E  ·F  ΩE  ·F  §             5°›©‘••ÃŒˇzl      f≠≤f≠≥F¡“∞       y    O^partitionKey=%28https%2Cginniemae.gov%29,:https://www.ginniemae.gov/Style%20Library/GNMA%20Scripts/megamenu/megamenu.js strongly-framed 1 security-info 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 request-method GET response-head HTTP/2 200 
+content-type: application/javascript
+content-length: 18146
+last-modified: Fri, 25 Aug 2023 21:57:01 GMT
+etag: "{0456D7B6-9E63-41AE-8D46-CCD1ADB6AD66},321"
+resourcetag: rt:0456D7B6-9E63-41AE-8D46-CCD1ADB6AD66@00000000321
+content-disposition: attachment; filename*=utf-8''megamenu%2ejs; filename="megamenu.js"
+x-download-options: noopen
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+x-frame-options: SAMEORIGIN, SAMEORIGIN
+content-security-policy: frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com *.teams.microsoft.us local.teams.office.com *.powerapps.com *.yammer.com *.officeapps.live.com *.office.com *.stream.azure-test.net *.microsoftstream.com *.dynamics.com *.microsoft.com onedrive.live.com *.onedrive.live.com;, frame-ancestors 'self'
+date: Sat, 06 Apr 2024 20:16:54 GMT
+expires: Fri, 22 Mar 2024 20:16:54 GMT,0
+sprequestguid: b6731ca1-5633-2062-3bd5-900d472cac86
+request-id: b6731ca1-5633-2062-3bd5-900d472cac86
+sprequestduration: 1142
+spiislatency: 1
+cache-control: private,max-age=0,no-cache
+pragma: no-cache
+accept-ranges: bytes
+x-sharepointhealthscore: 0
+public-extension: http://schemas.microsoft.com/repl-2
+microsoftsharepointteamservices: 16.0.0.10407
+x-content-type-options: nosniff
+x-ms-invokeapp: 1; RequireReadOnly
+x-from: WEB01
+access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept
+access-control-allow-methods: POST,GET,OPTIONS,PUT,DELETE
+x-xss-protection: 1; mode=block
+X-Firefox-Spdy: h2
+ original-response-headers date: Sat, 06 Apr 2024 19:40:08 GMT
+content-type: application/javascript
+content-length: 18146
+set-cookie: AWSALB=2f2+LwexRvkJpRIkSszFPR8D1Kv4j6E4ARzNYjMqaQ1SsM76LMxBpzqYraBguXJzV8Ln8OGy0cBc0aryo39SH2zfM5F2piV8zel3BHcd6OfhSNrs/Hne5bnWf4uZ; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/
+set-cookie: AWSALBCORS=2f2+LwexRvkJpRIkSszFPR8D1Kv4j6E4ARzNYjMqaQ1SsM76LMxBpzqYraBguXJzV8Ln8OGy0cBc0aryo39SH2zfM5F2piV8zel3BHcd6OfhSNrs/Hne5bnWf4uZ; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/; SameSite=None; Secure
+set-cookie: AWSALB=A04b4x1qR7G85htOQr3yMwuSfgxs2JtoxPAl/y3A9V2V9mu6KRaHNcn7uepRqcMdtfgFAAOHp1jSql71A4Kxc0YEF8mTWuFIABz/XxcwyIv1BW6/EJeKcb/e3tXw; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/
+set-cookie: AWSALBCORS=A04b4x1qR7G85htOQr3yMwuSfgxs2JtoxPAl/y3A9V2V9mu6KRaHNcn7uepRqcMdtfgFAAOHp1jSql71A4Kxc0YEF8mTWuFIABz/XxcwyIv1BW6/EJeKcb/e3tXw; Expires=Sat, 13 Apr 2024 19:40:07 GMT; Path=/; SameSite=None; Secure
+cache-control: private,max-age=0,no-cache
+pragma: no-cache
+expires: Fri, 22 Mar 2024 19:40:08 GMT,0
+last-modified: Fri, 25 Aug 2023 21:57:01 GMT
+accept-ranges: bytes
+etag: "{0456D7B6-9E63-41AE-8D46-CCD1ADB6AD66},321"
+x-sharepointhealthscore: 0
+resourcetag: rt:0456D7B6-9E63-41AE-8D46-CCD1ADB6AD66@00000000321
+content-disposition: attachment; filename*=utf-8''megamenu%2ejs; filename="megamenu.js"
+x-download-options: noopen
+public-extension: http://schemas.microsoft.com/repl-2
+sprequestguid: 9b711ca1-46ad-2062-aa45-1e3ff984dd15
+request-id: 9b711ca1-46ad-2062-aa45-1e3ff984dd15
+x-frame-options: SAMEORIGIN
+content-security-policy: frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com *.teams.microsoft.us local.teams.office.com *.powerapps.com *.yammer.com *.officeapps.live.com *.office.com *.stream.azure-test.net *.microsoftstream.com *.dynamics.com *.microsoft.com onedrive.live.com *.onedrive.live.com;
+sprequestduration: 1084
+spiislatency: 1
+microsoftsharepointteamservices: 16.0.0.10407
+x-content-type-options: nosniff
+x-ms-invokeapp: 1; RequireReadOnly
+x-from: WEB02
+x-frame-options: SAMEORIGIN
+content-security-policy: frame-ancestors 'self'
+access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept
+access-control-allow-methods: POST,GET,OPTIONS,PUT,DELETE
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+x-xss-protection: 1; mode=block
+X-Firefox-Spdy: h2
+ ctid 2 uncompressed-len 0 net-response-time-onstart 1545 net-response-time-onstop 1685 alt-data 1;18146,javascript/moz-script-bytecode-20240222211730-8l alt-data-from-child 1   ˆ≈

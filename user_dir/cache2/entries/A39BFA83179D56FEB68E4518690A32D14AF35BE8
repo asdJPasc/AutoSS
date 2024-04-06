@@ -1,0 +1,172 @@
+﻿// JavaScript Document
+
+function piePagina()
+{
+document.writeln("<div class='container'> ");
+document.writeln("            <div class='row'> ");
+document.writeln("                <div class='col-sm-2 col-xs-15 divFooterColumna'> ");
+document.writeln("                    <h4 class='colBlanco negrita'>Atención</h4> ");
+document.writeln("                     <ul> ");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='/institucional/contactenos/presencial_csc_servicios.html' target=´'_parent' class='aFooterLinks colBlanco'>Contáctenos</a></li> ");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='/institucional/contactenos/index.html' target='_parent' class='aFooterLinks colBlanco'>Centros de Servicios al Contribuyente</a></li> ");
+
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://orientacion.sunat.gob.pe/6701-03-horarios-de-pago-en-bancos-2' target='_parent' class='aFooterLinks colBlanco'>Horario de atención en bancos</a></li> ");
+
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='/institucional/contactenos/virtual.html' target='_parent' class='aFooterLinks colBlanco'>Consultas de Aduanas</a></li> ");
+document.writeln("                         <li><span><img src='/p/imagenes/bullet.png'></span><a href='/institucional/contactenos/chat-SUNAT-online.html'  target='_parent' class='aFooterLinks colBlanco'>Chat SUNAT</a></li> ");
+
+document.writeln("                         <li><span><img src='/p/imagenes/bullet.png'></span><a href='/cuentassunat/informacionContribuyente/index.html'  target='_parent' class='aFooterLinks colBlanco'>Solicitud de Acceso a la Información Pública</a></li> ");
+
+
+document.writeln("                         <li><span><img src='/p/imagenes/bullet.png'></span><a href='/institucional/integridad/denuncias-sunat.html'  target='_blank' class='aFooterLinks colBlanco'>Denuncias</a></li> ");
+document.writeln("                         <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://www.sunat.gob.pe/cl-ta-itmenuagrupa/MenuInternet.htm?agrupacion=1&pestana=22' target='_blank' class='aFooterLinks colBlanco'>Proveedores SUNAT</a></li> ");
+document.writeln("                     </ul> ");
+document.writeln("                 </div> ");
+
+document.writeln("                <div class='col-sm-2 col-xs-15 divFooterColumna'> ");
+document.writeln("                    <h4 class='colBlanco negrita'>Información de Interés</h4> ");
+document.writeln("                    <ul> ");
+/*document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a  class='aFooterLinks colBlanco'>Boletín SUNAT</a></li>");*/
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='/boletinAduanero/2019/boletin-aduanero-octubre.pdf' target='_blank' class='aFooterLinks colBlanco'>Boletín Aduanero</a></li>");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://charlas.sunat.gob.pe/' target='_parent' class='aFooterLinks colBlanco'>Charlas SUNAT</a></li>");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='/salaprensa/lima/index.html' target='_parent' class='aFooterLinks colBlanco'>Sala de Prensa</a></li>");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://www.sunat.gob.pe/institucional/iata/index.html/' target='_parent' class='aFooterLinks colBlanco'>Instituto Aduanero y Tributario</a></li>");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://cultura.sunat.gob.pe/' target='_parent' class='aFooterLinks colBlanco'>Cultura Tributaria y Aduanera</a></li>");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://www.rematedeaduanas.com/' target='_parent' class='aFooterLinks colBlanco'>Remate de Aduanas</a></li>");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://rematestributarios.sunat.gob.pe/' target='_blan' class='aFooterLinks colBlanco'>Remate de Tributos Internos</a></li>");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://www.youtube.com/user/sunatvideos1/' target='_parent' class='aFooterLinks colBlanco'>Multimedia SUNAT</a></li>");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='/gobiernoelectronico/index.html'  target='_parent' class='aFooterLinks colBlanco'>Gobierno Electrónico</a></li>");
+
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='/mensajes/mensajes-SUNAT.html'  target='_blank' class='aFooterLinks colBlanco'>Comunicados Portal SUNAT</a></li>");
+
+
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://emprender.sunat.gob.pe/insumos-quimicos'  target='_parent' class='aFooterLinks colBlanco'>Insumos Químicos y Bienes Fiscalizados</a></li>");
+
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://www.sunat.gob.pe/orientacion/deInteres/ReporteCATT-Peru2017.pdf'  target='_parent' class='aFooterLinks colBlanco'>Informe BM-Aduanas (CAT-R)</a></li>");
+
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='/estadisticasestudios/transparencia-Tributos-Ad.html'  target='_parent' class='aFooterLinks colBlanco'>Informacion sobre Transparencia en normas Tributarias y Aduaneras</a></li>");
+
+
+
+document.writeln("                    </ul>");
+document.writeln("                </div>");
+                
+
+/*
+document.writeln("                    <h4 class='colBlanco negrita'>Central de Consultas</h4>");
+document.writeln("                    <div>                       "); 
+document.writeln("                        <p class='aFooterLinks colBlanco'>");
+document.writeln("                            <span class='negrita'>Desde teléfonos Celulares</span><br>");
+document.writeln("                            Marcar:<br>");
+document.writeln("                            *4000 (Desde Bitel, Claro, Entel y Movistar); o (01)3150730");
+document.writeln("                        </p>");
+document.writeln("                    </div>");
+document.writeln("                    <div>    ");                    
+document.writeln("                        <p class='aFooterLinks colBlanco'>");
+document.writeln("                            <span class='negrita'>Desde teléfonos fijos</span><br>");
+document.writeln("                            Marcar 0-801-12-100 (Al costo de llamada local)");
+
+document.writeln("                        </p>");
+document.writeln("                    </div>");
+*/
+
+
+
+document.writeln("<div class='col-sm-2 col-xs-15 divFooterColumna'>                    ");
+document.writeln("<h4 class='colBlanco negrita'>Atención Telefónica</h4>");
+document.writeln(" <ul>                      ");
+
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a class='aFooterLinks colBlanco'>Horario:<br></a></li> ");
+document.writeln(" <a class='aFooterLinks colBlanco'>  De Lunes a viernes:</a><br> ");
+document.writeln(" <a class='aFooterLinks colBlanco'>  08:30 a.m. a 06:00 p.m.</a><br> ");
+
+/*document.writeln(" <a class='aFooterLinks colBlanco'>  Sábados:</a><br> ");
+document.writeln(" <a class='aFooterLinks colBlanco'>  09:00 a.m.a 01:00 p.m.</a> ");
+*/
+
+document.writeln("</li>");
+document.writeln(" ");
+document.writeln("<li> <span><img src='/p/imagenes/bullet.png'></span><a class='aFooterLinks colBlanco'>Desde teléfonos Fijos<br></a>");
+document.writeln("  <a class='aFooterLinks colBlanco'> 315 0730 </a>");
+document.writeln(" ");
+document.writeln("</li>");
+document.writeln("<li><span><img src='/p/imagenes/bullet.png'></span><a class='aFooterLinks colBlanco'>Desde teléfonos fijos Provincias<br></a>");
+document.writeln("   <a class='aFooterLinks colBlanco'> 0801 12 100 (a costo de llamada local) </a>");
+document.writeln("</li>");
+document.writeln("<li><span><img src='/p/imagenes/bullet.png'></span><a class='aFooterLinks colBlanco'>Desde Celulares<br></a>");
+document.writeln("  <a class='aFooterLinks colBlanco'>(01) 315 0730 (desde Bitel, Claro, Entel y Movistar) </a>");
+document.writeln("</li>  ");
+document.writeln("</ul>");
+document.writeln("</div>");
+
+
+
+
+
+
+
+document.writeln("                <div class='col-sm-2 col-xs-15 divFooterColumna'> ");
+document.writeln("                    <h4 class='colBlanco negrita'>Enlaces de Interés</h4> ");
+document.writeln("                    <ul> ");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://www.bn.com.pe/' target='_blank' class='aFooterLinks colBlanco'> Banco de la Nación</a></li> ");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://www.sunarp.gob.pe/SintermediacionD.asp' target='_parent' class='aFooterLinks colBlanco'>Constitución de Empresa en Línea</a></li> ");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://www.peru.info/' target='_parent' class='aFooterLinks colBlanco'>Marca Perú</a></li> ");
+
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://www.mef.gob.pe/' target='_blank' class='aFooterLinks colBlanco'>Ministerio de Economía y Finanzas</a></li> ");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='/institucional/integridad/index.html' target='_parent' class='aFooterLinks colBlanco'>Integridad</a></li> ");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='/mensajes/agosto/2012/SINAD/SINAD.zip' target='_parent' class='aFooterLinks colBlanco'>Sistema Nacional de Atención de Denuncias</a></li> ");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://www.sbs.gob.pe/' target='_blank' class='aFooterLinks colBlanco'> SBS</a></li> ");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://www.sencico.gob.pe/' target='_blank' class='aFooterLinks colBlanco'> SENCICO</a></li> ");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://www.sunarp.gob.pe/' target='_blank' class='aFooterLinks colBlanco'> SUNARP</a></li> ");
+document.writeln("                        <li><span><img src='/p/imagenes/bullet.png'></span><a href='https://www.sunarp.gob.pe/seccion/servicios/App/sociedades/consulta-pj-dl-1427.asp' target='_blank' class='aFooterLinks colBlanco'> SUNARP – Sociedades con anotación preventiva – DL N° 1427</a></li> ");
+document.writeln("                    </ul> ");
+document.writeln("                </div> ");
+document.writeln("                <div class='col-sm-2 col-xs-15 divFooterColumna divGobierno'> ");
+document.writeln("                    <h4 class='colBlanco negrita'>Gobierno del Perú</h4> ");
+document.writeln("                    <a href='https://www.peru.gob.pe/' target='_blank' border='0'><img src='/p/imagenes/bannerFooter01.png'/></a><br> ");
+document.writeln("                    <a href='https://www.sanciones.gob.pe/transparencia/' target='_blank' border='0'><img src='/p/imagenes/bannerFooter02.png'/></a><br> ");
+document.writeln("                    <a href='https://spij.minjus.gob.pe/Descargas/APP-MOVIL.jpg' target='_blank' border='0'><img src='/p/imagenes/bannerFooter03.png'/></a><br> ");
+document.writeln("                    <a href='https://www2.trabajo.gob.pe/prensa/charlas-y-eventos/' target='_blank' border='0'><img src='/p/imagenes/bannerTrabajadoras.png'/></a><br> ");
+document.writeln("                    <a href='https://busquedas.elperuano.pe/normaslegales/aprueban-politica-nacional-contra-el-lavado-de-activos-y-el-decreto-supremo-n-018-2017-jus-1565834-4/' target='_blank' border='0'><img src='/p/imagenes/bannerFooter05.png'/></a><br> ");
+
+document.writeln("                    <a href='https://www.gob.pe/institucion/mef/normas-legales/279568-233-2019-ef-10/' target='_blank' border='0'><img src='/p/imagenes/bicentenario.png'/></a><br> ");
+
+
+document.writeln("                </div> ");
+document.writeln("            </div><!--/row-->  ");
+document.writeln("     <script>    ");  
+document.writeln("        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ ");  
+document.writeln("        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o), ");  
+document.writeln("         m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) ");  
+document.writeln("         })(window,document,'script','https://www.google-analytics.com/analytics.js','ga'); ");  
+document.writeln("          ga('create', 'UA-39014705-24', 'auto'); ");  
+document.writeln("          ga('send', 'pageview'); ");  
+document.writeln("     </script>    ");  
+document.writeln("        </div> ");
+document.writeln("         ");  
+document.writeln("         ");  
+
+}
+
+����g      f�"f�"F��Kf�   \    O^partitionKey=%28https%2Csunat.gob.pe%29,:https://www.sunat.gob.pe/p/js/script/piePagina.js strongly-framed 1 security-info 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 request-method GET response-head HTTP/1.1 200 OK
+Date: Sat, 06 Apr 2024 19:57:23 GMT
+Content-Type: application/javascript
+Content-Length: 13637
+Last-Modified: Wed, 17 Jan 2024 22:33:16 GMT
+ETag: "65a855ac-3545"
+Access-Control-Allow-Origin: https://ww3.sunat.gob.pe
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With
+Accept-Ranges: bytes
+ original-response-headers Date: Sat, 06 Apr 2024 19:57:23 GMT
+Content-Type: application/javascript
+Content-Length: 13637
+Last-Modified: Wed, 17 Jan 2024 22:33:16 GMT
+Connection: keep-alive
+ETag: "65a855ac-3545"
+Access-Control-Allow-Origin: https://ww3.sunat.gob.pe
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With
+Accept-Ranges: bytes
+Set-Cookie: f5avraaaaaaaaaaaaaaaa_session_=HCENJBHALCGAOIOJGOGMGHINMEIMEPCIAKCKEKFCIMKDEGBOHMIHPDIEHMIDMFGDCKCDEEHHBHBEDANLFBDAKEHDGKAHIBNNDEJNDAPMCKOONIMEBBAAMFHEIFAAJDIH; HttpOnly; secure
+Set-Cookie: TS01df7e47=014dc399cb471fcd0885cab8c4fb5e783625def73374d95f8d8d0d58b7079ff7f2e96266ae665b3c7f08c6d361824a130b387868f70da09a1b29f4f79c7eb8d80b87ae0553f4944739a63f1714f962e962e4368bbb; Path=/; Domain=.www.sunat.gob.pe
+Set-Cookie: TSf806e172027=08fe7428c8ab20008b352116c150b1ec119e60aa73ae877ca9370a82f084bd774638482dd81f94d60887b2821e11300026316cea006b411feec97318ec7cac453b00747fc1d76700e00182145791921a60cbaf126395d925c366559239c4071e; Path=/
+ ctid 2 uncompressed-len 0 net-response-time-onstart 1679 net-response-time-onstop 1680   5E

@@ -11,17 +11,15 @@ from colorama import Fore
 from playwright.sync_api import sync_playwright, TimeoutError
 
 #USER SETTINGS
-cycle = 3200
-interval = 7
+cycle = 3200 #Capture screenshot per batch.
+#captureDelay = 7 #Delay timer before capturing screenshot to fully load the website
+browserless = True
 
 def check_playwright():
     try:
-        # Check if "playwright" command is available
         subprocess.run(["playwright", "install", "-h"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-        print("Playwright is already installed.")
     except FileNotFoundError:
         try:
-            # Attempt to install Playwright
             subprocess.run(["playwright", "install"], check=True)
             print("Playwright installation complete.")
         except subprocess.CalledProcessError:
@@ -90,7 +88,7 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
 
     while attempt <= max_attempts:
         try:
-            time.sleep(interval)
+            #time.sleep(captureDelay)
             remove_elements(page) #REMOVE HEADER AND FOOTER OF THE PAGE
             selectors = [
                 'button',
@@ -122,7 +120,7 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
             page.wait_for_load_state('networkidle')
 
             if detect_captcha(page):
-                print(f"{Fore.RED}CAPTCHA detected! Please perform a manual capture of the screenshot for row ID: {row_id:04}.{Fore.RESET}")
+                print(f"{Fore.RED}CAPTCHA detected!{Fore.RESET} Manual capture required for Row ID: {row_id:04}.{Fore.RESET}")
                 break
 
             timestamp = datetime.now().strftime("Date: %m-%d-%Y || Time: %I:%M:%S %p")
@@ -175,7 +173,7 @@ def process_excel_data(file_path):
 
         browser = p.firefox.launch_persistent_context (
             user_data_dir="user_dir",
-            headless=True,
+            headless=browserless,
             accept_downloads=True
         )
 

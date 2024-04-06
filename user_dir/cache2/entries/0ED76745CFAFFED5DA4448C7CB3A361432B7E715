@@ -1,0 +1,846 @@
+﻿<!--MIG1-->
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name = "viewport" content = "initial-scale = 1.0, user-scalable = no, width=device-width">
+
+<link rel="icon" href="/p/imagenes/icons/favicon.ico" type="image/x-icon" /> 
+<link rel="shortcut icon" href="/p/imagenes/icons/favicon.ico" type="image/x-icon" />
+
+<!-- Win8 tile -->
+<meta name="msapplication-TileImage" content="/p/imagenes/icons/favicon-144.png" />
+<meta name="msapplication-TileColor" content="#52B947"/>
+<meta name="application-name" content="name" />
+
+<!-- IE11 tiles -->
+<meta name="msapplication-square70x70logo" content="/p/imagenes/icons/tile-tiny.png" />
+<meta name="msapplication-square150x150logo" content="/p/imagenes/icons/tile-square.png" />
+<meta name="msapplication-wide310x150logo" content="/p/imagenes/icons/tile-wide.png" />
+<meta name="msapplication-square310x310logo" content="/p/imagenes/icons/tile-large.png" />
+  
+
+
+  <title>:: SUNAT ::</title>
+
+  <link rel="shortcut icon" href="/sunat.ico" />
+
+ 
+
+  <link rel="image_src" href="http://www.sunat.gob.pe/img/logo_sunat.gif" />
+
+<!--css-->
+
+  <link href="/css/global.css" rel="stylesheet" type="text/css" />
+
+
+  <link href="/css/print.css" rel="stylesheet" type="text/css" media="print" />
+
+<!--Script / Interaction-->
+  
+
+  <script type="text/javascript" src="../../../../../js/jquery.js"></script>
+
+
+
+  <script type="text/javascript" src="../../../../../js/menuLat/animatedcollapse.js"></script><!--Script / menulateral-->
+
+  
+
+  
+
+  <script type="text/javascript" src="../../../../../js/tooltip/jquery.tools.min.js"></script><!--Script / tooltip-->
+
+  
+
+  
+
+  <script type="text/javascript" src="../../../../../js/slide/jbannerTop.js"></script><!--Script / scroll imagenes-->
+
+  
+
+  
+
+  <script type="text/javascript" src="../../../../../js/portal.js"></script><!--Script / funciones-->
+
+  
+
+  
+
+  <script type="text/javascript" src="../../../../../js/font/fontResizeInfoLeg.js"></script>
+
+  
+
+  
+
+  <script type="text/javascript" src="../../../../../js/search.js"></script><!--[if lte IE 6]>
+
+<link href="../../css/ie.css" rel="stylesheet" type="text/css" />
+
+<![endif]-->
+
+
+
+
+
+  <script type="text/javascript" src="../../../../p/js/script/piePagina.js"></script>
+
+  
+
+  
+
+  <script type="text/javascript">
+
+$(document).ready(function(){$('.banner1').load('/banner/bannerSup.html');})
+
+  </script>
+
+  
+
+  
+
+<style>
+
+.tit1{
+	font-weight:bold;
+	text-align:center;
+	
+}
+.tbd{
+	text-align:center;
+	font-weight:bold;
+	padding:4px;
+	font:Verdana, Geneva, sans-serif;
+	font-size:15px;
+	
+}
+.tlin{
+	border:1px solid #C4E0FF;
+	
+}
+
+.tbd1{
+ padding:3px;
+ font:Verdana, Geneva, sans-serif;
+ font-size:15px;
+}
+ .tlin1 {	
+ border:1px solid #C4E0FF;
+ padding:3px;
+}
+
+  </style>
+
+
+ <link href="/p/js/libs/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+ <link href="/p/css/main.css" rel="stylesheet"/>
+  <!--[if lt IE 9]>
+    <script src="/p/js/libs/bootstrap/3.3.2/plugins/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="/p/js/libs/bootstrap/3.3.2/plugins/respond/1.4.2/respond.min.js"></script>
+  <![endif]--> 
+  <script src="/p/js/script/buscador.js"></script> 
+  <script src="/p/js/script/menuPersonas.js"></script>
+    <script src="/p/js/script/menuEmpresas.js"></script>
+    <script src="/p/js/script/menuAduanas.js"></script>
+    <script src="/p/js/script/piePagina.js"></script>
+    <script src="/p/js/script/pieRedSocial.js"></script>
+    <script src="/p/js/script/botonSOL.js"></script>
+
+    
+
+</head>
+ 
+
+
+
+
+
+<body class="pagInt">
+
+
+
+
+   <div id="divCabecera" class="navbar navbar-default sinBorde" role="navigation"> 
+        <div id="navBarSuperior" class="navbar-header">
+            <a class="navbar-brand navLogo" id="logosunat" href="/index.html" target="_parent">                           
+                <img id="imgLogo" src="/p/imagenes/logoamplio.png" class="hidden-xs hidden-sm hidden-md"/>                                
+                <img id="imgLogo" src="/p/imagenes/logo.png" class="hidden-lg"/>
+            </a>
+        </div><!--/.navbar-header -->
+        <div class="container-fluid">            
+            <div id="divNavPrinicipal" class="navbar">
+                <ul class="nav navbar-nav navbar-right">
+                    
+					<script type="text/javascript">bSOL();</script> <!--/BOTON SOL-->
+
+                </ul>
+
+            </div>     
+        </div>    
+        <div class="container-fluid">  
+             <div class="navbar-centro">
+             
+			<script type="text/javascript">buscaSUNAT();</script>
+
+              <ul id="ulMenu" class="nav navbar-nav navbar-nav-centro">
+                <li class="dropdown liOpcionMenu liOpcionCentro">
+                    <a href="/index.html" class="dropdown-toggle aOpcionMenu backPlomo3 colBlanco " role="button" aria-haspopup="true"><!--data-toggle="dropdown"-->
+                        <div>
+                            &nbsp;&nbsp;&nbsp;Personas&nbsp;&nbsp;
+                            <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span>
+                        </div>
+                        <div class="divOpcionSeparador"></div>
+                    </a>
+                    <div class="dropdown-menu multi-column columns-4 divSubmenu">
+                         <script type="text/javascript">menuPer();</script>
+                    </div>                   
+                </li>
+                <li class="dropdown liOpcionMenu liOpcionCentro">
+                  <a href="/empresas.html" target="_parent" class="dropdown-toggle aOpcionMenu backPlomo3 colBlanco" role="button" aria-haspopup="true"><!--data-toggle="dropdown"-->
+                      <div>
+                        &nbsp;&nbsp;&nbsp;Empresas&nbsp;&nbsp;
+                       <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span>
+                      </div>
+                      <div class="divOpcionSeparador"></div>
+                  </a>
+				    <div class="dropdown-menu multi-column columns-4 divSubmenu">
+                         <script type="text/javascript">menuEmpre();</script>
+                    </div> 
+                </li>
+                <li class="dropdown liOpcionMenu">
+                    <a href="/aduanas.html" target="_parent" class="dropdown-toggle aOpcionMenu backPlomo3 colBlanco" role="button" aria-haspopup="true"><!--data-toggle="dropdown"-->
+                       <div>
+                         &nbsp;&nbsp;&nbsp;Aduanas&nbsp;&nbsp;
+                        <span class="glyphicon glyphicon-menu-down" aria-hidden="true">&nbsp;</span></div>
+                       <div class="divOpcionSeparador"></div>
+                     </a>
+				     <div class="dropdown-menu multi-column columns-4 divSubmenu">
+                         <script type="text/javascript">menuAdu();</script>
+                    </div>
+                </li>
+              </ul>
+            </div>   
+        </div>   
+        <div id="divSeparador" class="backAzul1 hidden-xs"></div>
+    </div>
+<!--idivcuerpo-->
+			 <div id="divCuerpo" class="container">
+			 <div class="row">
+						<div class="col-sm-8 col-md-9">
+							<div>
+								<div id="divBreadcrumb">
+									<ol class="breadcrumb">
+									  
+		<!--idivol-->
+		                                                                                                                        
+                                                       
+                                                                                                                         
+                                                       
+                                                                                                                        
+                                                       
+                                                                                                                        
+                                                       
+                                                                                                                        
+                                                       
+                                                                                                                        
+                                                       
+                                                                                                                        
+                                                       
+                                                                                                                        
+                                                       
+
+		<li>
+		<i class="glyphicon glyphicon-home">
+		</i>
+		<a href="../../../../../index.html" target="_parent">Inicio</a> </li>
+		<li> Legislación                                                                                                                        
+                                                       
+                                                                                                                        
+                                                       
+                                                                                                                        
+                                                       
+                                                                                                                        
+
+		<!--fdivol-->
+									</ol>
+								</div>
+							</div> 
+							  <div id="menuTabs">
+							                                                          
+<ul class="legislacion uno">                                                                                                                        
+                                                       
+<li class="activo">Legislación General</li>                                                                                                                        
+                                                       
+<li><a href="../../../aduanera/index.html">Legislación Aduanera</a></li>                                                                                                                        
+                                                       
+<li><a href="../../../tributaria/index.html">Legislación Tributaria</a></li>                                                                                                                        
+                                                       
+                                                                                                                        
+                                                       
+</ul>                                                                                                                        
+                                                       
+</div>                                                                                                                        
+                                                       
+                                                                                                                        
+                                                       
+                                                                                                                        
+
+							<div class="panel panel-default sinBorde">
+							<div class="text panel-body text-justify">
+						
+			<!--itext-->
+			                                                       
+                                                                                                                        
+                                                       
+<div id="ayudaUsuario"> <a href="#" class="imprimir" onclick="window.print()"></a> <span>Tama&ntilde;o de Texto:</span> <a href="#" class="fmas fontResize" id="aumentar"></a> <a href="#" class="fmenos fontResize" id="disminuir"></a> </div>                                                                                                                        
+                                                       
+                                                                                                                        
+                                                       
+<div>
+			<h1>Resoluciones de Superintendencia</h1>
+			</div>                                                                                                                        
+                                                  <h2 class="tit1">ÍNDICE CORRELATIVO DE RESOLUCIONES DE SUPERINTENDENCIA DEL 2024</h2>     
+    
+<table cellspacing="2" cellpadding="2" >
+  <tr>
+    <td valign="top" class="tbd tlin">Resolución</td>
+    <td valign="top" class="tbd tlin">Sumilla</td>
+    <td valign="top" class="tbd tlin">Publicado en el Diario Oficial<br>      
+	"El Peruano" </td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000071-2024.pdf" target="_blank">R. Superintendencia Nº 000071-2024</a></td>
+    <td valign="top" class="tlin tbd1">Declara nulidad de oficio de la Licitación Pública N,° 0020-2023-SUNAT/8B7200-Primera Convocatoria</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000070-2024.pdf" target="_blank">R. Superintendencia Nº 000070-2024</a></td>
+    <td valign="top" class="tlin tbd1">Declara la nulidad de oficio del Contrato 0226-2021/SUNAT – Prestación de Servicios (derivado de la Adjudicación Simplificada N.° 0060-2021-SUNAT/7M0950 – Primera Convocatoria)</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000069-2024.pdf" target="_blank">R. Superintendencia Nº 000069-2024</a></td>
+    <td valign="top" class="tlin tbd1">Deja sin efecto encargaturas y designa en cargos de confianza </td>
+    <td class="tlin tbd1" >04/04/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1">
+	<a href="../000068-2024.pdf" target="_blank">R. Superintendencia Nº 000068-2024</a></td>
+    <td valign="top" class="tlin tbd1">Aprueba el Plan Estratégico Institucional 
+	(PEI) de la SUNAT para el periodo 2024-2027 - 
+	<a href="../anexo-000068-2024.pdf" target="_blank">Anexo</a></td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000067-2024.pdf" target="_blank">R. Superintendencia Nº 000067-2024</a></td>
+    <td valign="top" class="tlin tbd1">Autoriza viaje de servidora de la SUNAT para participar en el Programa Avanzado sobre el Liderazgo y la Dirección de las Administraciones Tributarias y Aduaneras, a realizarse en la ciudad de Antigua Guatemala, República de Guatemala</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000066-2024.pdf" target="_blank">R. Superintendencia Nº 000066-2024</a></td>
+    <td valign="top" class="tlin tbd1">Declara la nulidad de oficio del Concurso Público N.° 025-2023-SUNAT/7G0950 </td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000065-2024.pdf" target="_blank">R. Superintendencia Nº 000065-2024</a></td>
+    <td valign="top" class="tlin tbd1">Declara la nulidad de oficio del Contrato N.° 214-2023/SUNAT - Prestación de Servicios (derivado del Concurso Público N.° 0033-2023-SUNAT/7K0600 - Primera Convocatoria)</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000064-2024.pdf" target="_blank">R. Superintendencia Nº 000064-2024</a></td>
+    <td valign="top" class="tlin tbd1">Declara nulidad de oficio de la Licitación Pública N.° 017-2023-SUNAT/7G0850-1.</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000063-2024.pdf" target="_blank">R. Superintendencia Nº 000063-2024</a></td>
+    <td valign="top" class="tlin tbd1">Resolución de Superintendencia que posterga la oportunidad desde la cual deben llevar sus registros en el Sistema Integrado de Registros Electrónicos los sujetos obligados a ello a partir del período abril de 2024  </td>
+    <td class="tlin tbd1" >30/03/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000062-2024.pdf" target="_blank">R. Superintendencia Nº 000062-2024</a></td>
+    <td valign="top" class="tlin tbd1">Modifica la fecha de entrada en vigencia de la Resolución de Superintendencia N.° 000081-2023/SUNAT</td>
+    <td class="tlin tbd1" >31/03/2024</td>
+  </tr>
+    <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000061-2024.pdf" target="_blank">R. Superintendencia Nº 000061-2024</a></td>
+    <td valign="top" class="tlin tbd1">Aprueba el Presupuesto Analítico de Personal - PAP de la Superintendencia Nacional de Aduanas y de Administración Tributaria – SUNAT para el Año Fiscal 2024 - <a href="../anexo1-000061-2024.pdf" target="_blank">Anexo1</a> - <a href="../anexo2-000061-2024.pdf" target="_blank">Anexo2</a></td>
+    <td class="tlin tbd1" >&nbsp;</td>
+    </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000060-2024.pdf" target="_blank">R. Superintendencia Nº 000060-2024</a></td>
+    <td valign="top" class="tlin tbd1">Modifica la Resolución de Superintendencia N.° 000052-2024/SUNAT </td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000059-2024.pdf" target="_blank">R. Superintendencia Nº 000059-2024</a></td>
+    <td valign="top" class="tlin tbd1">Declara culminado el proceso de depuración y sinceramiento contable de la SUNAT – Ente Gastador</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000058-2024.pdf" target="_blank">R. Superintendencia Nº 000058-2024</a></td>
+    <td valign="top" class="tlin tbd1">Aprueba nueva versión del PDT del Impuesto Selectivo al Consumo, Formulario Virtual N.° 615</td>
+    <td class="tlin tbd1" >24/03/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000057-2024.pdf" target="_blank">R. Superintendencia Nº 000057-2024</a></td>
+    <td valign="top" class="tlin tbd1">Aprueba Normas Complementarias para la aplicación de la Ley N.º 31974 que autoriza excepcionalmente a la Superintendencia Nacional de Aduanas y de Administración Tributaria para disponer de Bienes y Mercancías y conforma Comisión de Supervisión</td>
+    <td class="tlin tbd1" >21/03/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000056-2024.pdf" target="_blank">R. Superintendencia Nº 000056-2024</a></td>
+    <td valign="top" class="tlin tbd1">Autoriza viaje de servidores de la SUNAT para participar en el "Intercambio de experiencias y buenas prácticas en la implementación de Foros de Diálogo con los contribuyentes de España" y en el "Foro de Diálogo de los Grandes Contribuyentes en la República Dominicana", que se realizarán en Santo Domingo, República Dominicana</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000055-2024.pdf" target="_blank">R. Superintendencia Nº 000055-2024</a></td>
+    <td valign="top" class="tlin tbd1">Deja sin efecto designación y encarga cargo de confianza</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000054-2024.pdf" target="_blank">R. Superintendencia Nº 000054-2024</a></td>
+    <td valign="top" class="tlin tbd1">Autoriza viaje de servidora de la SUNAT para participar en la Capacitación Nacional para la Aduana Colombiana, a realizarse en la ciudad de Bogotá, República de Colombia</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000053-2024.pdf" target="_blank">R. Superintendencia Nº 000053-2024</a></td>
+    <td valign="top" class="tlin tbd1">Autoriza interposici&oacute;n de recurso de anulaci&oacute;n de laudo arbitral en el marco del Contrato N&deg; 037-2020/SUNAt - Prestaci&oacute;n de Servicios (Concurso P&uacute;blico N.&deg; 073-2019-SUNAT/8B1200)</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000052-2024.pdf" target="_blank">R. Superintendencia Nº 000052-2024</a></td>
+    <td valign="top" class="tlin tbd1">Autoriza viaje de servidores de la SUNAT para participar en la "41ª Reunión del Grupo de Trabajo 10" de la Organización para la Cooperación y el Desarrollo Económicos – OCDE, a realizarse en la ciudad de Paris, República de Francia </td>
+    <td class="tlin tbd1" >13/03/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000051-2024.pdf" target="_blank">R. Superintendencia Nº 000051-2024</a></td>
+    <td valign="top" class="tlin tbd1">Autoriza viaje de servidores de la SUNAT para participar en el Taller de Intercambio Técnico que se realizará en la ciudad de San Salvador, República de El Salvador</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000050-2024.pdf" target="_blank">R. Superintendencia Nº 000050-2024</a></td>
+    <td valign="top" class="tlin tbd1">Deja sin efecto designaciones y encargatura y encarga cargos de confianza</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000049-2024.pdf" target="_blank">R. Superintendencia Nº 000049-2024</a></td>
+    <td valign="top" class="tlin tbd1">Encarga cargos de confianza</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000048-2024.pdf" target="_blank">R. Superintendencia Nº 000048-2024</a></td>
+    <td valign="top" class="tlin tbd1">Designa en cargos de confianza</td>
+    <td class="tlin tbd1" >07/03/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000047-2024.pdf" target="_blank">R. Superintendencia Nº 000047-2024</a></td>
+    <td valign="top" class="tlin tbd1">Designa cargo de confianza</td>
+    <td class="tlin tbd1" >07/03/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000046-2024.pdf" target="_blank">R. Superintendencia Nº 000046-2024</a></td>
+    <td valign="top" class="tlin tbd1">Deja sin efecto designaciones y encargatura en cargos de confianza</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000045-2024.pdf" target="_blank">R. Superintendencia Nº 000045-2024</a></td>
+    <td valign="top" class="tlin tbd1">Deja sin efecto encargatura y designa cargos de confianza</td>
+    <td class="tlin tbd1" >06/03/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000044-2024.pdf" target="_blank">R. Superintendencia Nº 000044-2024</a></td>
+    <td valign="top" class="tlin tbd1">Deja sin efecto designación en cargo de confianza</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000043-2024.pdf" target="_blank">R. Superintendencia Nº 000043-2024</a></td>
+    <td valign="top" class="tlin tbd1">Encarga cargo de confianza</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000042-2024.pdf" target="_blank">R. Superintendencia Nº 000042-2024</a></td>
+    <td valign="top" class="tlin tbd1">Asigna contribuyentes de la Intendencia de Principales Contribuyentes Nacionales a sus unidades de organización dependientes - <a href="../anexo-000042-2024.pdf" target="_blank">Anexo</a></td>
+    <td class="tlin tbd1" >05/03/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000041-2024.pdf" target="_blank">R. Superintendencia Nº 000041-2024</a></td>
+    <td valign="top" class="tlin tbd1">Autoriza viaje de servidora de la SUNAT para participar en el Taller hacia un Enfoque Intergubernamental para el Abordaje del Lavado de Activos a partir de Delitos Fiscales, a realizarse en la ciudad de Panamá, República de Panamá</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000040-2024.pdf" target="_blank">R. Superintendencia Nº 000040-2024</a></td>
+    <td valign="top" class="tlin tbd1">Modifica Disposición Complementaria Derogatoria de la Resolución de Superintendencia N.º 000132-2023/SUNAT</td>
+    <td class="tlin tbd1" >04/03/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000039-2024.pdf" target="_blank">R. Superintendencia Nº 000039-2024</a></td>
+    <td valign="top" class="tlin tbd1">Aprueba Tabla de Tiempos de Vida Útil de Equipos Informáticos de la Superintendencia Nacional de Aduanas y de Administración Tributaria – SUNAT - <a href="../anexo-000039-2024.pdf" target="_blank">Anexo</a></td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000038-2024.pdf" target="_blank">R. Superintendencia Nº 000038-2024</a></td>
+    <td valign="top" class="tlin tbd1">Modifica la fecha de entrada en vigencia de la 
+Resolución de Superintendencia N.º 000081-2023/SUNAT
+</td>
+    <td class="tlin tbd1" >29/02/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000037-2024.pdf" target="_blank">R. Superintendencia Nº 000037-2024</a></td>
+    <td valign="top" class="tlin tbd1">Autoriza viaje de servidores de la SUNAT para participar en el Curso de Investigación de Laboratorios Clandestinos que se realizará en el Antiguo Cuscatlán, San Salvador, República de El Salvador</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000036-2024.pdf" target="_blank">R. Superintendencia Nº 000036-2024</a></td>
+    <td valign="top" class="tlin tbd1">Autoriza transferencia financiera a favor de la Unidad Ejecutora 002-1698: Gestión de Proyectos y Fortalecimiento de Capacidades de la Contraloría General de la República</td>
+    <td class="tlin tbd1" >01/03/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000035-2024.pdf" target="_blank">R. Superintendencia Nº 000035-2024</a></td>
+    <td valign="top" class="tlin tbd1">Aviso de Sinceramiento</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000034-2024.pdf" target="_blank">R. Superintendencia Nº 000034-2024</a></td>
+    <td valign="top" class="tlin tbd1">Aprueba desagregación de los recursos aprobados mediante Decreto Supremo N.º 015-2024-EF</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000033-2024.pdf" target="_blank">R. Superintendencia Nº 000033-2024</a></td>
+    <td valign="top" class="tlin tbd1">Deja sin efecto y designa representante de la SUNAT ante la Comisión Especial que representa al Estado en Controversias Internacionales de Inversión</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000032-2024.pdf" target="_blank">R. Superintendencia Nº 000032-2024</a></td>
+    <td valign="top" class="tlin tbd1">Modifica la normativa sobre comprobantes de pago electrónicos para permitir que los boletos de transporte aéreo regular de pasajeros puedan ser modificados por notas electrónicas - <a href="../anexo-000032-2024.pdf" target="_blank">Anexo</a></td>
+    <td class="tlin tbd1" >01/03/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000031-2024.pdf" target="_blank">R. Superintendencia Nº 000031-2024</a></td>
+    <td valign="top" class="tlin tbd1">Declara la nulidad de oficio del Contrato N.° 160-2023/SUNAT -Prestación de Servicios (derivado del Concurso Público N.° 001-2023-SUNAT/3G0300 - Ítem 1)</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000030-2024.pdf" target="_blank">R. Superintendencia Nº 000030-2024</a></td>
+    <td valign="top" class="tlin tbd1">Declara la nulidad de oficio del Contrato N.° 09-2021/SUNAT AS N.° 03-2020-SUNAT/8I1000 – Segunda Convocatoria – Prestación accesoria (derivado de la Adjudicación Simplificada N.° 03-2020-SUNAT/8I1000 - Segunda Convocatoria) </td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000029-2024.pdf" target="_blank">R. Superintendencia Nº 000029-2024</a></td>
+    <td valign="top" class="tlin tbd1">Resolución de Superintendencia que modifica las Resoluciones de Superintendencia N° 000131-2022/SUNAT y N° 000171-2022/SUNAT y el procedimiento específico "Inspección no intrusiva de mercancía" CONTROL-PE.00.10 (version 1) </td>
+    <td class="tlin tbd1" >26/02/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000028-2024.pdf" target="_blank">R. Superintendencia Nº 000028-2024</a></td>
+    <td valign="top" class="tlin tbd1">Autoriza viaje de servidor de la SUNAT para participar en el Taller Nacional para la Aduana de Honduras sobre la Lucha contra la Falsificación y la Piratería, a realizarse en la ciudad de Tegucigalpa, República de Honduras</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000027-2024.pdf" target="_blank">R. Superintendencia Nº 000027-2024</a></td>
+    <td valign="top" class="tlin tbd1">Deja sin efecto designaciones y encargatura y designa en cargos de confianza
+
+</td>
+    <td class="tlin tbd1" >17/02/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000026-2024.pdf" target="_blank">R. Superintendencia Nº 000026-2024</a></td>
+    <td valign="top" class="tlin tbd1">Resolución de Superintendencia que modifica la Resolución de Superintendencia N.° 000269-2023/SUNAT para postergar la fecha de
+puesta a disposición del Formulario Virtual N.° 709 - Renta Anual - Persona Natural y de la información personalizada correspondiente al ejercicio 2023 de las personas naturales
+</td>
+    <td class="tlin tbd1" >11/02/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000025-2024.pdf" target="_blank">R. Superintendencia Nº 000025-2024</a></td>
+    <td valign="top" class="tlin tbd1">Aprueba resultados de avance del Plan de Depuración y Sinceramiento Contable de la SUNAT – Ente Gastador - <a href="../anexo-000025-2024.pdf" target="_blank">Anexo</a></td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000024-2024.pdf" target="_blank">R. Superintendencia Nº 000024-2024</a></td>
+    <td valign="top" class="tlin tbd1">Aprueba incorporación de mayores ingresos públicos en el Presupuesto Institucional del Año Fiscal 2024 de la Superintendencia Nacional de Aduanas y de Administración Tributaria </td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000023-2024.pdf" target="_blank">R. Superintendencia Nº 000023-2024</a></td>
+    <td valign="top" class="tlin tbd1">Resolución que aprueba el procedimiento específico "Aplicación de preferencias arancelarias al amparo del Acuerdo Comercial entre la Unión Europea y sus Estados Miembros, por una parte, y Colombia, el Perú y Ecuador, por otra" DESPA-PE.01.31 (versión 2) - <a href="../anexo-000023-2024.pdf" target="_blank">Anexo</a></td>
+    <td class="tlin tbd1" >08/02/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000022-2024.pdf" target="_blank">R. Superintendencia Nº 000022-2024</a></td>
+    <td valign="top" class="tlin tbd1">Deja sin efecto encargatura y designa en cargo de confianza</td>
+    <td class="tlin tbd1" >04/02/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000021-2024.pdf" target="_blank">R. Superintendencia Nº 000021-2024</a></td>
+    <td valign="top" class="tlin tbd1">Autoriza viaje de servidores de la SUNAT para realizar pruebas a canes en el marco del Contrato N.° 01-2024/SUNAT-MSI, derivado de la LPN N.° 004-2023-SUNAT/BID 3</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000020-2024.pdf" target="_blank">R. Superintendencia Nº 000020-2024</a></td>
+    <td valign="top" class="tlin tbd1">Deja sin efecto designacion y encarga en cargo directivo</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000019-2024.pdf" target="_blank">R. Superintendencia Nº 000019-2024</a></td>
+    <td valign="top" class="tlin tbd1">Deja sin efecto y designa representantes de la SUNAT ante la Comisión Multisectorial Permanente denominada "Mesa de Trabajo Intersectorial para la Gestión Migratoria"</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000018-2024.pdf" target="_blank">R. Superintendencia Nº 000018-2024</a></td>
+    <td valign="top" class="tlin tbd1">Autoriza viaje de servidores de la SUNAT para participar en una Visita de Estudio a la Administración Tributaria Australiana a realizarse en Sidney, Mancomunidad de Australia</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000017-2024.pdf" target="_blank">R. Superintendencia Nº 000017-2024</a></td>
+    <td valign="top" class="tlin tbd1">Aprueba nueva versión del PDT Planilla Electrónica - PLAME, Formulario Virtual N.° 0601 </td>
+    <td class="tlin tbd1" >06/02/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000016-2024.pdf" target="_blank">R. Superintendencia Nº 000016-2024</a></td>
+    <td valign="top" class="tlin tbd1">Declara la nulidad de oficio del Contrato N.° 231-2018/SUNAT -Prestación de Servicios (derivado del Concurso Público N.° 014-2018-SUNAT/7E9000)</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000015-2024.pdf" target="_blank">R. Superintendencia Nº 000015-2024</a></td>
+    <td valign="top" class="tlin tbd1">Deja sin efecto y designa representante de la SUNAT ante la Comisión Especial que representa al Estado en Controversias Internacionales de Inversión</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+    <tr>
+    <td valign="top" class="tlin tbd1">
+	<a href="../000014-2024.pdf" target="_blank">R. Superintendencia Nº 000014-2024</a></td>
+    <td valign="top" class="tlin tbd1">Declara la nulidad de oficio del Contrato N.° 127-2020/SUNAT - Prestación de Servicios (derivado del Concurso Público N.° 092-2019-SUNAT/7F0600 - Primera Convocatoria)</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+    </tr>
+    <tr>
+    <td valign="top" class="tlin tbd1">
+	<a href="../000013-2024.pdf" target="_blank">R. Superintendencia Nº 00001<span lang="es">3</span>-2024</a></td>
+    <td valign="top" class="tlin tbd1">Declara la nulidad de oficio del Contrato N.° 290-2020/SUNAT - Prestación de Servicios (derivado del Concurso Público N.° 052-2020-SUNAT/TG0600 - Primera Convocatoria) - <a href="../feErratas-000013-2024.pdf" target="_blank">Fe de Erratas</a></td>
+    <td class="tlin tbd1" >&nbsp;</td>
+    </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000012-2024.pdf" target="_blank">R. Superintendencia Nº 000012-2024</a></td>
+    <td valign="top" class="tlin tbd1">Declara la nulidad de oficio del Contrato N.° 39-2021/SUNAT – Prestación de Servicios (derivado del Concurso Público N.° 050-2020-SUNAT/7R0100 - Primera Convocatoria)</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000011-2024.pdf" target="_blank">R. Superintendencia Nº 000011-2024</a></td>
+    <td valign="top" class="tlin tbd1">Modifica la relación de trabajadores autorizados a solicitar transferencia de fondos y revocatoria de la orden de pago de cheques y designa trabajadores autorizados a solicitar chequeras</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000010-2024.pdf" target="_blank">R. Superintendencia Nº 000010-2024</a></td>
+    <td valign="top" class="tlin tbd1">Resolución de Superintendencia que modifica las Resoluciones de Superintendencia N° 000131-2022/SUNAT y N° 000171-2022/SUNAT y el procedimiento específico "Inspección no intrusiva de mercancía" CONTROL-PE.00.10 (versión 1) </td>
+    <td class="tlin tbd1" >28/01/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000009-2024.pdf" target="_blank">R. Superintendencia Nº 000009-2024</a></td>
+    <td valign="top" class="tlin tbd1">Modifican directorio de la Intendencia de Principales Contribuyentes Nacionales y los directorios de Principales Contribuyentes de la Intendencia Lima, Intendencias Regionales y Oficinas Zonales </td>
+    <td class="tlin tbd1" >27/01/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000008-2024.pdf" target="_blank">R. Superintendencia Nº 000008-2024</a></td>
+    <td valign="top" class="tlin tbd1">Declara la nulidad de oficio del Contrato N.° 307-2019/SUNAT - Prestación de Servicios (derivado del Concurso Público N.° 048-2019-SUNAT/3L0300 - Primera Convocatoria)</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000007-2024.pdf" target="_blank">R. Superintendencia Nº 000007-2024</a></td>
+    <td valign="top" class="tlin tbd1">Modifica la fecha de entrada en vigencia de la Resolución de Superintendencia N.º 000081-2023/SUNAT</td>
+    <td class="tlin tbd1" >24/01/2024</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000006-2024.pdf" target="_blank">R. Superintendencia Nº 000006-2024</a></td>
+    <td valign="top" class="tlin tbd1">Aprueba la desagregación de los recursos aprobados mediante Decreto Supremo N° 002-2024-EF</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000005-2024.pdf" target="_blank">R. Superintendencia Nº 000005-2024</a></td>
+    <td valign="top" class="tlin tbd1">Autoriza viaje de servidora de la SUNAT para participar en la 18va Reunión del Comité de Auditoría de la Organización Mundial de Aduanas (OMA) a realizarse en la ciudad de Bruselas, Reino de Bélgica</td>
+    <td class="tlin tbd1" >24/01/2024</td>
+  </tr>
+   <!-- 
+ <tr>
+    <td valign="top" class="tlin tbd1"><a href="../000200-2023.pdf" target="_blank">R. Superintendencia Nº 00020<span lang="es">1</span>-2023</a></td>
+    <td valign="top" class="tlin tbd1">Resolución de Superintendencia que aprueba un medio alternativo para la presentación de la Planilla Mensual de Pagos y las declaraciones mensuales de los empleadores que tengan hasta diez trabajadores y/o diez prestadores de servicios que obtengan rentas de cuarta categoría</td>
+    <td class="tlin tbd1"><span lang="es">30.09.2023</span></td>
+    </tr> -->
+
+    <tr>
+    <td valign="top" class="tlin tbd1">
+	<a href="../000004-2024.pdf" target="_blank">R. Superintendencia Nº 000004-2024</a></td>
+    <td valign="top" class="tlin tbd1">Aprueban el porcentaje requerido para determinar el límite máximo de devolución del impuesto selectivo al consumo a que se refiere el Reglamento del Decreto de Urgencia N.º 012-2019</td>
+    <td class="tlin tbd1" >17/01/2024</td>
+    </tr>
+
+    <tr>
+    <td valign="top" class="tlin tbd1">
+	<a href="../000003-2024.pdf" target="_blank">R. Superintendencia Nº 000003-2024</a></td>
+    <td valign="top" class="tlin tbd1">Deroga la Resolución de Superintendencia N.° 000121-2021/SUNAT</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+    </tr>
+
+  <tr>
+    <td valign="top" class="tlin tbd1">
+	<a href="../000002-2024.pdf" target="_blank">R. Superintendencia Nº 000002-2024</a></td>
+    <td valign="top" class="tlin tbd1">Deja sin efecto la conformación del Comité de Activos y Pasivos de la SUNAT</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="tlin tbd1">
+	<a href="../000001-2024.pdf" target="_blank">R. Superintendencia Nº 000001-2024</a></td>
+    <td valign="top" class="tlin tbd1">Designan representantes de la SUNAT ante la Comisión Especial que representa al Estado en Controversias Internacionales de Inversión</td>
+    <td class="tlin tbd1" >&nbsp;</td>
+  </tr>
+</table>
+
+<p align="center" dir="ltr">&nbsp;</p>                                                                                                                       
+                                                                                                                                                                            
+                                                       
+                                                                                                                       
+                                                  
+<div class="clear"></div>                                                                                                                       
+                                                       
+</div>
+
+<div class="clear"></div>                                                                                                                       
+                                                       
+<!--hasta aqui--> </div>                                                                                                                       
+
+			<!--ftext-->
+							</div>
+						<!--fin col-->   
+						<!--TODO-->
+						<div id="divIndice" class="col-sm-4 col-md-3">
+							<div class="panel panel-primary">
+								<div class="panel-heading text-center negrita">ÍNDICE</div>
+
+								<!-- List group -->
+								<div class="list-group divListaIndice">
+									
+			<!--iindice-->
+                               
+                                                       
+<li>
+		    <a class="list-group-item" href="../../index.html">
+			<p class="list-group-item-text">
+			<span aria-hidden="true" class="glyphicon glyphicon-list-alt">
+			</span> <strong>Resoluciones de Superintendencias</strong>
+			</p>
+			</a></li>                                     
+                                                       
+<li>
+		    <a class="list-group-item" href="../../../direc/index.html">
+			<p class="list-group-item-text">
+			<span aria-hidden="true" class="glyphicon glyphicon-list-alt">
+			</span> Directivas
+			</p>
+			</a></li>                                                              
+                                                       
+                                                         
+                                                       
+<li>
+		    <a class="list-group-item" href="#" onclick="window.open('http://www.sunat.gob.pe/institucional/quienessomos/igo/rof/rof.html','NewWindow','toolbar=no,location=no,top=300,left=270,directories=no,status=no,menubar=no,scrollbars=yes,resizable=no,copyhistory=yes,width=680,height=400')">
+			<p class="list-group-item-text">
+			<span aria-hidden="true" class="glyphicon glyphicon-list-alt">
+			</span> Reglamento de Organización y Funciones - ROF
+			</p>
+			</a></li>                                                          
+                                                       
+<li>
+		    <a class="list-group-item" href="../../../tupa/index.html">
+			<p class="list-group-item-text">
+			<span aria-hidden="true" class="glyphicon glyphicon-list-alt">
+			</span> TUPA
+			</p>
+			</a></li>                                                                                                  
+
+			<!--findice-->
+								</div>
+							  </div>
+						</div>
+					</div><!--fin row-->
+				</div><!--fin container-->
+				<!--fdivcuerpo-->
+ 
+                                                   
+<div id="medio">                                                                                                                        
+                                                       
+<div id="cont">                                                                                                                        
+                                                       
+<div id="contenido"><!--de aqui contenidos-->                                                                               
+                                                 
+</div>                                 
+   
+<div class="clear"></div>                                
+                                                   
+</div>  
+<!-- Bloque inferior -->                                 
+
+       <div id="footerBarraLinks" class="backPlomo3">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-2 text-center divFooterBarraLink">
+                    <a href="/institucional/quienessomos/index.html" target="_parent" class="aFooterBarraLink colBlanco negrita">Institucional</a>
+                </div>
+                <div class="col-sm-2 text-center divFooterBarraLink">                    
+                    <a href="/cuentassunat/index.html" target="_parent" class="aFooterBarraLink colBlanco negrita">SUNAT Rinde Cuentas</a>
+                </div>
+                <div class="col-sm-2 text-center divFooterBarraLink">
+                    <a href="/legislacion/general/index.html" target="_parent" class="aFooterBarraLink colBlanco negrita">Legislación</a>
+                </div>
+                <div class="col-sm-2 text-center divFooterBarraLink">
+                    <a href="/estadisticasestudios/index.html" target="_parent" class="aFooterBarraLink colBlanco negrita">Estadísticas y Estudios</a>
+                </div>
+                <div class="col-sm-2 text-center divFooterBarraLink">
+                    <a href="/indicestasas/index.html" target="_parent" class="aFooterBarraLink colBlanco negrita">Indices y Tasas</a></a>
+                </div>
+                <div class="col-sm-2 text-center divFooterBarraLink">
+                    <a href="/padronesnotificaciones/index.html" class="aFooterBarraLink colBlanco negrita">Padrones y Notificaciones</a>
+                </div>
+            </div> <!--/row-->
+        </div><!--/container-->
+    </div>    
+    <div id="footerLinks"  class="backAzul1">
+    <script type="text/javascript">piePagina();</script> 
+    <!--/container-->    
+    </div>    
+    <footer id="footerPrincipal" class="colBlanco">
+	<script type="text/javascript">pieRedesSociales();
+	</script>
+    </footer>
+
+<!-- fin Bloque inferior -->                         
+
+    <script src="/p/js/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="/p/js/libs/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <script src="/p/js/apps/main.js"></script>
+  </body>
+ 
+                                                       
+</html><script id="f5_cspm">(function(){var f5_cspm={f5_p:'NIFJEALCJEBNNHBKNEAOIJEEIPIAAGHDLFEJHILMGBCLODNLNMPCMHNDPCKOJLMFLGKBFJIIAALJKFJIBKAAIHEHAAHBMDLBHOPONGAKCNMAJMHBHFJNDFGGLDLCKKGI',setCharAt:function(str,index,chr){if(index>str.length-1)return str;return str.substr(0,index)+chr+str.substr(index+1);},get_byte:function(str,i){var s=(i/16)|0;i=(i&15);s=s*32;return((str.charCodeAt(i+16+s)-65)<<4)|(str.charCodeAt(i+s)-65);},set_byte:function(str,i,b){var s=(i/16)|0;i=(i&15);s=s*32;str=f5_cspm.setCharAt(str,(i+16+s),String.fromCharCode((b>>4)+65));str=f5_cspm.setCharAt(str,(i+s),String.fromCharCode((b&15)+65));return str;},set_latency:function(str,latency){latency=latency&0xffff;str=f5_cspm.set_byte(str,40,(latency>>8));str=f5_cspm.set_byte(str,41,(latency&0xff));str=f5_cspm.set_byte(str,35,2);return str;},wait_perf_data:function(){try{var wp=window.performance.timing;if(wp.loadEventEnd>0){var res=wp.loadEventEnd-wp.navigationStart;if(res<60001){var cookie_val=f5_cspm.set_latency(f5_cspm.f5_p,res);window.document.cookie='f5avr1161293126aaaaaaaaaaaaaaaa_cspm_='+encodeURIComponent(cookie_val)+';path=/';}
+return;}}
+catch(err){return;}
+setTimeout(f5_cspm.wait_perf_data,100);return;},go:function(){var chunk=window.document.cookie.split(/\s*;\s*/);for(var i=0;i<chunk.length;++i){var pair=chunk[i].split(/\s*=\s*/);if(pair[0]=='f5_cspm'&&pair[1]=='1234')
+{var d=new Date();d.setTime(d.getTime()-1000);window.document.cookie='f5_cspm=;expires='+d.toUTCString()+';path=/;';setTimeout(f5_cspm.wait_perf_data,100);}}}}
+f5_cspm.go();}());</script>��N��h      f�f�!F��Yf��   o    O^partitionKey=%28https%2Csunat.gob.pe%29,:https://www.sunat.gob.pe/legislacion/superin/2024/indices/indcor.htm strongly-framed 1 security-info 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 request-method GET response-head HTTP/1.1 200 OK
+Date: Sat, 06 Apr 2024 19:57:21 GMT
+Content-Type: text/html
+Content-Length: 49255
+Last-Modified: Sat, 06 Apr 2024 03:07:22 GMT
+ETag: "6610bc6a-ba58"
+Access-Control-Allow-Origin: https://ww3.sunat.gob.pe
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With
+Accept-Ranges: bytes
+ original-response-headers Date: Sat, 06 Apr 2024 19:57:21 GMT
+Content-Type: text/html
+Content-Length: 49255
+Last-Modified: Sat, 06 Apr 2024 03:07:22 GMT
+Connection: keep-alive
+ETag: "6610bc6a-ba58"
+Access-Control-Allow-Origin: https://ww3.sunat.gob.pe
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With
+Accept-Ranges: bytes
+Set-Cookie: f5avraaaaaaaaaaaaaaaa_session_=IALBGFMBGIBBFHPLMDPAPIEEPLLKMKEDAFFNBLKMHBCLODNLNDNDLPNDPCMOJLMFLGKDCJIIPHKPDFIOBKAAIHEHFKGHOIKHHKHACAFKCNMAJMBNHJOPPDDGLDLCKKPA; HttpOnly; secure
+Set-Cookie: f5_cspm=1234;
+Set-Cookie: TS01df7e47=014dc399cb6c7db3d778b50081cebafc6089abe91f74d95f8d8d0d58b7079ff7f2e96266ae665b3c7f08c6d361824a130b387868f7e18f8e50e2de427a23c1d49de93c77be6d60a0654322bbf2b32326efdd209add; Path=/; Domain=.www.sunat.gob.pe
+Set-Cookie: TSf806e172027=08fe7428c8ab200084195121d8c67c7a539d890cd7278e256228d3246f9a6d5ee4088a2240b26d5b084555d9071130000cfc650201ccf85b9c8ad25652ea3792ce0b296fbc76067098ad8b99503218bdca9b85140c33dd93f7adc0c3ba21a1bc; Path=/
+ ctid 1 uncompressed-len 0 net-response-time-onstart 1640 net-response-time-onstop 2277   �g

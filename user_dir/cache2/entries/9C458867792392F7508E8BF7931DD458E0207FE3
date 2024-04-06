@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<!--[if lt IE 9]><html class="no-js lt-ie9" lang="en" dir="ltr"><![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en" dir="ltr">
+<!--<![endif]-->
+<head>
+<meta charset="utf-8">
+<!-- Web Experience Toolkit (WET) / BoÃ®te Ã  outils de l'expÃ©rience Web (BOEW)
+wet-boew.github.io/wet-boew/License-en.html / wet-boew.github.io/wet-boew/Licence-fr.html -->
+<title>Canada Gazette, Part II: Volume 158 - Canada.ca</title>
+<!-- Meta data -->
+<meta name="description" content="Browse and read editions of the Canada Gazette, Part II. This part contains all enacted regulations and statutory instruments. Regular editions are published every second Wednesday and are available online at 9 am eastern time." />
+<meta name="dcterms.description" content="Browse and read editions of the Canada Gazette, Part II. This part contains all enacted regulations and statutory instruments. Regular editions are published every second Wednesday and are available online at 9 am eastern time." />
+<meta name="dcterms.creator" content="Government of Canada, Public Services and Procurement Canada, Canada Gazette" />
+<meta name="dcterms.title" content="Canada Gazette, Part II: Volume 158 - Canada.ca" />
+<meta name="dcterms.issued" title="W3CDTF" content="2024-01-04" />
+<meta name="dcterms.modified" title="W3CDTF" content="2024-03-27" />
+<meta name="dcterms.subject" title="gccore" content="Newspapers; Public notices; Legislation; Media; English; Navigation; Regulations; Modification" />
+<meta name="dcterms.language" title="ISO639-2" content="eng" />
+<meta name="keywords" content="Government du Canada, Canada Gazette, Part II, Official regulations" />
+<!-- Meta data--> 
+<!-- Start of tete-head.html / DÃ©but de tete-head.html -->
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<!-- AA-V4-DEV --> 
+<script src="//assets.adobedtm.com/be5dfd287373/0127575cd23a/launch-f7c3e6060667.min.js"></script>
+<!-- AA-V4 -->
+<meta property="dcterms:service" content="PSPC-SPAC"/>
+<meta property="dcterms:accessRights" content="2" />
+<link href="/boew-wet/wet4.0ca/GCWeb/assets/favicon.ico" rel="icon" type="image/x-icon">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+<link rel="stylesheet" href="/boew-wet/wet4.0ca/GCWeb/css/theme.min.css">
+<noscript>
+    <link rel="stylesheet" href="/boew-wet/wet4.0ca/wet-boew/css/noscript.min.css" />
+</noscript>
+<!-- End of tete-head.html / Fin De tete-head.html -->
+</head>
+
+<body vocab="http://schema.org/" typeof="WebPage">
+<!-- Start of google.html / DÃ©but de google.html -->
+<!-- Google Tag Manager DO NOT REMOVE OR MODIFY - NE PAS SUPPRIMER OU MODIFIER -->
+<noscript>
+<iframe title="Google Tag Manager" src="//www.googletagmanager.com/ns.html?id=GTM-TLGQ9K" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer1'?'&l='+l:'';j.async=true;j.src='//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer1','GTM-TLGQ9K');</script>
+<!-- End Google Tag Manager -->
+<!-- End of google.html / Fin De google.html -->
+
+<ul id="wb-tphp">
+    <li class="wb-slc"> <a class="wb-sl" href="#wb-cont">Skip to main content</a></li>
+    <li class="wb-slc visible-sm visible-md visible-lg"> <a class="wb-sl" href="#wb-info">Skip to "About this site"</a></li>
+</ul>
+<header role="banner"> 
+    <!-- Start of header-eng.html / DÃ©but de header-eng.html -->
+<div id="wb-bnr" class="container">
+	<div class="row">
+		<section id="wb-lng" class="col-xs-3 col-sm-12 pull-right text-right">
+			<h2 class="wb-inv">Language selection</h2>
+			<ul class="list-inline mrgn-bttm-0">
+				<li> <a lang="fr" href="/cgi-bin/language.pl"><span class="hidden-xs">FranÃ§ais</span> <abbr title="FranÃ§ais" class="visible-xs h3 mrgn-tp-sm mrgn-bttm-0 text-uppercase">fr</abbr> </a> </li>
+			</ul>
+		</section>
+		<div class="brand col-xs-9 col-sm-5 col-md-4" property="publisher" typeof="GovernmentOrganization"> <a href="https://www.canada.ca/en.html" property="url"><img src="/boew-wet/wet4.0ca/GCWeb/assets/sig-blk-en.svg" alt="Government of Canada" property="logo"><span class="wb-inv"> / <span lang="fr">Gouvernement du Canada</span></span></a>
+			<meta property="name" content="Government of Canada">
+			<meta property="areaServed" typeof="Country" content="Canada">
+			<link property="logo" href="/boew-wet/wet4.0ca/GCWeb/assets/wmms-blk.svg">
+		</div>
+		<section id="wb-srch" class="col-lg-offset-4 col-md-offset-4 col-sm-offset-2 col-xs-12 col-sm-5 col-md-4">
+			<h2>Search</h2>
+			<form action="https://www.canada.ca/en/public-services-procurement/search.html" method="get" name="cse-search-box" role="search">
+			
+				<div class="form-group wb-srch-qry">
+					<label for="wb-srch-q" class="wb-inv">Search PSPC</label>
+					
+					<input id="wb-srch-q" class="wb-srch-q form-control" name="q" type="search" value="" size="34" maxlength="170" placeholder="Search PSPC">
+		
+				</div>
+				<div class="form-group submit">
+					<button type="submit" id="wb-srch-sub" class="btn btn-primary btn-small" name="wb-srch-sub"><span class="glyphicon-search glyphicon"></span><span class="wb-inv">Search</span></button>
+				</div>
+			</form>
+		</section>
+	</div>
+</div>
+<nav class="gcweb-menu" typeof="SiteNavigationElement">
+	<div class="container">
+		<h2 class="wb-inv">Menu</h2>
+		<button type="button" aria-haspopup="true" aria-expanded="false"><span class="wb-inv">Main </span>Menu <span class="expicon glyphicon glyphicon-chevron-down"></span></button>
+		<ul role="menu" aria-orientation="vertical" data-ajax-replace="https://www.canada.ca/content/dam/canada/sitemenu/sitemenu-v2-en.html">
+			<li role="presentation"><a role="menuitem" href="https://www.canada.ca/en/services/jobs.html">Jobs and the workplace</a></li>
+			<li role="presentation"><a role="menuitem" href="https://www.canada.ca/en/services/immigration-citizenship.html">Immigration and citizenship</a></li>
+			<li role="presentation"><a role="menuitem" href="https://travel.gc.ca/">Travel and tourism</a></li>
+			<li role="presentation"><a role="menuitem" href="https://www.canada.ca/en/services/business.html">Business and industry</a></li>
+			<li role="presentation"><a role="menuitem" href="https://www.canada.ca/en/services/benefits.html">Benefits</a></li>
+			<li role="presentation"><a role="menuitem" href="https://www.canada.ca/en/services/health.html">Health</a></li>
+			<li role="presentation"><a role="menuitem" href="https://www.canada.ca/en/services/taxes.html">Taxes</a></li>
+			<li role="presentation"><a role="menuitem" href="https://www.canada.ca/en/services/environment.html">Environment and natural resources</a></li>
+			<li role="presentation"><a role="menuitem" href="https://www.canada.ca/en/services/defence.html">National security and defence</a></li>
+			<li role="presentation"><a role="menuitem" href="https://www.canada.ca/en/services/culture.html">Culture, history and sport</a></li>
+			<li role="presentation"><a role="menuitem" href="https://www.canada.ca/en/services/policing.html">Policing, justice and emergencies</a></li>
+			<li role="presentation"><a role="menuitem" href="https://www.canada.ca/en/services/transport.html">Transport and infrastructure</a></li>
+			<li role="presentation"><a role="menuitem" href="https://international.gc.ca/world-monde/index.aspx?lang=eng">Canada and the world</a></li>
+			<li role="presentation"><a role="menuitem" href="https://www.canada.ca/en/services/finance.html">Money and finances</a></li>
+			<li role="presentation"><a role="menuitem" href="https://www.canada.ca/en/services/science.html">Science and innovation</a></li>
+		</ul>
+	</div>
+</nav>
+<!-- End of header-eng.html / Fin De header-eng.html -->
+
+    <nav role="navigation" id="wb-bc" class="" property="breadcrumb">
+        <h2 class="wb-inv">You are here:</h2>
+        <div class="container">
+            <div class="row">
+                <ol class="breadcrumb">
+                    <li><a href="https://www.canada.ca/en.html">Home</a></li>
+<li><a href="https://www.canada.ca/en/government/system.html">How government works</a></li>
+<li><a href="https://www.canada.ca/en/government/system/laws.html">Treaties, laws and regulations</a></li>
+
+                    <li><a href="/accueil-home-eng.html">Canada Gazette</a></li>
+                    <li><a href="/rp-pr/publications-eng.html">Publications</a></li>
+                </ol>
+            </div>
+        </div>
+    </nav>
+</header>
+<main role="main" property="mainContentOfPage" class="container"> 
+    <!-- MainContentStart -->
+    <h1 id="wb-cont">Canada Gazette, Part&nbsp;II: Volume 158</h1>
+    <div class="row">
+        <div class="col-md-12">
+            <p>Browse and read editions of the Canada Gazette, Part&nbsp;II. This part contains all enacted regulations and statutory instruments. Regular editions are published every second Wednesday and are available online at 9&nbsp;am eastern time.</p>
+            <h2>On this page</h2>
+            <ul>
+                <li><a href="#a01">Regular and extra editions</a></li>
+                <!-- <li><a href="#a02">Consolidated index</a></li>-->
+                <li><a href="#a03">More information</a></li>
+            </ul>
+            <table class="table table-hover table-bordered">
+                <caption id="a01">
+                Regular and extra editions
+                </caption>
+                <tr class="active">
+                    <th scope="col">Publication date</th>
+                    <th scope="col">Edition number</th>
+                    <th scope="col">Extra edition number</th>
+                    <th scope="col">Statutory order and regulation registration numbers</th>
+                    <th scope="col">Statutory instrument registration numbers</th>
+                    <th scope="col">Non-official HTML version</th>
+                    <th scope="col">Official PDF version</th>
+                </tr>
+                 <tr>
+                    <td>Wednesday, March&nbsp;27,&nbsp;2024</td>
+                    <td>7</td>
+                    <td><abbr title="not applicable">n/a</abbr></td>
+                    <td>SOR/2024-44 to 45</td>
+                    <td><abbr title="not applicable">n/a</abbr></td>
+                    <td><a href="/rp-pr/p2/2024/2024-03-27/html/index-eng.html">Part&nbsp;II, volume&nbsp;158, number&nbsp;7</a></td>
+                    <td><a href="/rp-pr/p2/2024/2024-03-27/pdf/g2-15807.pdf">Part&nbsp;II, volume&nbsp;158, number&nbsp;7 (569KB)</a></td>
+                </tr>
+                  <tr>
+                    <td>Wednesday, March&nbsp;13,&nbsp;2024</td>
+                    <td>6</td>
+                    <td><abbr title="not applicable">n/a</abbr></td>
+                    <td>SOR/2024-32 to 43</td>
+                    <td>SI/2024-13 to 14</td>
+                    <td><a href="/rp-pr/p2/2024/2024-03-13/html/index-eng.html">Part&nbsp;II, volume&nbsp;158, number&nbsp;6</a></td>
+                    <td><a href="/rp-pr/p2/2024/2024-03-13/pdf/g2-15806.pdf">Part&nbsp;II, volume&nbsp;158, number&nbsp;6 (2.3MB)</a></td>
+                </tr>
+                <tr>
+                    <td>Wednesday, February&nbsp;28,&nbsp;2024</td>
+                    <td>5</td>
+                    <td><abbr title="not applicable">n/a</abbr></td>
+                    <td>SOR/2024-20 to 29</td>
+                    <td>SI/2024-8 to 9</td>
+                    <td><a href="/rp-pr/p2/2024/2024-02-28/html/index-eng.html">Part&nbsp;II, volume&nbsp;158, number&nbsp;5</a></td>
+                    <td><a href="/rp-pr/p2/2024/2024-02-28/pdf/g2-15805.pdf">Part&nbsp;II, volume&nbsp;158, number&nbsp;5 (4.7MB)</a></td>
+                </tr>
+                <tr>
+                    <td>Wednesday, February&nbsp;14,&nbsp;2024</td>
+                    <td>4</td>
+                    <td><abbr title="not applicable">n/a</abbr></td>
+                    <td>SOR/2024-4 to 19</td>
+                    <td>SI/2024-5 to 7</td>
+                    <td><a href="/rp-pr/p2/2024/2024-02-14/html/index-eng.html">Part&nbsp;II, volume&nbsp;158, number&nbsp;4</a></td>
+                    <td><a href="/rp-pr/p2/2024/2024-02-14/pdf/g2-15804.pdf">Part&nbsp;II, volume&nbsp;158, number&nbsp;4 (1.9MB)</a></td>
+                </tr>
+                <tr>
+                    <td>Wednesday, January&nbsp;31,&nbsp;2024</td>
+                    <td>3</td>
+                    <td><abbr title="not applicable">n/a</abbr></td>
+                    <td>SOR/2024-2 to 3</td>
+                    <td>SI/2024-4</td>
+                    <td><a href="/rp-pr/p2/2024/2024-01-31/html/index-eng.html">Part&nbsp;II, volume&nbsp;158, number&nbsp;3</a></td>
+                    <td><a href="/rp-pr/p2/2024/2024-01-31/pdf/g2-15803.pdf">Part&nbsp;II, volume&nbsp;158, number&nbsp;3 (406KB)</a></td>
+                </tr>
+                <tr>
+                    <td>Wednesday, January&nbsp;17,&nbsp;2024</td>
+                    <td>2</td>
+                    <td><abbr title="not applicable">n/a</abbr></td>
+                    <td>SOR/2024-1</td>
+                    <td>SI/2024-3</td>
+                    <td><a href="/rp-pr/p2/2024/2024-01-17/html/index-eng.html">Part&nbsp;II, volume&nbsp;158, number&nbsp;2</a></td>
+                    <td><a href="/rp-pr/p2/2024/2024-01-17/pdf/g2-15802.pdf">Part&nbsp;II, volume&nbsp;158, number&nbsp;2 (284KB)</a></td>
+                </tr>
+                <tr>
+                    <td>Wednesday, January&nbsp;3,&nbsp;2024</td>
+                    <td>1</td>
+                    <td><abbr title="not applicable">n/a</abbr></td>
+                    <td>SOR/2023-276 to 288</td>
+                    <td>SI/2024-1 to 2</td>
+                    <td><a href="/rp-pr/p2/2024/2024-01-03/html/index-eng.html">Part&nbsp;II, volume&nbsp;158, number&nbsp;1</a></td>
+                    <td><a href="/rp-pr/p2/2024/2024-01-03/pdf/g2-15801.pdf">Part&nbsp;II, volume&nbsp;158, number&nbsp;1 (1.7MB)</a></td>
+                </tr>
+            </table>
+            <p>Nota: Please contact the Privy Council Office regarding any errors in the consolidated index at <a href="mailto:cindex@pco-bcp.gc.ca">cindex@pco-bcp.gc.ca</a>.</p>
+            <h2 id="a03">More information</h2>
+            <ul>
+                <li><a href="/cg-gc/lm-sp-eng.html#a2">Parts of the Canada Gazette</a>: Learn more about what is published in Part&nbsp;II and the consolidated index</li>
+                <li><a href="/cg-gc/lm-sp-eng.html#a3">Publishing the Canada Gazette</a>: Learn the difference between the official and non-official version</li>
+            </ul>
+        </div>
+    </div>
+    <div class="row pagedetails">
+        <div class="col-sm-5 col-xs-12 datemod">
+            <dl id="wb-dtmd">
+                <dt>Date modified:</dt>
+                <dd>
+                    <time property="dateModified"> 
+                         
+                        2024-03-27 
+                    </time>
+                </dd>
+            </dl>
+        </div>
+    </div>
+    <!-- MainContentEnd --> 
+</main>
+<!-- Start of footer-eng.html / DÃ©but de footer-eng.html -->
+<footer id="wb-info">
+	<div class="landscape">
+		<nav class="container wb-navcurr">
+			<h2 class="wb-inv">About government</h2>
+			<ul class="list-unstyled colcount-sm-2 colcount-md-3">
+				<li><a href="https://www.canada.ca/en/contact.html">Contact us</a></li>
+				<li><a href="https://www.canada.ca/en/government/dept.html">Departments and agencies</a></li>
+				<li><a href="https://www.canada.ca/en/government/publicservice.html">Public service and military</a></li>
+				<li><a href="https://www.canada.ca/en/news.html">News</a></li>
+				<li><a href="https://www.canada.ca/en/government/system/laws.html">Treaties, laws and regulations</a></li>
+				<li><a href="https://www.canada.ca/en/transparency/reporting.html">Government-wide reporting</a></li>
+				<li><a href="https://pm.gc.ca/eng">Prime Minister</a></li>
+				<li><a href="https://www.canada.ca/en/government/system.html">How government works</a></li>
+				<li><a href="https://open.canada.ca/en/">Open government</a></li>
+			</ul>
+		</nav>
+	</div>
+	<div class="brand">
+		<div class="container">
+			<div class="row">
+				<nav class="col-md-9 col-lg-10 ftr-urlt-lnk">
+					<h2 class="wb-inv">About this site</h2>
+					<ul>
+						<li><a href="https://www.canada.ca/en/social.html">Social media</a></li>
+						<li><a href="https://www.canada.ca/en/mobile.html">Mobile applications</a></li>
+						<li><a href="https://www1.canada.ca/en/newsite.html">About Canada.ca</a></li>
+						<li><a href="https://www.canada.ca/en/transparency/terms.html">Terms and conditions</a></li>
+						<li><a href="https://www.canada.ca/en/transparency/privacy.html">Privacy</a></li>
+					</ul>
+				</nav>
+				<div class="col-xs-6 visible-sm visible-xs tofpg"> <a href="#wb-cont">Top of page <span class="glyphicon glyphicon-chevron-up"></span></a> </div>
+				<div class="col-xs-6 col-md-3 col-lg-2 text-right"> <img src="/boew-wet/wet4.0ca/GCWeb/assets/wmms-blk.svg" alt="Symbol of the Government of Canada"> </div>
+			</div>
+		</div>
+	</div>
+</footer>
+<!-- End of footer-eng.html / Fin De footer-eng.html --> 
+
+ 
+<!-- Start of script_pied-script_footer.html / DÃ©but de script_pied-script_footer.html -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.js"></script>
+<script src="/boew-wet/wet4.0ca/wet-boew/js/wet-boew.min.js"></script>
+<script src="/boew-wet/wet4.0ca/GCWeb/js/theme.min.js"></script>
+<!-- AA-V4 --> <script type="text/javascript">_satellite.pageBottom();</script>
+<!-- End of script_pied-script_footer.html / Fin De script_pied-script_footer.html --> 
+ 
+<script type="text/javascript">var webpub = webpub || { piwikSiteId: 57 };</script>
+<script type="text/javascript" src="/includes/piwik/piwik-min.js"></script>
+<noscript><p><img src="http://stats.tpsgc-pwgsc.gc.ca/piwik.php?idsite=57" style="border:0;" alt="" /></p></noscript>
+</body>
+</html>”W½Á|[           f®F¿¶²f­ò   ^    O^partitionKey=%28https%2Cgazette.gc.ca%29,:https://gazette.gc.ca/rp-pr/p2/2024/index-eng.html strongly-framed 1 security-info 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 request-method GET response-head HTTP/1.1 200 OK
+Date: Sat, 06 Apr 2024 20:17:57 GMT
+Server: Apache
+Accept-Ranges: bytes
+Content-Type: text/html
+ original-response-headers Date: Sat, 06 Apr 2024 20:17:57 GMT
+Server: Apache
+Accept-Ranges: bytes
+Keep-Alive: timeout=15, max=100
+Connection: Keep-Alive
+Transfer-Encoding: chunked
+Content-Type: text/html
+ ctid 1 uncompressed-len 0   GÂ

@@ -30,35 +30,16 @@ This script automates the task of capturing full-page screenshots of multiple we
 
 These limitations are being actively addressed by the developer to enhance the script's functionality and user experience. Your feedback and suggestions are invaluable in driving future improvements.
 ## How to Use:
-Notes: Ensure you have Python 3.x installed and Required Libraries/Modules:
-```bash
-Microsoft Windows [Version 10.0.22631.3155]
-(c) Microsoft Corporation. All rights reserved.
+Notes: Ensure you have latest Python installed:
 
-C:\Users\I51\OneDrive\Desktop\AutoSSFolder>pip install playwright
-```
-
-```bash
-Microsoft Windows [Version 10.0.22631.3155]
-(c) Microsoft Corporation. All rights reserved.
-
-C:\Users\I51\OneDrive\Desktop\AutoSSFolder>pip install pandas
-```
-
-- Download the script and the "agent.xlxs" file from [this link.](https://github.com/asdJPasc/AutoSS/archive/refs/heads/master.zip)
-
+- Download the script [HERE](https://github.com/asdJPasc/AutoSS/archive/refs/heads/master.zip)
 - Extract the downloaded ZIP file to your desktop.
-
-- Open the extracted folder.
-
+- Open the extracted folder named "AutoSS-master".
+- Inside the folder, locate and double-click on the "install.py" file.
 - Open the "agent.xlxs" file using Microsoft Excel or a compatible spreadsheet program.
-
 - In the spreadsheet, set the URLs, Name(RowID), Folder, and Extension.
-
 - Save the "agent.xlxs" file after configuring the settings.
-
 - Return to the folder containing the script and the "agent.xlxs" file.
-
 - Run the script by double-clicking the auto.py.
 ## Author
 
