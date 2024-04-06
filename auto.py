@@ -12,7 +12,7 @@ from playwright.sync_api import sync_playwright, TimeoutError
 
 #USER SETTINGS
 cycle = 3200 #Capture screenshot per batch.
-#captureDelay = 7 #Delay timer before capturing screenshot to fully load the website
+#captureDelay = 7 #Delay timer before capturing screenshot.
 browserless = True
 
 def check_playwright():
