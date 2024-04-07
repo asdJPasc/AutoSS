@@ -34,12 +34,26 @@ def cmd(title):
     ctypes.windll.kernel32.SetConsoleTitleW(title)
 
 def detect_captcha(page):
-    captcha_keywords = {'captcha', 'CAPTCHA', 'sendo exibido?', 'Verify you are human', 'Verifying you are human'}
+    captcha_keywords = {'captcha', 
+                        'CAPTCHA', 
+                        'sendo exibido?', 
+                        'Verify you are human', 
+                        'Verifying you are human'}
     body_text = page.query_selector('body').text_content()
     return any(keyword in body_text for keyword in captcha_keywords)
 
 def click_if_visible(page, selectors):
-    accept_texts = ["Accept", "I Accept", "Agree", "Save and Close", "Accept additional cookies", "Dismiss", "Yes, these cookies are OK", "Prosseguir", "Accept all cookies", "I understand and I accept the use of cookies", "Accept all", "Aceptar", "Aceptar y continuar", "Accept All Cookies", "Hide this message"]
+    accept_texts = ["Accept", 
+                    "I Accept", 
+                    "Agree", 
+                    "Save and Close", 
+                    "Accept additional cookies", 
+                    "Dismiss", "Yes, these cookies are OK", 
+                    "Prosseguir", "Accept all cookies", 
+                    "I understand and I accept the use of cookies", 
+                    "Accept all", "Aceptar", 
+                    "Aceptar y continuar", 
+                    "Accept All Cookies", "Hide this message"]
     for selector in selectors:
         for text in accept_texts:
             elements = page.query_selector_all(selector)
@@ -89,7 +103,7 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
     while attempt <= max_attempts:
         try:
             #time.sleep(captureDelay)
-            remove_elements(page) #REMOVE HEADER AND FOOTER OF THE PAGE
+            remove_elements(page)
             selectors = [
                 'button',
                 'button[type="button"]',
@@ -114,7 +128,6 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
                 if page.locator(locator).is_visible():
                     page.locator(locator).click()
 
-            
             # CUSTOM NAVIGATION BEFORE CAPTURING OF SCREENSHOT END #
 
             page.wait_for_load_state('networkidle')
@@ -138,16 +151,16 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
             page.screenshot(path=screenshot_path, full_page=True)
 
             cmdTimestamp = datetime.now().strftime("%I:%M:%S %p")
-            print(f"{Fore.GREEN}Screenshot of row ID {row_id:04} taken at {cmdTimestamp} has been saved.{Fore.RESET}")
+            print(f"{Fore.GREEN}Screenshot of row ID {Fore.WHITE}{row_id:04}{Fore.RESET} {Fore.GREEN}taken at {cmdTimestamp} has been saved.{Fore.RESET}")
             break
 
         except Exception as e:
-            print(f"{Fore.RED}Error capturing screenshot for row ID {row_id:04}: {e}. Attempt {attempt} of {max_attempts}{Fore.RESET}")
+            print(f"{Fore.RED}Error capturing screenshot for row ID {Fore.WHITE}{row_id:04}{Fore.RESET}: {Fore.RED}{e}. Attempt {attempt} of {max_attempts}.{Fore.RESET}")
             attempt += 1
             page.reload()
 
         except TimeoutError:
-            print(f"Timeout exceeded while navigating to row ID: {row_id:04}.")
+            print(f"Timeout exceeded while navigating to row ID: {Fore.WHITE}{row_id:04}{Fore.RESET}.")
             attempt += 1
             page.reload()
 
@@ -160,7 +173,7 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
                 break
 
     if attempt > max_attempts:
-        print(f"{Fore.YELLOW}Skipping URL {url} after {max_attempts} attempts. Moving to next URL.{Fore.RESET}")
+        print(f"{Fore.RED}Skipping URL {Fore.WHITE}{url}{Fore.RESET} {Fore.RED}after {max_attempts} attempts. Moving to next URL.{Fore.RESET}")
 
     if not page.is_closed():
         page.close()
@@ -179,7 +192,7 @@ def process_excel_data(file_path):
 
         for index, row in df.iterrows():
             url = row['URL']
-            row_id = f"{row['Name']:04}"
+            row_id = f"{row['RowID']:04}"
             folder = f"{row['Folder']:04}".replace(" ", "")
             extension = row['Extension']
 
@@ -194,16 +207,15 @@ def process_excel_data(file_path):
 def main():
     os.system('cls')
     check_playwright()
-    cmd(decode_base64("STUxIFNjcmlwdA=="))
-    stringCol = Fore.CYAN
-    print(stringCol + decode_base64("CiAgICAgICAgICAgICAgICAgICAgICAkJFwgICAgICAgICAgICAgICAgICAgJCRJNTEkXCAgICQkSTUxJFwgIAogICAgICAgICAgICAgICAgICAgICAgJCQgfCAgICAgICAgICAgICAgICAgJCQgIF9fJCRcICQkICBfXyQkXCAKICRJNTEkJFwgICQkXCAgICQkXCAkSTUxJCRcICAgICRJNTEkJFwgICAgICQkIC8gIFxfX3wkJCAvICBcX198CiBcX19fXyQkXCAkJCB8ICAkJCB8XF8kJCAgX3wgICQkICBfXyQkXCAgICBcJEk1MSQkXCAgXCRJNTEkJFwgIAogJCQkJCQkJCB8JCQgfCAgJCQgfCAgJCQgfCAgICAkJCAvICAkJCB8ICAgIFxfX19fJCRcICBcX19fXyQkXCAKJCQgIF9fJCQgfCQkIHwgICQkIHwgICQkIHwkJFwgJCQgfCAgJCQgfCAgICQkXCAgICQkIHwkJFwgICAkJCB8ClwkSTUxJCQkIHxcJEk1MSQkICB8ICBcJCQkJCAgfFwkSTUxJCQgIHwkJFxcJCRJNTEkICB8XCQkSTUxJCAgfAogXF9fX19fX198IFxfX19fX18vICAgIFxfX19fLyAgXF9fX19fXy8gXF9ffFxfX19fX18vICBcX19fX19fLyAKCi0tLS0tLS04PC0tLS0tLS0tLS0tLS1bIENvZGVkIHdpdGgg4p2k77iPIF0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0K") + Fore.RESET)
+    cmd(decode_base64("STUxIGF1dG9TUyB2ZXIuIDM="))
+    print(Fore.CYAN + decode_base64("CiAgICAgICAgICAgICAgICAgICAgICAkJFwgICAgICAgICAgICAgICAgICAgJCRJNTEkXCAgICQkSTUxJFwgIAogICAgICAgICAgICAgICAgICAgICAgJCQgfCAgICAgICAgICAgICAgICAgJCQgIF9fJCRcICQkICBfXyQkXCAKICRJNTEkJFwgICQkXCAgICQkXCAkSTUxJCRcICAgICRJNTEkJFwgICAgICQkIC8gIFxfX3wkJCAvICBcX198CiBcX19fXyQkXCAkJCB8ICAkJCB8XF8kJCAgX3wgICQkICBfXyQkXCAgICBcJEk1MSQkXCAgXCRJNTEkJFwgIAogJCQkJCQkJCB8JCQgfCAgJCQgfCAgJCQgfCAgICAkJCAvICAkJCB8ICAgIFxfX19fJCRcICBcX19fXyQkXCAKJCQgIF9fJCQgfCQkIHwgICQkIHwgICQkIHwkJFwgJCQgfCAgJCQgfCAgICQkXCAgICQkIHwkJFwgICAkJCB8ClwkSTUxJCQkIHxcJEk1MSQkICB8ICBcJCQkJCAgfFwkSTUxJCQgIHwkJFxcJCRJNTEkICB8XCQkSTUxJCAgfAogXF9fX19fX198IFxfX19fX18vICAgIFxfX19fLyAgXF9fX19fXy8gXF9ffFxfX19fX18vICBcX19fX19fLyAKCi0tLS0tLS04PC0tLS0tLS0tLS0tLS1bIENvZGVkIHdpdGgg4p2k77iPIF0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0K") + Fore.RESET)
     excel_file_path = "agents.xlsx"
     try:
         cycle_count = 0
 
         while True:
             cycle_count += 1
-            print(f"{Fore.CYAN}Starting cycle #{cycle_count}\n")
+            print(f"{Fore.WHITE}Starting cycle #{cycle_count}{Fore.RESET}\n")
             process_excel_data(excel_file_path)
             time.sleep(cycle)
     except KeyboardInterrupt:
