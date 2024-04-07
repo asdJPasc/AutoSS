@@ -39,7 +39,7 @@ Notes: Ensure you have latest Python installed:
 - Open the "agent.xlxs" file using Microsoft Excel or a compatible spreadsheet program.
 - In the spreadsheet, set the URLs, RowID, Folder, and Extension.
 - Save the "agent.xlxs" file after configuring the settings.
-- Return to the folder containing the script and the "agent.xlxs" file.
+- Return to the folder containing the script and the "agents.xlxs" file.
 - Run the script by double-clicking the auto.py.
 ## Author
 
