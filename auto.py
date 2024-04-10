@@ -1,6 +1,7 @@
 #I51/JPascual
 import subprocess
 import os
+import sys
 import base64
 import ctypes
 import time
@@ -10,10 +11,8 @@ from datetime import datetime
 from colorama import Fore
 from playwright.sync_api import sync_playwright, TimeoutError
 
-#USER SETTINGS
-cycle = 3200 #Capture screenshot per batch.
-#captureDelay = 7 #Delay timer before capturing screenshot.
-browserless = True
+cycle = 3200
+browserless = True if len(sys.argv) > 1 and sys.argv[1] == "False" else False
 
 def check_playwright():
     try:
@@ -102,7 +101,8 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
 
     while attempt <= max_attempts:
         try:
-            #time.sleep(captureDelay)
+            captureDelay = 0
+            time.sleep(captureDelay)
             remove_elements(page)
             selectors = [
                 'button',
