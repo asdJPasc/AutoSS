@@ -1,0 +1,719 @@
+/*
+ *	jQuery dotdotdot 3.2.2
+ *	@requires jQuery 1.7.0 or later
+ *
+ *	dotdotdot.frebsite.nl
+ *
+ *	Copyright (c) Fred Heusschen
+ *	www.frebsite.nl
+ *
+ *	License: CC-BY-NC-4.0
+ *	http://creativecommons.org/licenses/by-nc/4.0/
+ */
+
+(function( $ ) {
+	'use strict';
+	
+	var _PLUGIN_    = 'dotdotdot';
+	var _VERSION_   = '3.2.2';
+
+	if ( $[ _PLUGIN_ ] && $[ _PLUGIN_ ].version > _VERSION_ )
+	{
+		return;
+	}
+
+
+
+	/*
+		The class
+	*/
+	$[ _PLUGIN_ ] = function( $container, opts )
+	{
+		this.$dot 	= $container;
+		this.api	= [ 'getInstance', 'truncate', 'restore', 'destroy', 'watch', 'unwatch' ];
+		this.opts	= opts;
+
+		var oldAPI = this.$dot.data( _PLUGIN_ );
+		if ( oldAPI )
+		{
+			oldAPI.destroy();
+		}
+
+		this.init();
+		this.truncate();
+
+		if ( this.opts.watch )
+		{
+			this.watch();
+		}
+
+		return this;
+	};
+
+	$[ _PLUGIN_ ].version 	= _VERSION_;
+	$[ _PLUGIN_ ].uniqueId 	= 0;
+
+	$[ _PLUGIN_ ].defaults  = {
+		ellipsis		: '\u2026 ',
+		callback		: function( isTruncated ) {},
+		truncate 		: 'word',
+		tolerance		: 0,
+		keep			: null,
+		watch			: 'window',
+		height 			: null
+	};
+
+
+	$[ _PLUGIN_ ].prototype = {
+
+		init: function()
+		{
+			this.watchTimeout		= null;
+			this.watchInterval		= null;
+			this.uniqueId 			= $[ _PLUGIN_ ].uniqueId++;
+			this.originalStyle		= this.$dot.attr( 'style' ) || '';
+			this.originalContent 	= this._getOriginalContent();
+			
+			if ( this.$dot.css( 'word-wrap' ) !== 'break-word' )
+			{
+				this.$dot.css( 'word-wrap', 'break-word' );
+			}
+			if ( this.$dot.css( 'white-space' ) === 'nowrap' )
+			{
+				this.$dot.css( 'white-space', 'normal' );
+			}
+
+			if ( this.opts.height === null )
+			{
+				this.opts.height = this._getMaxHeight();
+			}
+
+			if ( typeof this.opts.ellipsis == 'string' )
+			{
+				this.opts.ellipsis = document.createTextNode( this.opts.ellipsis );
+			}
+		},
+
+		getInstance: function()
+		{
+			return this;
+		},
+
+		truncate: function()
+		{
+			var that = this;
+
+
+			//	Add inner node for measuring the height
+			this.$inner = this.$dot
+				.wrapInner( '<div />' )
+				.children()
+				.css({
+					'display'	: 'block',
+					'height'	: 'auto',
+					'width'		: 'auto',
+					'border'	: 'none',
+					'padding'	: 0,
+					'margin'	: 0
+				});
+
+
+			//	Set original content
+			this.$inner
+				.empty()
+				.append( this.originalContent.clone( true ) );
+
+
+			//	Get max height
+			this.maxHeight = this._getMaxHeight();
+
+
+			//	Truncate the text
+			var isTruncated = false;
+			if ( !this._fits() )
+			{
+				isTruncated = true;
+				this._truncateToNode( this.$inner[ 0 ] );
+			}
+
+			this.$dot[ isTruncated ? 'addClass' : 'removeClass' ]( _c.truncated );
+
+
+			//	Remove inner node
+			this.$inner.replaceWith( this.$inner.contents() );
+			this.$inner = null;
+
+
+			//	 Callback
+			this.opts.callback.call( this.$dot[ 0 ], isTruncated );
+
+			return isTruncated;
+		},
+
+		restore: function()
+		{
+			this.unwatch();
+
+			this.$dot
+				.empty()
+				.append( this.originalContent )
+				.attr( 'style', this.originalStyle )
+				.removeClass( _c.truncated );
+		},
+
+		destroy: function()
+		{
+			this.restore();
+			this.$dot.data( _PLUGIN_, null );
+		},
+
+		watch: function()
+		{
+			var that = this;
+
+			this.unwatch();
+
+			var oldSizes = {};
+
+			if ( this.opts.watch == 'window' )
+			{
+				$wndw.on(
+					_e.resize + that.uniqueId,
+					function( e )
+					{
+						if ( that.watchTimeout )
+						{
+							clearTimeout( that.watchTimeout );
+						}
+						that.watchTimeout = setTimeout(
+							function() {
+
+								oldSizes = that._watchSizes( oldSizes, $wndw, 'width', 'height' );
+
+							}, 100
+						);
+					}
+				);
+
+			}
+			else
+			{
+				this.watchInterval = setInterval(
+					function()
+					{
+						oldSizes = that._watchSizes( oldSizes, that.$dot, 'innerWidth', 'innerHeight' );
+
+					}, 500
+				);
+			}
+		},
+
+		unwatch: function()
+		{
+			$wndw.off( _e.resize + this.uniqueId );
+
+			if ( this.watchInterval )
+			{
+				clearInterval( this.watchInterval );
+			}
+
+			if ( this.watchTimeout )
+			{
+				clearTimeout( this.watchTimeout );
+			}
+		},
+
+		_api: function()
+		{
+			var that = this,
+				api = {};
+
+			$.each( this.api,
+				function( i )
+				{
+					var fn = this;
+					api[ fn ] = function()
+					{
+						var re = that[ fn ].apply( that, arguments );
+						return ( typeof re == 'undefined' ) ? api : re;
+					};
+				}
+			);
+			return api;
+		},
+
+		_truncateToNode: function( _elem )
+		{
+
+			var that = this;
+
+			var _coms = [],
+				_elms = [];
+
+			//	Empty the node 
+			//		-> replace all contents with comments
+			$(_elem)
+				.contents()
+				.each(
+					function()
+					{
+						var $e = $(this);
+						if ( !$e.hasClass( _c.keep ) )
+						{
+							var c = document.createComment( '' );
+							$e.replaceWith( c );
+
+							_elms.push( this );
+							_coms.push( c );
+						}
+					}
+				);
+
+			if ( !_elms.length )
+			{
+				return;
+			}
+
+			//	Re-fill the node 
+			//		-> replace comments with contents until it doesn't fit anymore
+			for ( var e = 0; e < _elms.length; e++ )
+			{
+
+				$(_coms[ e ]).replaceWith( _elms[ e ] );
+
+				$(_elms[ e ]).append( this.opts.ellipsis );
+				var fits = this._fits();
+				$(this.opts.ellipsis, _elms[ e ]).remove();
+
+				if ( !fits )
+				{
+					if ( this.opts.truncate == 'node' && e > 1 )
+					{
+						$(_elms[ e - 2 ]).remove();
+						return;
+					}
+					break;
+				}
+			}
+
+			//	Remove left over comments
+			for ( var c = e; c < _coms.length; c++ )
+			{
+				$(_coms[ c ]).remove();
+			}
+
+			//	Get last node 
+			//		-> the node that overflows
+
+			var _last = _elms[ Math.max( 0, Math.min( e, _elms.length - 1 ) ) ];
+
+			//	Border case
+			//		-> the last node with only an ellipsis in it...
+			if ( _last.nodeType == 1 )
+			{
+
+				var $e = $('<' + _last.nodeName + ' />');
+				$e.append( this.opts.ellipsis );
+
+				$(_last).replaceWith( $e );
+
+				//	... fits
+				//		-> Restore the full last node
+				if ( this._fits() )
+				{
+					$e.replaceWith( _last );
+				}
+
+				//	... doesn't fit
+				//		-> remove it and go back one node
+				else
+				{
+					$e.remove();
+					_last = _elms[ Math.max( 0, e - 1 ) ];
+				}
+			}
+
+			//	Proceed inside last node
+			if ( _last.nodeType == 1 )
+			{
+				this._truncateToNode( _last );
+			}
+			else
+			{
+				this._truncateToWord( _last );
+			}
+		},
+
+		_truncateToWord: function( _elem )
+		{
+
+			var e = _elem;
+
+			var that = this;
+
+			var txt = this.__getTextContent( e ),
+				sep = ( txt.indexOf( ' ' ) !== -1 ) ? ' ' : '\u3000',
+				arr = txt.split( sep ),
+				str = '';
+
+			for ( var a = arr.length; a >= 0; a-- )
+			{
+				str = arr.slice( 0, a ).join( sep );
+
+				that.__setTextContent( e, that._addEllipsis( str ) );
+
+				if ( that._fits() )
+				{
+					if ( that.opts.truncate == 'letter' )
+					{
+						that.__setTextContent( e, arr.slice( 0, a + 1 ).join( sep ) );
+						that._truncateToLetter( e );
+					}
+					break;
+				}
+			}
+		},
+
+		_truncateToLetter: function( e )
+		{
+			var that = this;
+
+			var txt = this.__getTextContent( e ),
+				arr = txt.split( '' ),
+				str = '';
+
+			for ( var a = arr.length; a >= 0; a-- )
+			{
+				str = arr.slice( 0, a ).join( '' );
+
+				if ( !str.length )
+				{
+					continue;
+				}
+
+				that.__setTextContent( e, that._addEllipsis( str ) );
+
+				if ( that._fits() )
+				{
+					break;
+				}
+			}
+		},
+
+		_fits: function()
+		{
+			return ( this.$inner.innerHeight() <= this.maxHeight + this.opts.tolerance );
+		},
+
+		_addEllipsis: function( txt )
+		{
+			var remove = [' ', '\u3000', ',', ';', '.', '!', '?'];
+
+			while ( $.inArray( txt.slice( -1 ), remove ) > -1 )
+			{
+				txt = txt.slice( 0, -1 );
+			}
+			txt += this.__getTextContent( this.opts.ellipsis );
+
+			return txt;
+		},
+
+		_getOriginalContent: function()
+		{
+			var that = this;
+
+			//	Add "keep" class to nodes to keep
+			this.$dot
+				.find( 'script, style' )
+				.addClass( _c.keep );
+
+			if ( this.opts.keep )
+			{
+				this.$dot
+					.find( this.opts.keep )
+					.addClass( _c.keep );
+			}
+
+			//	Filter out unneeded whitespace
+			this.$dot
+				.find( '*' )
+				.not( '.' + _c.keep )
+				.add( this.$dot )
+				.contents()
+				.each(
+					function()
+					{
+
+						var e = this,
+							$e = $(this);
+
+						//	Text nodes
+						if ( e.nodeType == 3 )
+						{
+
+							//	Remove whitespace where it does not take up space in the DOM
+							if ( $.trim( that.__getTextContent( e ) ) == '' )
+							{
+								if ( $e.parent().is( 'table, thead, tbody, tfoot, tr, dl, ul, ol, video' ) )
+								{
+									$e.remove();
+									return;
+								}
+								if ( $e.prev().is( 'div, p, table, td, td, dt, dd, li' ) )
+								{
+									$e.remove();
+									return;
+								}
+								if ( $e.next().is( 'div, p, table, td, td, dt, dd, li' ) )
+								{
+									$e.remove();
+									return;
+								}
+								if ( !$e.prev().length )
+								{
+									$e.remove();
+									return;
+								}
+								if ( !$e.next().length )
+								{
+									$e.remove();
+									return;
+								}
+							}
+						}
+
+						//	Comment nodes
+						else if ( e.nodeType == 8 )
+						{
+							$e.remove();
+						}
+
+					}
+				);
+
+			return this.$dot.contents();
+		},
+
+		_getMaxHeight: function()
+		{
+			if ( typeof this.opts.height == 'number' )
+			{
+				return this.opts.height;
+			}
+
+			//	Find smallest CSS height
+			var arr = [ 'maxHeight', 'height' ],
+				hgh = 0;
+ 
+			for ( var a = 0; a < arr.length; a++ )
+			{
+				hgh = window.getComputedStyle( this.$dot[ 0 ] )[ arr[ a ] ];
+				if ( hgh.slice( -2 ) == 'px' )
+				{
+					hgh = parseFloat( hgh );
+					break;
+				}
+			}
+
+			//	Remove padding-top/bottom when needed.
+			var arr = [];
+			switch ( this.$dot.css( 'boxSizing' ) )
+			{
+				case 'border-box':
+					arr.push( 'borderTopWidth' );
+					arr.push( 'borderBottomWidth' );
+					//	no break -> padding needs to be added too
+
+				case 'padding-box':
+					arr.push( 'paddingTop' );
+					arr.push( 'paddingBottom' );
+					break;
+			}
+			for ( var a = 0; a < arr.length; a++ )
+			{
+				var p = window.getComputedStyle( this.$dot[ 0 ] )[ arr[ a ] ];
+				if ( p.slice( -2 ) == 'px' )
+				{
+					hgh -= parseFloat( p );
+				}
+			}
+
+			//	Sanitize
+			return Math.max( hgh, 0 );
+		},
+
+		_watchSizes: function( oldSizes, $elem, width, height )
+		{
+			if ( this.$dot.is( ':visible' ) )
+			{
+				var newSizes = {
+					'width'		: $elem[ width  ](),
+					'height'	: $elem[ height ]()
+				};
+
+				if ( oldSizes.width != newSizes.width || oldSizes.height != newSizes.height )
+				{
+					this.truncate();
+				}
+
+				return newSizes;
+			}
+			return oldSizes;
+		},
+
+		__getTextContent: function( elem )
+		{
+			var arr = [ 'nodeValue', 'textContent', 'innerText' ];
+			for ( var a = 0; a < arr.length; a++ )
+			{
+				if ( typeof elem[ arr[ a ] ] == 'string' )
+				{
+					return elem[ arr[ a ] ];
+				}
+			}
+			return '';
+		},
+		__setTextContent: function( elem, content )
+		{
+			var arr = [ 'nodeValue', 'textContent', 'innerText' ];
+			for ( var a = 0; a < arr.length; a++ )
+			{
+				elem[ arr[ a ] ] = content;
+			}
+		}
+	};
+
+
+
+	/*
+		The jQuery plugin
+	*/
+	$.fn[ _PLUGIN_ ] = function( opts )
+	{
+		initPlugin();
+
+		opts = $.extend( true, {}, $[ _PLUGIN_ ].defaults, opts );
+
+		return this.each(
+			function()
+			{
+				$(this).data( _PLUGIN_, new $[ _PLUGIN_ ]( $(this), opts )._api() );
+			}
+		);
+	};
+
+
+
+	/*
+		Global variables
+	*/
+	var _c, _d, _e, $wndw;
+
+	function initPlugin()
+	{
+		$wndw = $(window);
+
+		//	Classnames, Datanames, Eventnames
+		_c = {};
+		_d = {};
+		_e = {};
+
+		$.each( [ _c, _d, _e ],
+			function( i, o )
+			{
+				o.add = function( a )
+				{
+					a = a.split( ' ' );
+					for ( var b = 0, l = a.length; b < l; b++ )
+					{
+						o[ a[ b ] ] = o.ddd( a[ b ] );
+					}
+				};
+			}
+		);
+
+		//	Classnames
+		_c.ddd = function( c ) { return 'ddd-' + c; };
+		_c.add( 'truncated keep' );
+
+		//	Datanames
+		_d.ddd = function( d ) { return 'ddd-' + d; };
+
+		//	Eventnames
+		_e.ddd = function( e ) { return e + '.ddd'; };
+		_e.add( 'resize' );
+
+
+		//	Only once
+		initPlugin = function() {};
+
+	}
+
+
+})( jQuery );
+Á£tñ      fÖffÖgFÄ1ì       }    O^partitionKey=%28https%2Cginniemae.gov%29,:https://www.ginniemae.gov/Style%20Library/GNMA%20Scripts/home/jquery.dotdotdot.js strongly-framed 1 security-info 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 request-method GET response-head HTTP/2 200 
+content-type: application/javascript
+content-length: 12434
+last-modified: Mon, 12 Oct 2020 23:01:30 GMT
+etag: "{4961410A-583D-4942-BC31-F452F5E821BC},41"
+resourcetag: rt:4961410A-583D-4942-BC31-F452F5E821BC@00000000041
+content-disposition: attachment; filename*=utf-8''jquery%2edotdotdot%2ejs; filename="jquery.dotdotdot.js"
+x-download-options: noopen
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+x-frame-options: SAMEORIGIN, SAMEORIGIN
+content-security-policy: frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com *.teams.microsoft.us local.teams.office.com *.powerapps.com *.yammer.com *.officeapps.live.com *.office.com *.stream.azure-test.net *.microsoftstream.com *.dynamics.com *.microsoft.com onedrive.live.com *.onedrive.live.com;, frame-ancestors 'self'
+date: Wed, 10 Apr 2024 18:11:57 GMT
+cache-control: private,max-age=0,no-cache
+pragma: no-cache
+expires: Tue, 26 Mar 2024 18:11:57 GMT,0
+accept-ranges: bytes
+x-sharepointhealthscore: 0
+public-extension: http://schemas.microsoft.com/repl-2
+sprequestguid: 26b61da1-06d2-2062-3bd5-9d017c361dd2
+request-id: 26b61da1-06d2-2062-3bd5-9d017c361dd2
+sprequestduration: 1278
+spiislatency: 43
+microsoftsharepointteamservices: 16.0.0.10407
+x-content-type-options: nosniff
+x-ms-invokeapp: 1; RequireReadOnly
+x-from: WEB01
+access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept
+access-control-allow-methods: POST,GET,OPTIONS,PUT,DELETE
+x-xss-protection: 1; mode=block
+X-Firefox-Spdy: h2
+ original-response-headers date: Wed, 10 Apr 2024 17:47:31 GMT
+content-type: application/javascript
+content-length: 12434
+set-cookie: AWSALB=OO2Ur5DUOM8WRIaxLWWVZcbIlgA3AdvKw8pvkH/Ahn39ttiOqTUs7h6IS+FQdVAeHKSXAnJmtYsTOpp6/PbZlIegUS9KoK+rncNRNz7HUBAA35SYf/W3eotZ8lCR; Expires=Wed, 17 Apr 2024 17:47:30 GMT; Path=/
+set-cookie: AWSALBCORS=OO2Ur5DUOM8WRIaxLWWVZcbIlgA3AdvKw8pvkH/Ahn39ttiOqTUs7h6IS+FQdVAeHKSXAnJmtYsTOpp6/PbZlIegUS9KoK+rncNRNz7HUBAA35SYf/W3eotZ8lCR; Expires=Wed, 17 Apr 2024 17:47:30 GMT; Path=/; SameSite=None; Secure
+set-cookie: AWSALB=Okmdk0HxS76XzA3sbN1BfskEDjQKp+WApjGmBO5jMBNaBLECbg2xhWfzXI4Ju1Fy5fU30XQGaEjqrLIhumV1MRQKF22Cj9Y4fxTOzI8UBba0IrNtUPvB7vykvUij; Expires=Wed, 17 Apr 2024 17:47:30 GMT; Path=/
+set-cookie: AWSALBCORS=Okmdk0HxS76XzA3sbN1BfskEDjQKp+WApjGmBO5jMBNaBLECbg2xhWfzXI4Ju1Fy5fU30XQGaEjqrLIhumV1MRQKF22Cj9Y4fxTOzI8UBba0IrNtUPvB7vykvUij; Expires=Wed, 17 Apr 2024 17:47:30 GMT; Path=/; SameSite=None; Secure
+cache-control: private,max-age=0,no-cache
+pragma: no-cache
+expires: Tue, 26 Mar 2024 17:47:31 GMT,0
+last-modified: Mon, 12 Oct 2020 23:01:30 GMT
+accept-ranges: bytes
+etag: "{4961410A-583D-4942-BC31-F452F5E821BC},41"
+x-sharepointhealthscore: 0
+resourcetag: rt:4961410A-583D-4942-BC31-F452F5E821BC@00000000041
+content-disposition: attachment; filename*=utf-8''jquery%2edotdotdot%2ejs; filename="jquery.dotdotdot.js"
+x-download-options: noopen
+public-extension: http://schemas.microsoft.com/repl-2
+sprequestguid: c1b41da1-5601-2062-3bd5-9781ef501e57
+request-id: c1b41da1-5601-2062-3bd5-9781ef501e57
+x-frame-options: SAMEORIGIN
+content-security-policy: frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com *.teams.microsoft.us local.teams.office.com *.powerapps.com *.yammer.com *.officeapps.live.com *.office.com *.stream.azure-test.net *.microsoftstream.com *.dynamics.com *.microsoft.com onedrive.live.com *.onedrive.live.com;
+sprequestduration: 1208
+spiislatency: 0
+microsoftsharepointteamservices: 16.0.0.10407
+x-content-type-options: nosniff
+x-ms-invokeapp: 1; RequireReadOnly
+x-from: WEB01
+x-frame-options: SAMEORIGIN
+content-security-policy: frame-ancestors 'self'
+access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept
+access-control-allow-methods: POST,GET,OPTIONS,PUT,DELETE
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+x-xss-protection: 1; mode=block
+X-Firefox-Spdy: h2
+ ctid 2 uncompressed-len 0 net-response-time-onstart 1573 net-response-time-onstop 1632   0’

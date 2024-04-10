@@ -1,0 +1,844 @@
+function stripScriptTags(htmlContent) {
+    var div = document.createElement('div');
+    div.innerHTML = htmlContent;
+    var scripts = div.getElementsByTagName('script');
+    var i = scripts.length;
+    while (i--) {
+        scripts[i].parentNode.removeChild(scripts[i]);
+    }
+    //remove print div
+    var divs = div.getElementsByTagName('div');
+    var i = divs.length;
+    while (i--) {
+        if (divs[i].className == "accessibility")
+            divs[i].parentNode.removeChild(divs[i]);
+    }
+    return div.innerHTML;
+}
+
+function setUserInputTagValues(jqueryContentID) {
+    //set input tag values
+    $(jqueryContentID).find("input").each(
+        function () {
+            if ($(this).attr("type") == undefined || $(this).attr("type").toUpperCase() == "TEXT") {
+                var value = $(this).val();
+                $(this).get(0).setAttribute("value", $(this).val());
+                //$(this).value=value;
+                /*if(typeof console != "undefined")
+                    console.log($(this).attr("value"));*/
+            }
+        });
+
+    //set select tag value			     	
+    $(jqueryContentID).find("select option:selected").each(function () {
+        $(this).get(0).setAttribute("selected", "selected");
+    });
+
+}
+
+function printContent(jqueryContentID, stripScriptTag) {
+    //$("<div id='dialog-message' title='IE Alert'><p>We recommend printing this page in Microsoft Edge, Google Chrome or Firefox browser.</p></div>").appendTo(".shareContentDiv").css('display', 'none');
+    $("<div id='dialog-message' title=''><div><img src='https://ginniemae.gov/publishingimages/gnma_logo_small.png' alt='Data Search' style='margin-top: 5px;' /></div><div><p><b>Printing Tip</b> <br><br>We recommend printing this page in Microsoft Edge, Google Chrome, or Firefox. Internet Explorer is currently not supported for printing.</p><div></div>").appendTo("#WebPartWPQ5").css('display', 'none');
+    var userAgent = window.navigator.userAgent;
+    var checkForIE = userAgent.indexOf("MSIE ");
+    if (checkForIE > 0) {
+        //console.log("IE : ", parseInt(userAgent.substring(checkForIE + 5, userAgent.indexOf(".", checkForIE))));
+        $("#dialog-message").dialog({
+            modal: true,
+            draggable: true,
+            class: 'ui-dialog ui-corner-all ui-widget ui-widget-content ui-front ui-dialog-buttons ui-draggable',
+            width: 400,
+        });
+        $('#dialog-message').show();
+        return false;    }
+    else {
+       // console.log('other browser');
+    }
+    
+    var modalHtml = "<div id=\"dialogPrintOptions\" title=\"Pick Your Format\"><p>Print Options:<ul><li>Listing: List of all events grouped by the days on which they occur.</li><li>Calendar: Events displayed on a month calendar view.</li></ul></p></div>";
+    if (typeof window.calPrintFormat == 'undefined')
+        window.calPrintFormat = "";
+    if ($("div.ms-acal-rootdiv").length > 0) {
+
+        var modalObj = $(modalHtml).appendTo("#s4-bodyContainer");
+        $(modalObj).dialog({
+            resizable: false,
+            height: "auto",
+            width: 400,
+            modal: true,
+            buttons: {
+                " Listing ": function () {
+                    window.calPrintFormat = "list";
+                    $(this).dialog("close");
+                    printContentExecute(jqueryContentID, stripScriptTag);
+                },
+                "Calendar": function () {
+                    window.calPrintFormat = "calendar";
+                    $(this).dialog("close");
+                    printContentExecute(jqueryContentID, stripScriptTag);
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            },
+            create: function () { $(this).closest(".ui-dialog").addClass("dialogPrintOptions"); }
+        });
+
+    }
+    else {
+        printContentExecute(jqueryContentID, stripScriptTag);
+    }
+
+}
+
+function printContentExecute(jqueryContentID, stripScriptTag) {
+    if (jqueryContentID.indexOf('MRScreen') == -1 && jqueryContentID.indexOf("#ZoomInScreen")==-1 )//pjp added for disclosure popup mrscreen on 9/25/2020
+        jqueryContentID = jqueryContentID.concat(",div.expandedContent:has(div[id*='WebPartWPQ'])"); //removed pjp on 2/5/2018 div.expandedContent:visible:contains('div')");
+
+
+    $("div.ui-accordion-content").show();//open accordions
+
+    if (window.calPrintFormat == "list") {
+        window.calPrintFormat == "";
+        printCalendarAgendaView("print");
+
+    } else if (window.calPrintFormat == "calendar") {
+        window.calPrintFormat == "";
+        printSPCalendar(); //old calendar print with full calendar layout
+    }
+    else {
+        var printPreviewWindowSetting = "toolbar=yes,location=no,directories=yes,menubar=yes,scrollbars=yes";
+        var printTitle = document.title;
+        var printLogo = "<img style='border: currentColor; border-image: none;' alt='GinnieMae.gov' src='/publishingimages/gnma_logo_small.png'>";
+
+        //pages does not have one standard body div tag. Because of that the following logic we are applying to get the body content 
+        //first look for inside_right in the page, if does not exist then look for inside_body
+        var content = "";
+        //console.log(jqueryContentID);
+        if ($(jqueryContentID).length != 0) {
+            //set input attribute values for all input tags
+            setUserInputTagValues(jqueryContentID);
+            //get the content and strip Script Tags
+            $(jqueryContentID).each(function (i, cont) {
+                content = content + $(cont).html();
+            });
+            //content = $(jqueryContentID).html();
+            if (stripScriptTag == true)
+                content = stripScriptTags(content);
+
+            //console.log(content);
+            printPreviewWindowSetting = printPreviewWindowSetting + ",width=" + $(jqueryContentID).width() + ", height=600, left=100, top=25";
+        }
+
+        //do not call printer friendly window if the content is empty
+        if (content != null) {
+
+            var printContent = '';
+            //style sheets for preview - begin
+            var previewStyle = '<script type="text/javascript" src="/Style Library/GNMA Scripts/jquery-1.4.4.js"></script><script type="text/javascript" src="/Style Library/GNMA Scripts/printpreview.js"></script>';
+
+
+
+            // previewStyle = previewStyle +'<link rel="stylesheet" type="text\/css" href="\/_layouts\/1033\/styles\/Themable\/corev4.css" />';
+
+            //previewStyle = previewStyle +'<link rel="stylesheet" type="text\/css" href="//cloud.typography.com/6197894/6218952/css/fonts.css" />';
+
+            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/_layouts\/1033\/styles\/Themable\/search.css" />';
+
+            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/gm.css"/>';
+            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/gm_contentarea.css"/>';
+            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/ginniemae_rte.css"/>';
+            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/en-US/Themable\/Core%20Styles\/controls.css"/>';
+            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/ginniemae_print.css"/>';
+            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/investors\/investor_search_tools\/siteassets\/newdisclosuresearch\/css\/disclosuresearch.css"/>';
+
+
+            if ($("#disclosureSearchMain").length > 0 && $("#searchPanel").length == 0) {
+                previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/ginniemae_search.css"/>';
+
+
+                previewStyle = previewStyle + '<style type="text\/css">@page{size:auto !important;}.printmd {margin-top:40%;padding: 10px;border: 2px solid black;text-align: center;border-radius: 5px;font-family: helvetica;}					@page {size: 25cm 35.7cm;	margin: 5mm 5mm 5mm 5mm;} @media print {.noprint {  visibility: hidden;	} }</style>';
+
+            }
+            //style sheets for preview - end
+
+
+            printContent = printContent + '<html><he' + 'ad>';
+            printContent = printContent + '<title>' + printTitle + '</title>';
+            printContent = printContent + previewStyle;
+            printContent = printContent + '</he' + 'ad><bo' + 'dy  class="ms-WPBody"><left><div id="main-body">';//onLoad="self.print()"
+
+            //logo
+            printContent = printContent + '<div style="display:none;" class="print_logo">' + printLogo + '</div><div id=\'reportTitle\' style=\'float: left;margin-left: 50%;font-size: 14px;font-weight: 600;padding-bottom: 20px;position: relative;left: -300px;width: 600px;text-align: center;\'></div>';
+
+            printContent = printContent + "<div style='display:none;' id='cc'>" + content + "</div>";
+            printContent = printContent + "</div></left></body></html>";
+            //console.log(docprint);
+            $("div.ui-accordion-content:not(.ui-accordion-content-active)").hide();//close accordions
+            var printPreviewWindow = window.open("", "", printPreviewWindowSetting);
+            printPreviewWindow.document.open();
+            printPreviewWindow.document.write(printContent);
+
+
+            var $jqDoc = $(printPreviewWindow.document);
+            if ($("#disclosureSearchMain").length == 0) {
+                setTimeout(function () {
+                    $jqDoc.find("#cc, .print_logo").show();
+                    printPreviewWindow.document.close();
+                    printPreviewWindow.focus();
+                    printPreviewWindow.print();
+                }, 1000);
+
+            }
+            else {
+                //for disclosure search
+
+                var disclI = setInterval(function () {
+
+
+                    //$jqDoc = $(printPreviewWindow.document);
+
+                    if (($("#disclosureSearchMain").length > 0 && $("#searchPanel").length == 0) || $jqDoc.find("#MRScreenContent div").length > 0  || $("#ChartScreenContent div").length > 0) {
+                        if ($jqDoc.find("#messageDialogue.printmd").length == 0) {
+                            $jqDoc.find("body").prepend("<div id=\"messageDialogue\" class=\"printmd  noprint\">We recommend printing this report in Microsoft Edge, Google Chrome, or Firefox.</div>");
+                            //$jqDoc.find("#messageDialogue.printmd").dialog({width: 330,dialogClass: 'disclDialog', modal:true, position: 'center'});	
+                        }
+
+                        clearInterval(disclI);
+                        //console.log('cleared interval');
+                        // $jqDoc.find(".sectioncol").each(function(i,el){
+                        // 	$(el).css('width',$(el).attr('width')-5);
+                        // });
+                        $jqDoc.find('div.print_logo:first').parent().hide();
+                        //$jqDoc.find('div.print_logo:first').parent().append("<div style='float:left;margin-left:50%;font-size:14px;font-weight:600;padding-bottom:20px;position:relative;left:-45px;'>" + tabtitle + " Report</div>");
+
+
+                        $jqDoc.find(".scrollable").parent().css({ 'height': 'auto', 'width': '100%', 'overflow-x': 'visible', 'overflow-y': 'visible' });
+                        $jqDoc.find("#disclosureSearchMain, #MRScreenContent").hide();
+                        var mb = $jqDoc.find("#main-body");
+
+                        $jqDoc.find(".disclosureHeader").clone().appendTo(mb);
+                         var csrcurl = "";
+						if($("#ZoomInScreen canvas").length > 0){
+     						 $(mb).find("canvas").each(function(ci,citem){
+                                csrcurl = $("#ZoomInScreen canvas")[ci].toDataURL();
+                                $(citem).replaceWith("<img src='" + csrcurl + "' style='height: " + $(citem).height() + "px;width:" + $(citem).width() + "px;'></img>");
+                           });  
+                                                     
+                            $jqDoc.find("#cc").show();
+                            $jqDoc.find("#reportTitle").hide();
+
+      					
+                        }else if( $("#ChartScreen").length > 0)
+                        {
+                           
+                           $(mb).find("canvas").each(function(ci,citem){
+                               var citemid = $(citem).attr('id');
+                               var cobj = window.top.document.getElementById(citemid);
+                               csrcurl = cobj.toDataURL();
+                                $(citem).replaceWith("<img src='" + csrcurl + "' style='height: " + $(cobj).height() + "px;width:" + $(cobj).width() + "px;'></img>");
+                           });  
+                           /** 
+                            $(mb).find("#gmChart").replaceWith("<img src='" + $("#ChartScreen #gmChart:first")[0].toDataURL()  + "' style='height: " + $("#gmChart").height() + "px;width:" + $("#gmChart").width() + "px;'></img>");
+                           **/
+                            $(mb).find("div.disclosureHeader, #chartOptions").hide();
+                           
+                            $jqDoc.find("#cc").show();
+                        
+                        }else
+                        {
+                            $jqDoc.find(".disclosureMain").clone().appendTo(mb);
+                        }
+
+
+                        //$(mb).find(".sectioncol").css({'width':'auto', 'min-width':'auto'})
+                        $(mb).find(".section").each(function (i, sec) {
+                            if ($(sec).find(".sectioncol").length == 3)
+                                $(sec).find(".sectioncol").css({ 'width': '32%' });//'min-width':'auto'
+                        });
+
+                        $(mb).find('.headsectioncol table th, th.header')
+                            .css({ 'color': 'black' })
+                            .each(function () {
+                                this.style.setProperty('font-size', '11px', 'important');
+                            });
+
+
+                        $(mb).find('.disclosureMain table th, .sectionHead')
+                            .css({ 'color': 'black', 'background-color': 'white', 'font-size': '11px' })
+                            .each(function () {
+                                this.style.setProperty('font-size', '11px', 'important');
+                            });
+
+                        $(mb).find('.disclosureMain table td')
+                            .css({ 'color': 'black', 'background-color': 'white', 'font-size': '10px' })
+                            .each(function () {
+                                this.style.setProperty('font-size', '10px', 'important');
+                            });
+
+                        $(mb).find('td.subhead')
+                            .prop('style', "color: black !important;background-color:white !important';font-size: '11px !important'")
+                            .each(function () {
+                                this.style.setProperty('background-color', 'white', 'important');
+                            });
+
+                        $(mb).find('.disclosureHeader').css({ 'background-color': 'white', 'color': 'black', 'font-size': '11px' });
+                        $(mb).find('.disclosureMain .tablesorter-icon').remove();
+                        
+
+                       
+
+
+
+
+                    }else{
+				//non search result page
+				$jqDoc.find("#cc").show();
+
+			}
+
+				//end if
+
+                    $jqDoc.find(".printmd").css({ 'margin-top': '0px' })
+                    //$jqDoc.find(".printmd").text("We recommend printing this report in LANDSCAPE orientation.");
+                    var tabtitle = $("div.disclosureLeftNav a.selected").text();
+                    if( $("#ChartScreen").length > 0){
+                        tabtitle = $("div[aria-describedby='ChartScreen'] .ui-dialog-title").text();
+                    }
+                    //console.log(tabtitle);
+                    $jqDoc.find("#reportTitle").html(tabtitle);
+                    //console.log('show cc and print logo');
+                    $jqDoc.find(".print_logo").show();//removed #cc, 
+                    //console.log('show parent');
+                    $jqDoc.find('div.print_logo:first').parent().show();
+
+                    clearInterval(disclI);
+                    setTimeout(function () {
+
+                        printPreviewWindow.document.close();
+                        printPreviewWindow.focus();
+                        printPreviewWindow.print();
+                        clearInterval(disclI);
+                    }, 2000);
+
+                }, 3000);
+            }
+
+        }
+    }
+
+}
+
+
+function printSPCalendarAsImage() {
+
+    $.holdReady(true);
+
+
+    $.getScript("/Style%20Library/GNMA%20Scripts/calendar/html2canvas.js", function () {
+        $.holdReady(false);
+
+        var d = $.Deferred();
+        $("#s4-workspace").scrollTop(0);
+        d.done(function (r) {
+            var win;
+            window.setTimeout(function () {
+
+                html2canvas($("#CenteredContent1"), {
+                    height: $("#CenteredContent1").height() * 1.13,
+                    logging: false,
+                    allowTaint: true,
+                    onrendered: function (canvas) {
+                        theCanvas = canvas;
+                        // $("#CenteredContent1").append(canvas);
+
+                        var url = theCanvas.toDataURL();
+                        //alert(url);
+                        win = window.open('', window.document.title, 'toolbar=no,location=no');
+
+                        //$(win.document.body).append("<div style='position:fixed;left:0;right:0;top:0;bottom:0;text-align:center;'><img style='max-width:99%;max-height:99%;' src=\""+url+"\"/></div>");
+
+
+                        var i = setInterval(function () {
+                            if (typeof win.document != 'undefined') {
+                                clearInterval(i);
+                                $(win.document.body).append("<img style=\"width:100%;\" src=\"" + url + "\"/>");
+                                win.print();
+                            }
+                        }, 1000);
+
+                    }//end on rendered
+                });//end html2canvas
+
+                setTimeout(function () {
+                    //alert('return page');
+
+                    $("#printLogo").remove();
+                    $("div.expandedContent:nth-child(2),.gmHeaderBar,.gmFooter,#SlideShowZone,div.centeredContent:first,.shareContentDiv,div.content_last_updated, a[title='Previous Month'],a[title='Next Month']").show();
+                    $("div.ms-acal-item").css({ 'max-height': '34px', 'overflow': 'hidden' });
+                    fixUpCalendar();
+
+                }, 1000);
+            }, 2000);
+
+        });
+
+        $(".s4-wpTopTable").each(function (i, tbl) { $(tbl).attr('width', $(tbl).outerWidth()); });
+        var printLogo = "<img id='printLogo' style='border: currentColor; border-image: none;' alt='GinnieMae.gov' src='/publishingimages/gnma_logo_small.png'>";
+
+        $("div.expandedContent:nth-child(2),.gmHeaderBar,.gmFooter,#SlideShowZone,div.centeredContent:first,.shareContentDiv,div.content_last_updated, a[title='Previous Month'],a[title='Next Month']").hide();
+        $("div.boxedContent:first").prepend(printLogo);
+        $("div.ms-acal-item").css({ 'max-height': 'none', 'overflow': 'visible' });
+        fixUpCalendar();
+
+        d.resolve('done');
+
+    });//end loading html canvas script
+
+}
+
+
+function printCalendar(jqueryContentID) {
+    var printPreviewWindowSetting = "toolbar=yes,location=no,directories=yes,menubar=yes,scrollbars=yes";
+
+    var printTitle = document.title;
+    //  var printLogo = '';
+
+    //  if ($('td.s4-titlelogo').length != 0)
+    //	printLogo = $('.gmLogo').html();
+
+    var printLogo = "<img style='border: currentColor; border-image: none;' alt='GinnieMae.gov' src='/publishingimages/gnma_logo_small.png'>";
+
+    if ($(jqueryContentID).length != 0) {
+        var calendarObject = $(jqueryContentID).find('#calendar').first();
+        if (calendarObject.length != 0) {
+            var date = calendarObject.fullCalendar('getDate');
+            var selectedMonth = date.getMonth();
+            var selectedYear = date.getFullYear();
+            //console.log($(jqueryContentID).attr("siteURL"));
+            printPreviewWindowSetting = printPreviewWindowSetting + ",width=" + 1000 + ", height=700, left=100, top=25";
+
+            var previewStyle = '';
+            //previewStyle = previewStyle +'<link rel="stylesheet" type="text\/css" href="\/_layouts\/1033\/styles\/Themable\/corev4.css" />';
+            //previewStyle = previewStyle +'<link rel="stylesheet" type="text\/css" href="//cloud.typography.com/6197894/6218952/css/fonts.css" />';
+            previewStyle = previewStyle + '<link rel="stylesheet" type="text\/css" href="\/Style%20Library\/GNMA%20CSS\/ginniemae_print.css"/>';
+            previewStyle = previewStyle + '<link rel="stylesheet" type="text/css" href="/Style Library/GNMA CSS/fullcalendar.css">';
+            previewStyle = previewStyle + '<link rel="stylesheet" type="text/css" href="/Style Library/GNMA CSS/fullcalendar.print.css">';
+            previewStyle = previewStyle + '<script type="text/javascript" src="/Style Library/GNMA Scripts/jquery-1.4.4.js"></script>';
+            previewStyle = previewStyle + '<script type="text/javascript" src="/Style Library/GNMA Scripts/jquery-ui-1.8.23.min.js"></script>';
+            previewStyle = previewStyle + '<script type="text/javascript" src="/Style Library/GNMA Scripts/fullcalendar.min.js"></script>';
+            previewStyle = previewStyle + '<script type="text/javascript" src="/Style Library/GNMA Scripts/jquery.SPServices-0.7.2.js"></script>';
+            previewStyle = previewStyle + '<script type="text/javascript" src="/Style Library/GNMA Scripts/CalendarPrint_Preview.js"></script>';
+
+
+
+            var printContent = '<html><he' + 'ad>';
+            printContent = printContent + '<title>' + printTitle + '</title>';
+            printContent = printContent + previewStyle;
+            printContent = printContent + '</head><body class="ms-WPBody" onLoad="self.print()"><left><div id="main-body">';
+
+            //logo
+            printContent = printContent + '<div class="print_logo">' + printLogo + '</div>';
+            //alert(selectedMonth);
+            //console.log(content);
+            //printContent = printContent +'<div style="width: 950px;	margin: 0 auto;" id="calendar" class="fc" '+'siteURL="'+calendarObject.attr("siteURL")+'" listName="'+calendarObject.attr("listName")+'" currentMonth="'+selectedMonth+'"></div>';
+            printContent = printContent + '<div style="width: 950px;	margin: 0 auto;" id="calendar" class="fc" ' + 'siteURL="' + calendarObject.attr("siteURL") + '" listName="' + calendarObject.attr("listName") + '" currentMonth="' + selectedMonth + '" currentYear="' + selectedYear + '"></div>';
+            printContent = printContent + "</div></left></body></html>";
+            //console.log(docprint);
+            $("div.ui-accordion-content:not(.ui-accordion-content-active)").hide();//close accordions
+            var printPreviewWindow = window.open("", "", printPreviewWindowSetting);
+            printPreviewWindow.document.open();
+            printPreviewWindow.document.write(printContent);
+            printPreviewWindow.document.close();
+            window.print();
+            //printPreviewWindow.document.body.style.overflow = 'scroll';
+            printPreviewWindow.focus();
+
+        }
+    }
+}
+
+
+var spin;
+
+function printCalendarAgendaView(output, dt) {
+    var cWebPart = $("div.ms-acal-header:first").closest("div[webpartid]");
+    spin = $("<div id='loadingicon'><img src='/publishingimages/loading.gif'/></div>").insertBefore(cWebPart);
+    spin.hide().show();
+    var events = [];
+    var includeddays = [];
+    dt = dt != null ? dt : $("tr.ms-acal-summary-dayrow:eq(1) th:first").attr('date').split('/');
+    var calName = $(".pageHeader:first").text().trim();
+    var startDate = dt[2] + "-" + dt[0] + "-" + dt[1] + "T12:00:00Z";// "2012-05-12T12:00:00Z"; // Our example will show the month of May 2012
+
+    var objDate = new Date(startDate.split('T')[0].split('-')[0], parseInt(startDate.split('T')[0].split('-')[1]) - 1, startDate.split('T')[0].split('-')[2]);
+
+
+    var ctx = "ctx" + cWebPart.attr('id').split('WebPart')[1];
+    var listNm = eval(ctx + ".ListTitle");
+    $().SPServices({
+        operation: "GetListItems",
+        async: false,
+        listName: listNm,
+        CAMLViewFields: "<ViewFields>" +
+            "<FieldRef Name='Title'/>" +
+            "<FieldRef Name='CalTitle'/>" +
+            "<FieldRef Name='ID' />" +
+            "<FieldRef Name='Description' />" +
+            "<FieldRef Name='EventDescription' />" +
+            "<FieldRef Name='Body' />" +
+            "<FieldRef Name='Expires' />" +
+            "<FieldRef Name='URL' />" +
+            "<FieldRef Name='Created' />" +
+            "<FieldRef Name='Duration0' />" +
+            "<FieldRef Name='EventDate' />" +
+            "<FieldRef Name='EndDate' />" +
+            "<FieldRef Name='fAllDayEvent' />" +
+            "<FieldRef Name='RecurrenceID' />" +
+            "<FieldRef Name='fRecurrence' />" +
+            "<FieldRef Name='RecurrenceData' />" +
+            "</ViewFields>",
+        CAMLQuery: "<Query>" +
+            "<Where>" +
+            "<DateRangesOverlap>" +
+            "<FieldRef Name='EventDate' />" +
+            "<FieldRef Name='EndDate' />" +
+            "<FieldRef Name='RecurrenceID' />" +
+            "<Value Type='DateTime'>" +
+            "<Month />" +
+            "</Value>" +
+            "</DateRangesOverlap>" +
+            "</Where>" +
+            "<OrderBy>" +
+            "<FieldRef Name='EventDate' />" +
+            "</OrderBy>" +
+            "</Query>",
+        CAMLQueryOptions: "<QueryOptions>" +
+            "<CalendarDate>" + startDate + "</CalendarDate>" +
+            "<RecurrencePatternXMLVersion>v3</RecurrencePatternXMLVersion>" +
+            "<ExpandRecurrence>TRUE</ExpandRecurrence>" +
+            "</QueryOptions>",
+        completefunc: function (xData, Status) {
+            var pushed = false;
+            var startSpl = [];
+            var endSpl = [];
+            var startSplTime = [];
+            var endSplTime = [];
+            var i;
+            //$(xData.responseXML).SPFilterNode("z:row").each(function() {
+            $($.parseXML(xData.responseText)).find("*[ows_ID]").each(function (ri, r) {
+                var $node = r,// $(this),
+                    fADE = $(r).attr("ows_fAllDayEvent") || 0,
+                    thisADE = (fADE == 0),
+                    thisID = $(r).attr("ows_ID"),
+                    sepID = thisID.indexOf(';#'),
+                    thisTitle = $(r).attr("ows_CalTitle").split(';#')[1],
+                    thisTitle = thisTitle;//.replace('&amp;','and').replace('&','and').replace('/','\\');
+                thisRecurrence = $(r).attr("ows_fRecurrence"),
+                    thisDesc = $(r).attr("ows_EventDescription");
+                if (sepID != -1) thisID = thisID.substring(0, sepID);
+                var thisUrl = "DispForm.aspx?ID=" + thisID,
+                    thisClass = thisTitle.replace(" ", "").substr(0, 10).replace(",", "").replace(" ", "") + thisID,
+                    thisRD = $(r).attr("ows_RecurrenceData");
+                startSpl = $(r).attr("ows_EventDate").split(" ")[0].split("-");
+                startSplTime = $(r).attr("ows_EventDate").split(" ")[1].split(":");
+                endSpl = $(r).attr("ows_EndDate").split(" ")[0].split("-");
+                endSplTime = $(r).attr("ows_EndDate").split(" ")[1].split(":");
+                sDt = $(r).attr("ows_EventDate");
+                eDt = $(r).attr("ows_EndDate");           // if working with FullCalendar or building an events object for another purpose...
+                i = {};
+                i.id = thisID;
+                i.title = thisTitle;
+                i.startDt = sDt;
+                i.endDt = eDt;
+                i.dtStart = new Date(startSpl[0], startSpl[1] - 1, startSpl[2], startSplTime[0], startSplTime[1], startSplTime[2]);
+                i.dtEnd = new Date(endSpl[0], endSpl[1] - 1, endSpl[2], endSplTime[0], endSplTime[1], endSplTime[2]);
+                if ($(r).attr("ows_Duration0") != null && $(r).attr("ows_Duration0") != "" && parseInt($(r).attr("ows_Duration0")) > 1) {
+                    i.dtEnd = i.dtEnd.addDays(parseInt($(r).attr("ows_Duration0")) - 1);
+                }
+                i.multiDay = (parseInt(sDt.split(" ")[0].split("-")[2]) != parseInt(eDt.split(" ")[0].split("-")[2]) ? true : false);
+
+                i.allDay = thisADE;
+                i.description = thisDesc;
+
+
+                var start = new Date(i.dtStart);
+
+
+
+                start.setHours(0, 0, 0, 0);
+                while (start <= i.dtEnd) {
+                    if (start.getMonth() == objDate.getMonth()) {
+                        if (pushed == false) {
+                            events.push(i);
+                            pushed = true;
+                        }
+                        if (!(includeddays.map(Number).indexOf(+start) >= 0))
+                            includeddays.push(start);
+                    }
+                    start = start.addDays(1);
+                }//end while
+                pushed = false;
+            });//end each event
+            if (output === "print")
+                renderEventsInAgendaFormat(calName, objDate, events, includeddays);
+            else if (output === "mobile")
+                renderMobileCalendar(calName, objDate, events, includeddays);
+
+        }
+    })
+}
+
+function renderMobileCalendar(name, objDate, events, includeddays) {
+    var selYear = objDate.getFullYear();
+    var selMonth = objDate.getMonth();
+    var years = [];
+    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+    var monthsInt = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    var dx = new Date().getFullYear() - 3;
+    while (dx <= new Date().getFullYear() + 4) {
+        years.push(dx);
+        dx++;
+    }
+    //console.log('mobile time');
+    var locale = "en-us";
+    var month = objDate.toLocaleString(locale, { month: "long" });
+    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    var period = month + " " + objDate.getFullYear();
+    var prevDate = "";
+    var dt = new Date();
+    var check = new Date();
+
+    var dtspl = [];
+    var fEvents = [];
+    var tbl;
+
+    if ($(".mobileCal").length === 0) {
+        $(".pageHeader").parent().css({ 'padding-left': '0px', 'margin-bottom': '10px' });
+        $(".pageHeader").parent().find("*:not('.pageHeader')").wrapAll("<div class='card-wrapper card-2'/>");
+
+        tbl = $("<div class='card-wrapper card-2'><table cellpadding='0' cellspacing='0' class='mobileCal'> \
+		<thead><tr><th colspan='2' class='mCalHeader'><select id='mCalMonthSel'></select>  <select id='mCalYearSel'></select></th></tr></thead> \
+		<tbody></tbody> \
+	</table></div>").appendTo($("div.ms-acal-rootdiv").closest("div[webpartid]"));
+        setTimeout(function () {
+            $("div.ms-acal-rootdiv").closest("div[webpartid]")
+                .css('left', '0px')
+                .css('overflow', 'visible');
+        }, 100);
+        //$("div.ms-acal-header").appendTo(tbl.find("th.mCalHeader"));
+        $(months).each(function (mi, m) {
+            tbl.find("#mCalMonthSel").append("<option " + (selMonth === mi ? "selected='SELECTED'" : "") + " value='" + (mi + 1) + "'>" + m + "</option>");
+        });
+
+        $(years).each(function (yi, y) {
+            tbl.find("#mCalYearSel").append("<option " + (selYear === y ? "selected='SELECTED'" : "") + " value='" + y + "'>" + y + "</option>");
+        });
+        $("#mCalMonthSel,#mCalYearSel")
+            .selectmenu({
+                change: function (evt) {
+                    printCalendarAgendaView("mobile", [parseInt($("#mCalMonthSel").val()), 1, parseInt($("#mCalYearSel").val())]);
+                }
+            });
+    } else {//calendar already exists, just remove rows
+        tbl = $("table.mobileCal");
+    }
+    if (events.length == 0) {
+        tbl.find("tbody").find("tr").remove();
+        tbl.find("tbody").append("<tr><td colspan='2' style='text-align:center;'>There are no events for the month.</td></tr>");
+    } else {
+        tbl.find("tbody").find("tr").remove();
+        $(includeddays).each(function (id, iditem) {
+            check = iditem;
+            check.setHours(0, 0, 0, 0);
+            var d1;
+            var d2;
+            fEvents = $(events).filter(function (fi, fitem) {
+                d1 = new Date(fitem.dtStart);
+                d1.setHours(0, 0, 0, 0);
+                d2 = new Date(fitem.dtEnd);
+                d2.setHours(0, 0, 0, 0);
+                return (check.getTime() <= d2.getTime() && check.getTime() >= d1.getTime());
+            });
+            fEvents.sort(function (a, b) {
+                return (new Date(a.dtStart).getHours() + new Date(a.dtStart).getMinutes()) - (new Date(b.dtStart).getHours() + new Date(b.dtStart).getMinutes());
+            });
+            var dayRow = $("<tr><td class='mDayCol'><div>" + (check.getDate()) + "</div><div>" + days[check.getDay()].substring(0, 3) + "</div></td><td class='mEventCol'></td></tr>").appendTo(tbl.find("tbody"));
+            fEvents.each(function (i, item) {
+                dtspl = item.startDt.split(" ")[0].split('-');
+                dt = new Date(dtspl[0], dtspl[1] - 1, dtspl[2]);
+                if (item.title.indexOf(",") > -1)
+                    dayRow.find("td:last").append("<div data-title='" + item.title + "' data-desc='" + item.description + "' class='mobileEvent'>" + item.title.substr(0, item.title.lastIndexOf(",")) + (item.multiDay ? "*" : "") + item.title.substr(item.title.lastIndexOf(",")) + "</div>");
+                else
+                    dayRow.find("td:last").append("<div data-title='" + item.title + "' data-desc='" + item.description + "'  class='mobileEvent'>" + item.title + (item.multiDay ? "*" : "") + "</div>");
+
+                prevDate = item.startDt.split(" ")[0];
+            });
+        });//end included date
+    }
+    spin
+        .hide('slow')
+        .remove();
+    applyMobileTooltips();
+
+}
+
+function renderEventsInAgendaFormat(name, objDate, events, includeddays) {
+    var locale = "en-us";
+    var month = objDate.toLocaleString(locale, { month: "long" });
+    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    var period = month + " " + objDate.getFullYear();
+    var win = window.open('', window.document.title, 'toolbar=no,location=no');
+    $.get('/style%20library/gnma%20css/gm.css', function (data) {
+        win.document.write("<html><head><style>" + data + "</style></head><body></body></html>");
+    });
+    var prevDate = "";
+    var dt = new Date();
+    var check = new Date();
+
+    var dtspl = [];
+    var fEvents = [];
+    var i = setInterval(function () {
+        if (typeof win.document != 'undefined') {
+            clearInterval(i);
+            $(win.document.body).append("<div class='calendarAgendaViewCont'><table cellspacing='0' cellpadding='0' class='calendarAgendaView'><thead><tr><th colspan='2' style='text-align:left;'><img src='/publishingimages/gmbw.png'/></th></tr><tr><th colspan='2' style='text-align:center;'><span style='font-size:16px;'>" + name + "</span><br/>" + period + "</th></tr><tr><th colspan='2' style='text-align:right;padding:3px;'>*Recurring event</th></thead><tfoot></tfoot><tbody></tbody></table></div>");
+            var tbl = $(win.document.body).find("table.calendarAgendaView tbody");
+            if (events.length == 0) {
+                tbl.append("<tr><td colspan='2' style='text-align:center;'>There are no events for the month.</td></tr>");
+            }
+            $(includeddays).each(function (id, iditem) {
+                check = iditem;
+                check.setHours(0, 0, 0, 0);
+                var d1;
+                var d2;
+                fEvents = $(events).filter(function (fi, fitem) {
+                    d1 = new Date(fitem.dtStart);
+                    d1.setHours(0, 0, 0, 0);
+                    d2 = new Date(fitem.dtEnd);
+                    d2.setHours(0, 0, 0, 0);
+                    return (check.getTime() <= d2.getTime() && check.getTime() >= d1.getTime());
+                });
+                fEvents.sort(function (a, b) {
+                    return (new Date(a.dtStart).getHours() + new Date(a.dtStart).getMinutes()) - (new Date(b.dtStart).getHours() + new Date(b.dtStart).getMinutes());
+                });
+                tbl.append("<tr><td colspan='2'><div style='page-break-inside:avoid;'><div class='grpCont'><div class='evDt'>" + (check.getDate()) + "-" + days[check.getDay()] + "</div><div class='imgCont'><img src='/style library/images/black.png' /></div></div><ul></ul></div></td></tr>");
+                fEvents.each(function (i, item) {
+                    dtspl = item.startDt.split(" ")[0].split('-');
+                    dt = new Date(dtspl[0], dtspl[1] - 1, dtspl[2]);
+                    if (item.title.indexOf(",") > -1)
+                        tbl.find("ul:last").append("<li>" + item.title.substr(0, item.title.lastIndexOf(",")) + (item.multiDay ? "*" : "") + item.title.substr(item.title.lastIndexOf(",")) + "</li>");
+                    else
+                        tbl.find("ul:last").append("<li>" + item.title + (item.multiDay ? "*" : "") + "</li>");
+
+                    prevDate = item.startDt.split(" ")[0];
+                });
+            });//end included date
+            setTimeout(function () {
+                win.document.close();
+                win.focus();
+                win.print();
+                win.close();
+
+            }, 1000);
+        }
+    }, 1000);
+}
+
+function printSPCalendar() {
+    $(".s4-wpTopTable").each(function (i, tbl) { $(tbl).attr('width', $(tbl).outerWidth()); });
+    var printLogo = "<img id='printLogo' style='border: currentColor; border-image: none;' alt='GinnieMae.gov' src='/publishingimages/gnma_logo_small.png'>";
+    $("div.expandedContent:nth-child(2),.gmHeaderBar,.gmFooter,#SlideShowZone,div.centeredContent:first,.shareContentDiv,div.content_last_updated, a[title='Previous Month'],a[title='Next Month']").hide();
+    $("div.boxedContent:first").prepend(printLogo);
+    setTimeout(function () {
+        window.print();
+
+    }, 500);
+    setTimeout(function () {
+        $("#printLogo").remove();
+        $("div.expandedContent:nth-child(2),.gmHeaderBar,.gmFooter,#SlideShowZone,div.centeredContent:first,.shareContentDiv,div.content_last_updated, a[title='Previous Month'],a[title='Next Month']").show();
+    }, 1000);
+
+}
+
+Date.prototype.addDays = function (days) {
+    var dat = new Date(this.valueOf());
+    dat.setDate(dat.getDate() + days);
+    return dat;
+}
+
+function applyMobileTooltips() {
+    $(document).tooltip({
+        items: ".mobileEvent",
+        track: true,
+        content: function () {
+            var element = $(this);
+            var desc = $(this).data('desc');
+            return element.data('title') + (desc != "" && $("<span>" + desc.replace('/', '').replace('&amp;', '') + "</span>").text().trim() != "" ? "<br />" + desc : "");
+        }
+    });
+}ØöÂ§û      f÷ff÷gFƒ1Ï       m    O^partitionKey=%28https%2Cginniemae.gov%29,:https://www.ginniemae.gov/Style%20Library/GNMA%20Scripts/print.js strongly-framed 1 security-info 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 request-method GET response-head HTTP/2 200 
+content-type: application/javascript
+content-length: 40372
+last-modified: Fri, 17 Jun 2022 22:41:21 GMT
+etag: "{45DA400F-1628-46CE-9E2D-52FE7C23B1DD},187"
+resourcetag: rt:45DA400F-1628-46CE-9E2D-52FE7C23B1DD@00000000187
+content-disposition: attachment; filename*=utf-8''print%2ejs; filename="print.js"
+x-download-options: noopen
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+x-frame-options: SAMEORIGIN, SAMEORIGIN
+content-security-policy: frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com *.teams.microsoft.us local.teams.office.com *.powerapps.com *.yammer.com *.officeapps.live.com *.office.com *.stream.azure-test.net *.microsoftstream.com *.dynamics.com *.microsoft.com onedrive.live.com *.onedrive.live.com;, frame-ancestors 'self'
+date: Wed, 10 Apr 2024 18:11:57 GMT
+cache-control: private,max-age=0,no-cache
+pragma: no-cache
+expires: Tue, 26 Mar 2024 18:11:57 GMT,0
+accept-ranges: bytes
+x-sharepointhealthscore: 0
+public-extension: http://schemas.microsoft.com/repl-2
+sprequestguid: 26b61da1-a6d2-2062-3bd5-9cb478a1e5d4
+request-id: 26b61da1-a6d2-2062-3bd5-9cb478a1e5d4
+sprequestduration: 1299
+spiislatency: 0
+microsoftsharepointteamservices: 16.0.0.10407
+x-content-type-options: nosniff
+x-ms-invokeapp: 1; RequireReadOnly
+x-from: WEB01
+access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept
+access-control-allow-methods: POST,GET,OPTIONS,PUT,DELETE
+x-xss-protection: 1; mode=block
+X-Firefox-Spdy: h2
+ original-response-headers date: Wed, 10 Apr 2024 17:47:31 GMT
+content-type: application/javascript
+content-length: 40372
+set-cookie: AWSALB=7Xj+0OcgCWhxHepnvZzPUNxMa8uoo4OrLaMmvzaw6mPRmF5fH2hEVQuHl2xQbgfLkL7PDZY5wuMPGe7lD9RPBcCoZaOfYKQFZSU10ls46XlUNLhEioJ+fPQefqCG; Expires=Wed, 17 Apr 2024 17:47:30 GMT; Path=/
+set-cookie: AWSALBCORS=7Xj+0OcgCWhxHepnvZzPUNxMa8uoo4OrLaMmvzaw6mPRmF5fH2hEVQuHl2xQbgfLkL7PDZY5wuMPGe7lD9RPBcCoZaOfYKQFZSU10ls46XlUNLhEioJ+fPQefqCG; Expires=Wed, 17 Apr 2024 17:47:30 GMT; Path=/; SameSite=None; Secure
+set-cookie: AWSALB=6TABN1u1PU/2eSRiD5CcVwx6HNr9p5OVbPl78jyHorU5zb74544wdoSdM6fvn3nPOk3E9zsHwupbs+t2BrzTM+39/9X3QDfncgQwGp5TE3o9WTm3CemafU+5eSjt; Expires=Wed, 17 Apr 2024 17:47:30 GMT; Path=/
+set-cookie: AWSALBCORS=6TABN1u1PU/2eSRiD5CcVwx6HNr9p5OVbPl78jyHorU5zb74544wdoSdM6fvn3nPOk3E9zsHwupbs+t2BrzTM+39/9X3QDfncgQwGp5TE3o9WTm3CemafU+5eSjt; Expires=Wed, 17 Apr 2024 17:47:30 GMT; Path=/; SameSite=None; Secure
+cache-control: private,max-age=0,no-cache
+pragma: no-cache
+expires: Tue, 26 Mar 2024 17:47:31 GMT,0
+last-modified: Fri, 17 Jun 2022 22:41:21 GMT
+accept-ranges: bytes
+etag: "{45DA400F-1628-46CE-9E2D-52FE7C23B1DD},187"
+x-sharepointhealthscore: 0
+resourcetag: rt:45DA400F-1628-46CE-9E2D-52FE7C23B1DD@00000000187
+content-disposition: attachment; filename*=utf-8''print%2ejs; filename="print.js"
+x-download-options: noopen
+public-extension: http://schemas.microsoft.com/repl-2
+sprequestguid: c1b41da1-d604-2062-3bd5-9880425f7af0
+request-id: c1b41da1-d604-2062-3bd5-9880425f7af0
+x-frame-options: SAMEORIGIN
+content-security-policy: frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com *.teams.microsoft.us local.teams.office.com *.powerapps.com *.yammer.com *.officeapps.live.com *.office.com *.stream.azure-test.net *.microsoftstream.com *.dynamics.com *.microsoft.com onedrive.live.com *.onedrive.live.com;
+sprequestduration: 1190
+spiislatency: 0
+microsoftsharepointteamservices: 16.0.0.10407
+x-content-type-options: nosniff
+x-ms-invokeapp: 1; RequireReadOnly
+x-from: WEB01
+x-frame-options: SAMEORIGIN
+content-security-policy: frame-ancestors 'self'
+access-control-allow-headers: Origin, X-Requested-With, Content-Type, Accept
+access-control-allow-methods: POST,GET,OPTIONS,PUT,DELETE
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+x-xss-protection: 1; mode=block
+X-Firefox-Spdy: h2
+ ctid 2 uncompressed-len 0 net-response-time-onstart 1735 net-response-time-onstop 1788   ù¥
