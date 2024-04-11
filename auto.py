@@ -12,6 +12,7 @@ from colorama import Fore
 from playwright.sync_api import sync_playwright, TimeoutError
 
 cycle = 3200
+captureDelay = 7
 browserless = True if len(sys.argv) > 1 and sys.argv[1] == "False" else False
 
 def check_playwright():
@@ -101,7 +102,6 @@ def capture_full_page_screenshot(context, url, row_id, folder, extension):
 
     while attempt <= max_attempts:
         try:
-            captureDelay = 0
             time.sleep(captureDelay)
             remove_elements(page)
             selectors = [
