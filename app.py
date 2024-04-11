@@ -3,7 +3,7 @@ import subprocess
 
 window = tk.Tk()
 window.title("I51 autoSS ver. 3")
-window.geometry("250x250")
+window.geometry("270x180")
 window.iconbitmap(r"icoFile\icon.ico")
 
 process = None
