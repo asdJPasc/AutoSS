@@ -9,7 +9,7 @@ This script automates the task of capturing full-page screenshots of multiple we
 
 ## Features
 
-- Effortless Automation: Say goodbye to manual screenshot capturing. The script handles everything automatically, saving you time and effort.
+- Effortless Automation: The script handles everything automatically, saving you time and effort.
 - Customizable Configuration: Easily customize the interval between screenshot captures, ensuring flexibility to meet specific needs.
 - Dynamic Element Removal: Unwanted elements like headers, footers, or pop-ups are automatically removed before capturing screenshots, ensuring clean and focused images.
 - Captcha Detection: The script intelligently detects and skips web pages with CAPTCHA challenges, preventing interruptions in the automation process.
