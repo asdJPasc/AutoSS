@@ -7,7 +7,7 @@ import zipfile
 
 GITHUB_OWNER = "asdJPasc"
 GITHUB_REPO = "AutoSS"
-CURRENT_VERSION = "1.0.6"
+CURRENT_VERSION = "1.0.7"
 
 window = tk.Tk()
 window.title("I51 autoSS ver. 3")
@@ -69,26 +69,31 @@ def fetch_latest_release(url):
         response = requests.get(url)
         response.raise_for_status()
         release_data = response.json()
-        print("Release Data:", release_data)
-        if "assets" in release_data and release_data["assets"]:
-            latest_version = release_data["tag_name"]
-            status_label.config(text=f"Update available: {latest_version}", fg="green")
-            button_check_updates.config(text="Download Update", command=lambda: download_update(release_data))
-        else:
-            if "zipball_url" in release_data:
-                latest_version = release_data["tag_name"]
+
+        if 'tag_name' in release_data:
+            latest_version = release_data['tag_name']
+            
+            # Compare versions
+            if compare_versions(latest_version, CURRENT_VERSION):
                 status_label.config(text=f"Update available: {latest_version}", fg="green")
                 button_check_updates.config(text="Download Update", command=lambda: download_update(release_data))
             else:
-                status_label.config(text="No download assets available", fg="red")
-                button_check_updates.config(text="Check for Updates", command=lambda: fetch_latest_release(url))
+                status_label.config(text="You are on the latest version.", fg="green")
+                button_check_updates.config(state="disabled")
+        else:
+            status_label.config(text="Error: No valid release found", fg="red")
+    
     except requests.exceptions.RequestException as e:
         status_label.config(text=f"Error: {str(e)}", fg="red")
 
 def compare_versions(latest_version, current_version):
+
     latest_version = latest_version.lstrip('v')
+    current_version = current_version.lstrip('v')
+    
     latest_parts = [int(x) for x in latest_version.split('.')]
     current_parts = [int(x) for x in current_version.split('.')]
+    
     return latest_parts > current_parts
 
 def download_update(release_data):
