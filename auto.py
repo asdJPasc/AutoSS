@@ -2,13 +2,13 @@
 import subprocess
 import os
 import sys
-import base64
+import io
 import ctypes
 import time
 import playwright
 import pandas as pd
+from colorama import Fore, init
 from datetime import datetime
-from colorama import Fore
 from playwright.sync_api import sync_playwright, TimeoutError
 
 cycle = 3200
@@ -24,11 +24,6 @@ def check_playwright():
             print("Playwright installation complete.")
         except subprocess.CalledProcessError:
             print("Error occurred while installing browsers via playwright. Please install manually using 'playwright install' command.")
-
-def decode_base64(encoded_string):
-    decoded_bytes = base64.b64decode(encoded_string)
-    decoded_string = decoded_bytes.decode('utf-8')
-    return decoded_string
 
 def cmd(title):
     ctypes.windll.kernel32.SetConsoleTitleW(title)
@@ -207,8 +202,7 @@ def process_excel_data(file_path):
 def main():
     os.system('cls')
     check_playwright()
-    cmd(decode_base64("STUxIGF1dG9TUyB2ZXIuIDM="))
-    print(Fore.CYAN + decode_base64("CiAgICAgICAgICAgICAgICAgICAgICAkJFwgICAgICAgICAgICAgICAgICAgJCRJNTEkXCAgICQkSTUxJFwgIAogICAgICAgICAgICAgICAgICAgICAgJCQgfCAgICAgICAgICAgICAgICAgJCQgIF9fJCRcICQkICBfXyQkXCAKICRJNTEkJFwgICQkXCAgICQkXCAkSTUxJCRcICAgICRJNTEkJFwgICAgICQkIC8gIFxfX3wkJCAvICBcX198CiBcX19fXyQkXCAkJCB8ICAkJCB8XF8kJCAgX3wgICQkICBfXyQkXCAgICBcJEk1MSQkXCAgXCRJNTEkJFwgIAogJCQkJCQkJCB8JCQgfCAgJCQgfCAgJCQgfCAgICAkJCAvICAkJCB8ICAgIFxfX19fJCRcICBcX19fXyQkXCAKJCQgIF9fJCQgfCQkIHwgICQkIHwgICQkIHwkJFwgJCQgfCAgJCQgfCAgICQkXCAgICQkIHwkJFwgICAkJCB8ClwkSTUxJCQkIHxcJEk1MSQkICB8ICBcJCQkJCAgfFwkSTUxJCQgIHwkJFxcJCRJNTEkICB8XCQkSTUxJCAgfAogXF9fX19fX198IFxfX19fX18vICAgIFxfX19fLyAgXF9fX19fXy8gXF9ffFxfX19fX18vICBcX19fX19fLyAKCi0tLS0tLS04PC0tLS0tLS0tLS0tLS1bIENvZGVkIHdpdGgg4p2k77iPIF0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0K") + Fore.RESET)
+    cmd("I51 Auto SS v3")
     excel_file_path = "agents.xlsx"
     try:
         cycle_count = 0
