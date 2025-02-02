@@ -7,10 +7,10 @@ import zipfile
 
 GITHUB_OWNER = "asdJPasc"
 GITHUB_REPO = "AutoSS"
-CURRENT_VERSION = "1.0.7"
+CURRENT_VERSION = "1.0.8"
 
 window = tk.Tk()
-window.title("I51 autoSS ver. 3")
+window.title("I51 | Autoss v{}".format(CURRENT_VERSION))
 window.geometry("270x250")
 window.iconbitmap(r"icoFile\icon.ico")
 window.resizable(False, False)
