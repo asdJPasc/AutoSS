@@ -7,7 +7,7 @@ import zipfile
 
 GITHUB_OWNER = "asdJPasc"
 GITHUB_REPO = "AutoSS"
-CURRENT_VERSION = "1.0.8"
+CURRENT_VERSION = "1.0.9"
 
 window = tk.Tk()
 window.title("I51 | Autoss v{}".format(CURRENT_VERSION))
@@ -134,6 +134,7 @@ def extract_file(file_path):
                             f_out.write(zip_ref.read(member))
             
             status_label.config(text="Update completed successfully.", fg="green")
+            os.remove(file_path)
     except Exception as e:
         status_label.config(text=f"Error extracting the file: {str(e)}", fg="red")
 
