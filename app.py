@@ -7,7 +7,7 @@ import zipfile
 
 GITHUB_OWNER = "asdJPasc"
 GITHUB_REPO = "AutoSS"
-CURRENT_VERSION = "1.0.3"
+CURRENT_VERSION = "1.0.6"
 
 window = tk.Tk()
 window.title("I51 autoSS ver. 3")
@@ -115,8 +115,20 @@ def extract_file(file_path):
     try:
         if file_path.endswith(".zip"):
             with zipfile.ZipFile(file_path, "r") as zip_ref:
-                zip_ref.extractall("extracted_files")
-            status_label.config(text=f"Extracted to 'extracted_files'", fg="green")
+                extract_to = os.getcwd()
+
+                for member in zip_ref.namelist():
+                    if 'icoFile' in member:
+                        continue
+
+                    filename = os.path.basename(member)
+
+                    if filename:
+                        extracted_path = os.path.join(extract_to, filename)
+                        with open(extracted_path, "wb") as f_out:
+                            f_out.write(zip_ref.read(member))
+            
+            status_label.config(text="Update completed successfully.", fg="green")
     except Exception as e:
         status_label.config(text=f"Error extracting the file: {str(e)}", fg="red")
 
