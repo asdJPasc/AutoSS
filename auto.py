@@ -202,7 +202,7 @@ def process_excel_data(file_path):
 def main():
     os.system('cls')
     check_playwright()
-    cmd("I51 Auto SS v3")
+    cmd("I51 Auto Screenshot")
     excel_file_path = "agents.xlsx"
     try:
         cycle_count = 0
