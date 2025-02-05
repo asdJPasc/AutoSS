@@ -7,7 +7,7 @@ import zipfile
 
 GITHUB_OWNER = "asdJPasc"
 GITHUB_REPO = "AutoSS"
-CURRENT_VERSION = "1.1.2"
+CURRENT_VERSION = "1.1.3"
 
 window = tk.Tk()
 window.title("I51 | Autoss v{}".format(CURRENT_VERSION))
